@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum BottomNav { home, profile, leaderboard, community }
+enum BottomNav { home, community, leaderboard, profile }
 
 extension BottomNavX on BottomNav {
   int get index => BottomNav.values.indexOf(this);
