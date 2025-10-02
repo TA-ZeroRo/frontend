@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rive/rive.dart' hide Image;
+import '../../../core/theme/app_color.dart';
 import '../../routes/router_path.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -50,7 +51,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
