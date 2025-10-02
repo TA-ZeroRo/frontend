@@ -1,24 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum BottomNav { home, community, leaderboard, profile }
+enum BottomNav {
+  home('Home', Icons.home_outlined),
+  community('Community', Icons.forum_outlined),
+  leaderboard('Leaderboard', Icons.emoji_events_outlined),
+  profile('Profile', Icons.person_outline);
 
-extension BottomNavX on BottomNav {
-  int get index => BottomNav.values.indexOf(this);
+  final String title;
+  final IconData iconData;
+  const BottomNav(this.title, this.iconData);
 
-  String get title => switch (this) {
-    BottomNav.home => 'Home',
-    BottomNav.profile => 'Profile',
-    BottomNav.leaderboard => 'Leaderboard',
-    BottomNav.community => 'Community',
-  };
-
-  Icon get icon => switch (this) {
-    BottomNav.home => const Icon(Icons.home_outlined),
-    BottomNav.profile => const Icon(Icons.person_outline),
-    BottomNav.leaderboard => const Icon(Icons.emoji_events_outlined),
-    BottomNav.community => const Icon(Icons.forum_outlined),
-  };
+  Icon get icon => Icon(iconData);
 }
 
 class BottomNavNotifier extends Notifier<BottomNav> {
