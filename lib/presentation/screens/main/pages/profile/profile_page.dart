@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'components/profile_info_section.dart';
+import 'components/point_chart_section.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -11,10 +12,7 @@ class ProfilePage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text(
           '프로필',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         elevation: 0,
@@ -24,7 +22,8 @@ class ProfilePage extends ConsumerWidget {
         child: Column(
           children: [
             ProfileInfoSection(),
-            // TODO: 여기에 다른 섹션들 추가 (예: 통계, 설정 등)
+            PointChartSection(),
+            // TODO: 여기에 다른 섹션들 추가 (예: 설정 등)
           ],
         ),
       ),
