@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'mock/mock_ranking_data.dart';
 
-class LeaderboardAsyncNotifier extends AsyncNotifier<List<RankingItem>> {
+class RankingAsyncNotifier extends AsyncNotifier<List<RankingItem>> {
   @override
   Future<List<RankingItem>> build() async {
     return await _fetchRankings();
@@ -22,7 +22,7 @@ class LeaderboardAsyncNotifier extends AsyncNotifier<List<RankingItem>> {
   }
 }
 
-final leaderboardProvider =
-    AsyncNotifierProvider<LeaderboardAsyncNotifier, List<RankingItem>>(
-  LeaderboardAsyncNotifier.new,
+final rankingProvider =
+    AsyncNotifierProvider<RankingAsyncNotifier, List<RankingItem>>(
+  RankingAsyncNotifier.new,
 );

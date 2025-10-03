@@ -8,4 +8,8 @@ class RoutePath {
   static const String newPost = '/new-post';
 
   static const String editPost = '/edit-post';
+
+  static const String verifyImage = '/verify-image';
+
+  static const String verifyQuiz = '/verify-quiz';
 }
