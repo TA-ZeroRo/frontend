@@ -461,6 +461,10 @@ final userProvider = NotifierProvider<UserNotifier, User?>(UserNotifier.new);
 
 Create a Riverpod folder named `state`, and implement providers in files with the suffix `_controller.dart`.
 
+**Naming convention for controller files:**
+- File name should reflect the **state/domain** being managed, not the page name
+- Examples: `ranking_controller.dart` (manages Ranking data), `profile_controller.dart` (manages Profile state)
+
 If you want to use mock data, create a `Mock` folder under `state` and put mock data files there.
 
 ### 2. Provider naming convention
