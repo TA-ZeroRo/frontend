@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/theme/app_color.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../routes/router_path.dart';
 
@@ -10,12 +11,14 @@ class HomePage extends StatelessWidget {
     const double appBarHeight = 60;
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Image.asset(
           'assets/images/zeroro_logo_design5.png',
           height: appBarHeight,
           fit: BoxFit.contain,
         ),
+        backgroundColor: AppColors.background,
       ),
       body: Center(
         child: Column(
