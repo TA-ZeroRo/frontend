@@ -6,6 +6,7 @@ import 'pages/home/home_page.dart';
 import 'pages/playground/playground_page.dart';
 import 'pages/profile/profile_page.dart';
 import 'state/bottom_nav_controller.dart';
+import 'pages/home/state/chat_controller.dart';
 
 class MainScreen extends ConsumerWidget {
   const MainScreen({super.key});
@@ -13,6 +14,7 @@ class MainScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final BottomNav nav = ref.watch(bottomNavProvider);
+    final chatViewState = ref.watch(chatViewStateProvider);
 
     final Widget page = switch (nav) {
       BottomNav.home => const HomePage(),
@@ -21,9 +23,13 @@ class MainScreen extends ConsumerWidget {
       BottomNav.community => const CommunityPage(),
     };
 
+    // Hide bottom navigation bar when chat is active on home page
+    final shouldShowBottomNav = nav != BottomNav.home ||
+        chatViewState == ChatViewState.characterVisible;
+
     return Scaffold(
       body: AnimatedBodyWrapper(key: ValueKey(nav.name), child: page),
-      bottomNavigationBar: const _BottomNavigationBar(),
+      bottomNavigationBar: shouldShowBottomNav ? const _BottomNavigationBar() : null,
     );
   }
 }
