@@ -5,17 +5,22 @@ Do not include full details here—only instructions on where to find them or wh
 
 ---
 
-## Documentation
-- For **project architecture** related tasks: see `docs/architecture.md`  
+## Read only the docs relevant to your current task
+
+- Architecture/Project setup: `frontend/docs/architecture.md`
+- State management (Riverpod): `frontend/docs/state_management.md`
+- UI design & styling: `frontend/docs/design_guide.md`
 
 ---
 
 ## MCP Usage
-- For tasks involving the **remote database**: use the `supabase mcp`  
-- For tasks related to **UI packages** (existing or new): use the `context-7 mcp`  
+
+- For tasks involving the **remote database**: use the `supabase mcp`
+- For tasks related to **UI packages** (existing or new): use the `context-7 mcp`
 
 ---
 
 ## Notes
-- Keep this file lightweight; it is meant to route you to the right resources.  
-- Update the references here whenever new documents or MCPs are introduced.  
+
+- Keep this file lightweight; it is meant to route you to the right resources.
+- Update the references here whenever new documents or MCPs are introduced.

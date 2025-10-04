@@ -139,8 +139,8 @@ class RankTile extends StatelessWidget {
     final isTopThree = rank <= 3;
 
     return Container(
-      width: 40,
-      height: 40,
+      width: 32,
+      height: 32,
       decoration: BoxDecoration(
         color: isTopThree ? _getRankColor(rank) : AppColors.primaryContainer,
         shape: BoxShape.circle,
@@ -163,13 +163,13 @@ class RankTile extends StatelessWidget {
                     ? Icons.looks_two
                     : Icons.looks_3,
                 color: AppColors.white,
-                size: 20,
+                size: 18,
               )
             : Text(
                 '$rank',
                 style: const TextStyle(
                   color: Colors.black87,
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -203,19 +203,19 @@ class RankTile extends StatelessWidget {
         child: Row(
           children: [
             _buildRankBadge(rank),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             // 프로필 이미지
             ClipOval(
               child: userImg != null && userImg!.isNotEmpty
                   ? Image.network(
                       userImg!,
-                      width: 40,
-                      height: 40,
+                      width: 32,
+                      height: 32,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
-                          width: 40,
-                          height: 40,
+                          width: 32,
+                          height: 32,
                           decoration: BoxDecoration(
                             color: Colors.grey[300],
                             shape: BoxShape.circle,
@@ -223,14 +223,14 @@ class RankTile extends StatelessWidget {
                           child: const Icon(
                             Icons.person,
                             color: Colors.white,
-                            size: 20,
+                            size: 16,
                           ),
                         );
                       },
                     )
                   : Container(
-                      width: 40,
-                      height: 40,
+                      width: 32,
+                      height: 32,
                       decoration: BoxDecoration(
                         color: Colors.grey[300],
                         shape: BoxShape.circle,
@@ -238,11 +238,11 @@ class RankTile extends StatelessWidget {
                       child: const Icon(
                         Icons.person,
                         color: Colors.white,
-                        size: 20,
+                        size: 16,
                       ),
                     ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             // 사용자 정보
             Expanded(
               child: Column(
@@ -251,7 +251,7 @@ class RankTile extends StatelessWidget {
                   Text(
                     name,
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
                     ),
@@ -260,24 +260,28 @@ class RankTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     '활동 점수',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    style: TextStyle(fontSize: 11, color: Colors.grey[600]),
                   ),
                 ],
               ),
             ),
+            const SizedBox(width: 4),
             // 점수
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.positive.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                '$score점',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.positive,
+            Flexible(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: AppColors.positive.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  '$score점',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.positive,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),

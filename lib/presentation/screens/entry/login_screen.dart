@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/app_color.dart';
 import '../../routes/router_path.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -8,6 +9,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -33,13 +35,13 @@ class LoginScreen extends StatelessWidget {
           // 구글 로그인 버튼
           SizedBox(
             height: 56,
-            width: 380,
+            width: 340,
             child: ElevatedButton(
               onPressed: () {
                 context.go(RoutePath.main);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
+                backgroundColor: AppColors.buttonColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                   side: BorderSide(color: Colors.grey.shade400, width: 1),
@@ -86,14 +88,14 @@ class LoginScreen extends StatelessWidget {
 
           // 게스트 로그인 버튼
           SizedBox(
-            width: 380,
+            width: 340,
             height: 56,
             child: ElevatedButton(
               onPressed: () {
                 context.go(RoutePath.main);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
+                backgroundColor: AppColors.buttonColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                   side: BorderSide(color: Colors.grey.shade400, width: 1),

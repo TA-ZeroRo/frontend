@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'state/leaderboard_controller.dart';
+import '../../../../../core/theme/app_color.dart';
+import 'state/ranking_controller.dart';
 import 'state/mock/mock_ranking_data.dart';
 import 'components/ranking_view.dart';
 
@@ -9,12 +10,12 @@ class LeaderboardPage extends ConsumerWidget {
   const LeaderboardPage({super.key});
 
   Future<void> _onRefresh(WidgetRef ref) async {
-    await ref.read(leaderboardProvider.notifier).refresh();
+    await ref.read(rankingProvider.notifier).refresh();
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncRankings = ref.watch(leaderboardProvider);
+    final asyncRankings = ref.watch(rankingProvider);
 
     return asyncRankings.when(
       data: (rankings) => _buildSuccessView(context, ref, rankings),
@@ -26,11 +27,11 @@ class LeaderboardPage extends ConsumerWidget {
   Widget _buildSuccessView(
       BuildContext context, WidgetRef ref, List<RankingItem> rankings) {
     return Container(
-      color: Colors.grey[50], // 전체 배경 연한 회색
+      color: AppColors.background, // 전체 배경 연한 회색
       child: RefreshIndicator(
         onRefresh: () => _onRefresh(ref),
         color: Theme.of(context).primaryColor,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.background,
         displacement: 40.0,
         strokeWidth: 2.5,
         child: CustomScrollView(
@@ -82,7 +83,7 @@ class LeaderboardPage extends ConsumerWidget {
     return RefreshIndicator(
       onRefresh: () => _onRefresh(ref),
       color: Theme.of(context).primaryColor,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       displacement: 40.0,
       strokeWidth: 2.5,
       child: CustomScrollView(
@@ -120,6 +121,7 @@ class LeaderboardPage extends ConsumerWidget {
 
   Widget _buildLoadingView() {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
           _buildAppBar(),
@@ -145,7 +147,7 @@ class LeaderboardPage extends ConsumerWidget {
 
   Widget _buildAppBar() {
     return const SliverAppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       elevation: 0,
       floating: true,
       snap: true,
