@@ -18,12 +18,9 @@ class ChatHeader extends ConsumerWidget {
         vertical: ChatSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3),
+        color: Colors.white,
         border: Border(
-          bottom: BorderSide(
-            color: Colors.black.withOpacity(0.1),
-            width: 1,
-          ),
+          bottom: BorderSide(color: Colors.black.withOpacity(0.1), width: 1),
         ),
       ),
       child: SafeArea(
@@ -39,11 +36,13 @@ class ChatHeader extends ConsumerWidget {
               ),
               onPressed: () {
                 if (viewState == ChatViewState.historyOpen) {
-                  ref.read(chatViewStateProvider.notifier).setState(
-                      ChatViewState.chatActive);
+                  ref
+                      .read(chatViewStateProvider.notifier)
+                      .setState(ChatViewState.chatActive);
                 } else {
-                  ref.read(chatViewStateProvider.notifier).setState(
-                      ChatViewState.historyOpen);
+                  ref
+                      .read(chatViewStateProvider.notifier)
+                      .setState(ChatViewState.historyOpen);
                 }
               },
               tooltip: '대화 목록',
@@ -76,8 +75,9 @@ class ChatHeader extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.close),
               onPressed: () {
-                ref.read(chatViewStateProvider.notifier).setState(
-                    ChatViewState.characterVisible);
+                ref
+                    .read(chatViewStateProvider.notifier)
+                    .setState(ChatViewState.characterVisible);
               },
               tooltip: '닫기',
             ),

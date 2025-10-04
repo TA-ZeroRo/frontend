@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/theme/app_color.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toastification/toastification.dart';
 
@@ -156,7 +157,9 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
     );
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
+        backgroundColor: AppColors.background,
         title: const Text(
           '사진 인증',
           style: TextStyle(
@@ -443,7 +446,7 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.background,
                   border: Border(
                     top: BorderSide(color: Colors.grey.shade300),
                   ),
