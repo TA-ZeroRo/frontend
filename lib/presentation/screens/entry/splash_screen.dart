@@ -67,12 +67,13 @@ class _SplashScreenState extends State<SplashScreen> {
                     ),
 
                   // Rive 애니메이션
-                  RiveAnimation.asset(
-                    'assets/animation/zeroro4.riv',
-                    controllers: [_controller!],
-                    onInit: _onRiveInit,
-                    fit: BoxFit.contain,
-                  ),
+                  if (_controller != null)
+                    RiveAnimation.asset(
+                      'assets/animation/zeroro_ani.riv',
+                      controllers: [_controller!],
+                      onInit: _onRiveInit,
+                      fit: BoxFit.contain,
+                    ),
                 ],
               ),
             ),
