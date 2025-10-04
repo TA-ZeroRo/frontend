@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'pages/community/community_page.dart';
 import 'pages/home/home_page.dart';
-import 'pages/leaderboard/leaderboard_page.dart';
+import 'pages/playground/playground_page.dart';
 import 'pages/profile/profile_page.dart';
 import 'state/bottom_nav_controller.dart';
 
@@ -17,7 +17,7 @@ class MainScreen extends ConsumerWidget {
     final Widget page = switch (nav) {
       BottomNav.home => const HomePage(),
       BottomNav.profile => const ProfilePage(),
-      BottomNav.leaderboard => const LeaderboardPage(),
+      BottomNav.playground => const PlaygroundPage(),
       BottomNav.community => const CommunityPage(),
     };
 

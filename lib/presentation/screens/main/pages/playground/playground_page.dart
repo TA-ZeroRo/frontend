@@ -6,8 +6,8 @@ import 'state/ranking_controller.dart';
 import 'state/mock/mock_ranking_data.dart';
 import 'components/ranking_view.dart';
 
-class LeaderboardPage extends ConsumerWidget {
-  const LeaderboardPage({super.key});
+class PlaygroundPage extends ConsumerWidget {
+  const PlaygroundPage({super.key});
 
   Future<void> _onRefresh(WidgetRef ref) async {
     await ref.read(rankingProvider.notifier).refresh();
@@ -152,7 +152,7 @@ class LeaderboardPage extends ConsumerWidget {
       floating: true,
       snap: true,
       title: Text(
-        'Leaderboard',
+        'Playground',
         style: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.bold,
