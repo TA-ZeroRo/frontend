@@ -31,7 +31,7 @@ class LeaderboardPage extends ConsumerWidget {
       child: RefreshIndicator(
         onRefresh: () => _onRefresh(ref),
         color: Theme.of(context).primaryColor,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.background,
         displacement: 40.0,
         strokeWidth: 2.5,
         child: CustomScrollView(
@@ -83,7 +83,7 @@ class LeaderboardPage extends ConsumerWidget {
     return RefreshIndicator(
       onRefresh: () => _onRefresh(ref),
       color: Theme.of(context).primaryColor,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       displacement: 40.0,
       strokeWidth: 2.5,
       child: CustomScrollView(
@@ -121,6 +121,7 @@ class LeaderboardPage extends ConsumerWidget {
 
   Widget _buildLoadingView() {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
           _buildAppBar(),

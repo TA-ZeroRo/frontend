@@ -41,6 +41,7 @@ class LoginScreen extends StatelessWidget {
                 context.go(RoutePath.main);
               },
               style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.buttonColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                   side: BorderSide(color: Colors.grey.shade400, width: 1),
@@ -94,6 +95,7 @@ class LoginScreen extends StatelessWidget {
                 context.go(RoutePath.main);
               },
               style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.buttonColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                   side: BorderSide(color: Colors.grey.shade400, width: 1),

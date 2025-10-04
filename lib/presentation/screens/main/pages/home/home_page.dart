@@ -8,7 +8,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double appBarHeight = 60;
+    const double appBarHeight = 50;
 
     return Scaffold(
       backgroundColor: AppColors.background,
