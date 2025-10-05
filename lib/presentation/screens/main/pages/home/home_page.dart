@@ -14,7 +14,7 @@ class HomePage extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Image.asset(
-          'assets/images/zeroro_logo_design5.png',
+          'assets/images/ZeroRo_logo.png',
           height: appBarHeight,
           fit: BoxFit.contain,
         ),
