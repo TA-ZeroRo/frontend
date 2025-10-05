@@ -16,7 +16,7 @@ class LoginScreen extends StatelessWidget {
         children: [
           // 로고 이미지
           Image.asset(
-            'assets/images/zeroro_logo_design5.png',
+            'assets/images/ZeroRo_logo.png',
             height: 80,
             fit: BoxFit.contain,
           ),
@@ -105,11 +105,7 @@ class LoginScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.person_outline,
-                    color: Colors.grey[700],
-                    size: 24,
-                  ),
+                  Icon(Icons.person_outline, color: Colors.grey[700], size: 24),
                   const SizedBox(width: 12),
                   Text(
                     '게스트로 시작하기',
