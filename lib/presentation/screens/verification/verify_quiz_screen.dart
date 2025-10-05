@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/theme/app_color.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'components/info_dialog.dart';
@@ -313,8 +314,9 @@ class _VerifyQuizScreenState extends ConsumerState<VerifyQuizScreen>
     final quizState = ref.watch(quizVerificationProvider);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
+        backgroundColor: AppColors.background,
         title: const Text(
           '퀴즈 인증',
           style: TextStyle(
@@ -324,7 +326,6 @@ class _VerifyQuizScreenState extends ConsumerState<VerifyQuizScreen>
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
         elevation: 0,
         shadowColor: Colors.transparent,
       ),
@@ -332,7 +333,7 @@ class _VerifyQuizScreenState extends ConsumerState<VerifyQuizScreen>
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.background,
           border: Border(top: BorderSide(color: Colors.grey.shade200)),
           boxShadow: [
             BoxShadow(

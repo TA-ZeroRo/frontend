@@ -1,8 +1,10 @@
 # State Management Guide
 
+> **⚠️ Riverpod 3.0.0 Update**: `StateProvider`는 legacy로 이동되었습니다. 모든 상태 관리에 `NotifierProvider`를 사용하세요.
+
 | Situation                            | Recommended Provider    | Use cases                                        |
 | ------------------------------------ | ----------------------- | ------------------------------------------------ |
-| Simple values (number, string, bool) | `StateProvider`         | Counter, switches, simple settings               |
+| Simple values (number, string, bool) | `NotifierProvider`      | Counter, switches, simple settings, view states  |
 | Complex synchronous state            | `NotifierProvider`      | User info, shopping cart, form data              |
 | Asynchronous data handling           | `AsyncNotifierProvider` | API calls, database CRUD                         |
 | One-off API calls                    | `FutureProvider`        | Initial configuration loading, simple data fetch |
@@ -12,29 +14,84 @@
 
 ## Detailed examples by Provider
 
-### 1. StateProvider — Simple state management
+### 1. NotifierProvider — Simple state management
 
 **When to use**
 
-* Managing primitive types (int, String, bool)
-* Simple UI state (toggle, counter, etc.)
+* Managing primitive types (int, String, bool, enum)
+* Simple UI state (toggle, counter, view states)
+* Any state that needs controlled updates
+
+**✅ Recommended Pattern (Riverpod 3.0+)**
 
 ```dart
-enum ThemeMode { light, dark }
-final counterProvider = StateProvider<int>((ref) => 0);
-final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.light);
+// Example 1: Counter
+class CounterNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
 
+  void increment() => state++;
+  void decrement() => state--;
+  void reset() => state = 0;
+}
+
+final counterProvider = NotifierProvider<CounterNotifier, int>(
+  CounterNotifier.new,
+);
+
+// Example 2: Enum state (View state, Theme mode, etc.)
+enum ChatViewState {
+  characterVisible,
+  chatActive,
+  historyOpen,
+}
+
+class ChatViewStateNotifier extends Notifier<ChatViewState> {
+  @override
+  ChatViewState build() => ChatViewState.characterVisible;
+
+  void setState(ChatViewState newState) {
+    state = newState;
+  }
+}
+
+final chatViewStateProvider = NotifierProvider<ChatViewStateNotifier, ChatViewState>(
+  ChatViewStateNotifier.new,
+);
+
+// Example 3: Boolean state
+class AITypingNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void setTyping(bool isTyping) {
+    state = isTyping;
+  }
+}
+
+final isAITypingProvider = NotifierProvider<AITypingNotifier, bool>(
+  AITypingNotifier.new,
+);
+
+// Usage in Widget
 class SimpleCounterWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final count = ref.watch(counterProvider);
+    final viewState = ref.watch(chatViewStateProvider);
 
     return Column(
       children: [
         Text('Count: $count'),
         ElevatedButton(
-          onPressed: () => ref.read(counterProvider.notifier).state++,
+          onPressed: () => ref.read(counterProvider.notifier).increment(),
           child: Text('Increment'),
+        ),
+        ElevatedButton(
+          onPressed: () => ref.read(chatViewStateProvider.notifier).setState(
+            ChatViewState.chatActive,
+          ),
+          child: Text('Open Chat'),
         ),
       ],
     );
@@ -42,13 +99,22 @@ class SimpleCounterWidget extends ConsumerWidget {
 }
 ```
 
-### 2. NotifierProvider — Complex synchronous state
+**❌ Legacy Pattern (Deprecated in Riverpod 3.0+)**
+
+```dart
+// DON'T use StateProvider in new code
+// It has been moved to package:flutter_riverpod/legacy.dart
+final counterProvider = StateProvider<int>((ref) => 0);
+ref.read(counterProvider.notifier).state++; // Legacy pattern
+```
+
+### 2. NotifierProvider — Complex object state
 
 **When to use**
 
-* Managing complex object state
+* Managing complex object state (models with Freezed)
 * State changes with business logic
-* State with multiple fields
+* State with multiple fields and methods
 
 ```dart
 // domain/model/user.dart
@@ -471,8 +537,100 @@ If you want to use mock data, create a `Mock` folder under `state` and put mock 
 
 ```dart
 final userProvider = NotifierProvider<UserNotifier, User?>(UserNotifier.new);
-final todosProvider = AsyncNotifierProvider<TodosNotifier, List<Todo>>(TodosNotifier.new);
+final todosProvider = AsyncNotifierProvider<TodosAsyncNotifier, List<Todo>>(TodosAsyncNotifier.new);
 final configProvider = FutureProvider<AppConfig>((ref) => ...);
 ```
+
+---
+
+## Riverpod 3.0.0 Migration Guide
+
+### StateProvider → NotifierProvider
+
+**Before (Legacy - Don't use)**
+```dart
+final counterProvider = StateProvider<int>((ref) => 0);
+
+// Usage
+ref.read(counterProvider.notifier).state++;
+final count = ref.watch(counterProvider);
+```
+
+**After (Recommended)**
+```dart
+class CounterNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void increment() => state++;
+}
+
+final counterProvider = NotifierProvider<CounterNotifier, int>(
+  CounterNotifier.new,
+);
+
+// Usage
+ref.read(counterProvider.notifier).increment();
+final count = ref.watch(counterProvider);
+```
+
+### Benefits of Notifier Pattern
+
+1. **Type Safety**: Methods are explicitly defined
+2. **Better Encapsulation**: State changes only through defined methods
+3. **Easier Testing**: Mock notifier methods instead of direct state access
+4. **Business Logic**: Notifier class can contain complex logic
+5. **Code Generation Support**: Works with `@riverpod` annotation
+
+### Real-world Example from Chat Feature
+
+```dart
+// View state management
+enum ChatViewState {
+  characterVisible,
+  chatActive,
+  historyOpen,
+}
+
+class ChatViewStateNotifier extends Notifier<ChatViewState> {
+  @override
+  ChatViewState build() => ChatViewState.characterVisible;
+
+  void setState(ChatViewState newState) {
+    state = newState;
+  }
+}
+
+final chatViewStateProvider = NotifierProvider<ChatViewStateNotifier, ChatViewState>(
+  ChatViewStateNotifier.new,
+);
+
+// Boolean state management
+class AITypingNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void setTyping(bool isTyping) {
+    state = isTyping;
+  }
+}
+
+final isAITypingProvider = NotifierProvider<AITypingNotifier, bool>(
+  AITypingNotifier.new,
+);
+
+// Usage in widgets
+ref.read(chatViewStateProvider.notifier).setState(ChatViewState.chatActive);
+ref.read(isAITypingProvider.notifier).setTyping(true);
+```
+
+### Migration Checklist
+
+- [ ] Replace all `StateProvider` with `NotifierProvider`
+- [ ] Create Notifier classes for each state
+- [ ] Replace `.state =` assignments with method calls
+- [ ] Update widget code to use notifier methods
+- [ ] Remove `package:flutter_riverpod/legacy.dart` imports if any
+- [ ] Run `flutter analyze` to check for issues
 
 ---

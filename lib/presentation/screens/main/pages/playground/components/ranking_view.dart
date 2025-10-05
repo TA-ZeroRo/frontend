@@ -58,42 +58,24 @@ class _RankingViewState extends ConsumerState<RankingView> {
       return const Center(child: Text('충분한 리더보드 데이터가 없습니다.'));
     }
 
-    // TODO: 내 랭킹 정보는 추후 Profile 연동 필요. 임시로 첫 번째 유저 정보 사용
-    final myRank = ranking.isNotEmpty
-        ? ranking.indexWhere(
-            (r) => r.userId == 'me',
-          )
-        : -1; // 실제 내 userId로 대체 필요
-
     // 3명 미만인 경우: ListView만 사용
     if (ranking.length < 3) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (ranking.isNotEmpty)
-            MyRankTile(
-              rank: myRank >= 0 ? myRank + 1 : 1,
-              name: ranking[myRank >= 0 ? myRank : 0].username,
-              score: ranking[myRank >= 0 ? myRank : 0].totalPoints,
-            ),
-          Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              controller: _scrollController,
-              itemCount: ranking.length,
-              itemBuilder: (context, index) {
-                final user = ranking[index];
-                final rank = index + 1;
-                return RankTile(
-                  rank: rank,
-                  name: user.username,
-                  score: user.totalPoints,
-                  userImg: user.userImg,
-                );
-              },
-            ),
-          ),
-        ],
+      return Expanded(
+        child: ListView.builder(
+          padding: EdgeInsets.zero,
+          controller: _scrollController,
+          itemCount: ranking.length,
+          itemBuilder: (context, index) {
+            final user = ranking[index];
+            final rank = index + 1;
+            return RankTile(
+              rank: rank,
+              name: user.username,
+              score: user.totalPoints,
+              userImg: user.userImg,
+            );
+          },
+        ),
       );
     }
 
@@ -104,18 +86,13 @@ class _RankingViewState extends ConsumerState<RankingView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (ranking.isNotEmpty)
-          MyRankTile(
-            rank: myRank >= 0 ? myRank + 1 : 1,
-            name: ranking[myRank >= 0 ? myRank : 0].username,
-            score: ranking[myRank >= 0 ? myRank : 0].totalPoints,
-          ),
-        PodiumList(top3: podium, height: _podiumHeight),
+        PodiumList(top3: podium, height: _podiumHeight, shouldAnimate: false),
         const SizedBox(height: 16),
         Expanded(
           child: rest.isEmpty
               ? const Center(child: Text('추가 순위 데이터가 없습니다.'))
               : ListView.builder(
+            padding: EdgeInsets.zero,
                   controller: _scrollController,
                   itemCount: rest.length,
                   itemBuilder: (context, index) {

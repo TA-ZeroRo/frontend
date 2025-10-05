@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import '../state/mock/mock_ranking_data.dart';
 
 class PodiumList extends StatefulWidget {
-  const PodiumList({super.key, required this.top3, this.height = 220.0});
+  const PodiumList({super.key, required this.top3, this.height = 200.0, this.shouldAnimate = true});
   final List<RankingItem> top3;
   final double height;
+  final bool shouldAnimate;
 
   @override
   State<PodiumList> createState() => _PodiumListState();
@@ -25,6 +26,7 @@ class _PodiumListState extends State<PodiumList> with TickerProviderStateMixin {
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
+      value: widget.shouldAnimate ? 0.0 : 1.0,
     );
 
     // 3등 애니메이션 (0.0 ~ 0.3초)
@@ -51,8 +53,10 @@ class _PodiumListState extends State<PodiumList> with TickerProviderStateMixin {
       ),
     );
 
-    // 애니메이션 시작
-    _animationController.forward();
+    // 애니메이션 시작 (shouldAnimate가 true일 때만)
+    if (widget.shouldAnimate) {
+      _animationController.forward();
+    }
   }
 
   @override

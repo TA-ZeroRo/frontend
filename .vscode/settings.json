@@ -1,0 +1,5 @@
+{
+  "dart.flutterSdkPath": "C:\\sdk\\flutter",
+  "dart.flutterSelectDeviceWhenConnected": true,
+  "dart.flutterAdditionalArgs": ["--device-id", "android"]
+}

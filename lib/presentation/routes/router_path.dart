@@ -12,4 +12,6 @@ class RoutePath {
   static const String verifyImage = '/verify-image';
 
   static const String verifyQuiz = '/verify-quiz';
+
+  static const String campaignRecruiting = '/campaign-recruiting';
 }

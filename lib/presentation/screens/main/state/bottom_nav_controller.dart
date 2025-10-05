@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum BottomNav {
-  home('Home', Icons.home_outlined),
-  community('Community', Icons.forum_outlined),
-  leaderboard('Leaderboard', Icons.emoji_events_outlined),
-  profile('Profile', Icons.person_outline);
+  home('홈', Icons.eco),
+  playground('놀이터', Icons.sports_esports),
+  community('커뮤니티', Icons.groups),
+  profile('프로필', Icons.account_circle);
 
   final String title;
   final IconData iconData;

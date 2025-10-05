@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'presentation/routes/router.dart';
 
 void main() async {
-  runApp(MainApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const MainApp());
 }
 
 class MainApp extends StatelessWidget {
