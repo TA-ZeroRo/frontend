@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'components/profile_info_section.dart';
 import 'components/point_chart_section.dart';
+import 'settings_dialog.dart' show showSettingsDialog;
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -17,13 +18,20 @@ class ProfilePage extends ConsumerWidget {
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_rounded),
+            onPressed: () => showSettingsDialog(context),
+            tooltip: '설정',
+          ),
+        ],
       ),
       body: const SingleChildScrollView(
         child: Column(
           children: [
             ProfileInfoSection(),
             PointChartSection(),
-            // TODO: 여기에 다른 섹션들 추가 (예: 설정 등)
+            // ✅ 설정 기능이 AppBar에 추가됨
           ],
         ),
       ),
