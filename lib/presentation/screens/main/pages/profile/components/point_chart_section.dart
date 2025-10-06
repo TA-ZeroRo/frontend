@@ -525,19 +525,25 @@ class _PointChartSectionState extends ConsumerState<PointChartSection>
                                                     return SizedBox(
                                                       width: 60.0,
                                                       child: Center(
-                                                        child: Text(
-                                                          DateFormat(
-                                                            'M/d',
-                                                          ).format(data.date),
-                                                          style:
-                                                              const TextStyle(
-                                                                color: Colors
-                                                                    .black87,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                fontSize: 10,
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets.only(
+                                                                bottom: 16.0,
                                                               ),
+                                                          child: Text(
+                                                            DateFormat(
+                                                              'M/d',
+                                                            ).format(data.date),
+                                                            style:
+                                                                const TextStyle(
+                                                                  color: Colors
+                                                                      .black87,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  fontSize: 10,
+                                                                ),
+                                                          ),
                                                         ),
                                                       ),
                                                     );
