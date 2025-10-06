@@ -433,7 +433,7 @@ class _PointChartSectionState extends ConsumerState<PointChartSection>
                                                                   ),
                                                               decoration: BoxDecoration(
                                                                 color: Colors
-                                                                    .white,
+                                                                    .transparent,
                                                                 borderRadius:
                                                                     BorderRadius.circular(
                                                                       4,
