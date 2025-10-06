@@ -56,55 +56,26 @@ class ProfilePage extends ConsumerWidget {
 
   Widget _buildSliverAppBar(BuildContext context) {
     return SliverAppBar(
-      backgroundColor: AppColors.background.withValues(alpha: 0.95),
+      backgroundColor: AppColors.background,
       elevation: 0,
       floating: true,
       snap: true,
-      expandedHeight: 120,
-      flexibleSpace: FlexibleSpaceBar(
-        title: Text(
-          '프로필',
-          style: AppTextStyle.headlineSmall.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.primaryAccent.withValues(alpha: 0.1),
-                AppColors.background.withValues(alpha: 0.8),
-              ],
-            ),
-          ),
+      title: Text(
+        '프로필',
+        style: AppTextStyle.headlineSmall.copyWith(
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.bold,
         ),
       ),
+      centerTitle: true,
       actions: [
-        Container(
-          margin: const EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(
-            color: AppColors.background.withValues(alpha: 0.9),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.cardShadow,
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+        IconButton(
+          icon: const Icon(
+            Icons.settings_rounded,
+            color: AppColors.textPrimary,
           ),
-          child: IconButton(
-            icon: const Icon(
-              Icons.settings_rounded,
-              color: AppColors.textPrimary,
-            ),
-            onPressed: () => showSettingsDialog(context),
-            tooltip: '설정',
-          ),
+          onPressed: () => showSettingsDialog(context),
+          tooltip: '설정',
         ),
       ],
     );
