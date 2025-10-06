@@ -5,6 +5,7 @@ class PageTransitions {
     return PageRouteBuilder<T>(
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        // 스케일과 페이드 애니메이션 조합
         const begin = Offset(0.0, 1.0);
         const end = Offset.zero;
         const curve = Curves.easeOutCubic;
@@ -13,10 +14,12 @@ class PageTransitions {
           begin: begin,
           end: end,
         ).chain(CurveTween(curve: curve));
+
         var fadeAnimation = Tween(
           begin: 0.0,
           end: 1.0,
         ).chain(CurveTween(curve: curve));
+
         var scaleAnimation = Tween(
           begin: 0.95,
           end: 1.0,
