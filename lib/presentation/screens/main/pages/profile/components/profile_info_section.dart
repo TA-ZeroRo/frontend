@@ -32,24 +32,41 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
 
   void _toggleEdit() {
     if (_isEditing) {
-      // 저장 로직
+      // 저장 로직 - 이름 유효성 검사
+      final trimmedName = _usernameController.text.trim();
+
+      if (trimmedName.isEmpty) {
+        // 이름이 비어있으면 경고 문구 표시하고 편집 모드 유지
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('이름을 입력해주세요.'),
+            backgroundColor: Color.fromRGBO(255, 86, 69, 1),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return; // 편집 모드 유지
+      }
+
+      // 이름이 있으면 저장 진행
       final notifier = ref.read(profileProvider.notifier);
-      notifier.updateUsername(_usernameController.text.trim());
+      notifier.updateUsername(trimmedName);
       notifier.updateUserImage(_tempImageUrl);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('프로필이 업데이트되었습니다.'),
-          backgroundColor: const Color.fromRGBO(116, 205, 124, 1),
+          backgroundColor: Color.fromRGBO(116, 205, 124, 1),
         ),
       );
+
+      setState(() => _isEditing = false);
     } else {
       // 편집 모드 시작 - 현재 값으로 초기화
       final profile = ref.read(profileProvider);
       _usernameController.text = profile.username;
       _tempImageUrl = profile.userImg;
+      setState(() => _isEditing = true);
     }
-    setState(() => _isEditing = !_isEditing);
   }
 
   void _cancelEdit() {
