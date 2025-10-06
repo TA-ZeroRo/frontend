@@ -151,6 +151,7 @@ class ActivityVerificationFabState extends State<ActivityVerificationFab>
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
           child: Container(
+            width: 140,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: AppColors.cardBackground,
