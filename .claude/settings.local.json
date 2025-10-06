@@ -5,7 +5,8 @@
       "Bash(findstr:*)",
       "Bash(dart fix:*)",
       "Bash(flutter pub:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(dart run build_runner:*)"
     ],
     "deny": [],
     "ask": []

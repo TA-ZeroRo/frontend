@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../domain/model/post.dart';
 import '../screens/campaign/campaign_recruiting_screen.dart';
 import '../screens/entry/login_screen.dart';
+import '../screens/entry/register_screen.dart';
 import '../screens/entry/splash_screen.dart';
 import '../screens/main/main_screen.dart';
 import '../screens/post/edit_post_screen.dart';
@@ -21,6 +22,11 @@ final GoRouter router = GoRouter(
       path: RoutePath.login,
       name: 'login',
       builder: (context, state) => const LoginScreen(),
+    ),
+    GoRoute(
+      path: RoutePath.register,
+      name: 'register',
+      builder: (context, state) => const RegisterScreen(),
     ),
     GoRoute(
       path: RoutePath.main,
