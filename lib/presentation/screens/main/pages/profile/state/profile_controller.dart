@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../../domain/model/profile.dart';
+import '../../../../../../domain/model/profile_model.dart';
 
 class ProfileNotifier extends Notifier<Profile> {
   @override
