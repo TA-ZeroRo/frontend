@@ -14,14 +14,16 @@ class HomePage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Image.asset(
-          'assets/images/ZeroRo_logo.png',
-          height: appBarHeight,
-          fit: BoxFit.contain,
-        ),
-        backgroundColor: AppColors.background,
-      ),
+      appBar: viewState == ChatViewState.characterVisible
+          ? AppBar(
+              title: Image.asset(
+                'assets/images/ZeroRo_logo.png',
+                height: appBarHeight,
+                fit: BoxFit.contain,
+              ),
+              backgroundColor: AppColors.background,
+            )
+          : null,
       body: Stack(
         fit: StackFit.expand,
         children: [
