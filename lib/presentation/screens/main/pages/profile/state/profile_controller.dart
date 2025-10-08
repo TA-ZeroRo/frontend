@@ -27,6 +27,28 @@ class ProfileNotifier extends Notifier<Profile> {
   void updateContinuousDays(int days) {
     state = state.copyWith(continuousDays: days);
   }
+
+  void updateBirthDate(DateTime? birthDate) {
+    state = state.copyWith(birthDate: birthDate);
+  }
+
+  void updateRegion(String? region) {
+    state = state.copyWith(region: region);
+  }
+
+  void updateProfile({
+    String? username,
+    String? userImg,
+    DateTime? birthDate,
+    String? region,
+  }) {
+    state = state.copyWith(
+      username: username,
+      userImg: userImg,
+      birthDate: birthDate,
+      region: region,
+    );
+  }
 }
 
 final profileProvider = NotifierProvider<ProfileNotifier, Profile>(
