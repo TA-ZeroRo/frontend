@@ -680,7 +680,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                       )
                     else
                       Text(
-                        profile.username.isNotEmpty ? profile.username : '김오띠',
+                        profile.username,
                         style: AppTextStyle.headlineSmall.copyWith(
                           color: AppColors.textPrimary,
                           fontWeight: FontWeight.bold,
