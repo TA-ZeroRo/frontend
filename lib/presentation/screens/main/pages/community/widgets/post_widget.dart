@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../../domain/model/post.dart';
+import '../../../../../../domain/model/post/post.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
 import '../../profile/state/profile_controller.dart';

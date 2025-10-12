@@ -6,7 +6,14 @@
       "Bash(dart fix:*)",
       "Bash(flutter pub:*)",
       "Bash(tree:*)",
-      "Bash(dart run build_runner:*)"
+      "Bash(dart run build_runner:*)",
+      "Bash(move verification_result.dart verification_result/)",
+      "Bash(move quiz_question.dart quiz_question/)",
+      "Bash(move chart_data.dart chart_data/)",
+      "Bash(move app_settings.dart app_settings/)",
+      "Bash(move profile.dart profile/)",
+      "Bash(del profile_model.dart)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []

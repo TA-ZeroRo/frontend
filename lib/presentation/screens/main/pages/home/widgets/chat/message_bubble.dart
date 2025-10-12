@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/chat_colors.dart';
 import 'package:frontend/core/theme/chat_spacing.dart';
 import 'package:frontend/core/theme/app_text_style.dart';
-import 'package:frontend/domain/model/chat_message.dart';
+import 'package:frontend/domain/model/chat_message/chat_message.dart';
 
 class MessageBubble extends StatelessWidget {
   final ChatMessage message;

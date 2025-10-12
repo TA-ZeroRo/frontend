@@ -1,6 +1,6 @@
-import 'package:frontend/domain/model/chat_message.dart';
-import 'package:frontend/domain/model/conversation.dart';
-import 'package:frontend/domain/model/chat_summary.dart';
+import 'package:frontend/domain/model/chat_message/chat_message.dart';
+import 'package:frontend/domain/model/conversation/conversation.dart';
+import 'package:frontend/domain/model/chat_summary/chat_summary.dart';
 
 class MockChatData {
   MockChatData._();

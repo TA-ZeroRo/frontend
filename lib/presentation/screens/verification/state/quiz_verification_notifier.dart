@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../domain/model/quiz_question.dart';
+import '../../../../domain/model/quiz_question/quiz_question.dart';
 
 // Mock Quiz Data
 const _mockQuizQuestions = [

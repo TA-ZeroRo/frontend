@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../../domain/model/comment.dart';
-import '../../../../../../domain/model/post.dart';
+import '../../../../../../domain/model/comment/comment.dart';
+import '../../../../../../domain/model/post/post.dart';
 import 'mock/mock_posts.dart';
 import 'mock/mock_comments.dart';
 

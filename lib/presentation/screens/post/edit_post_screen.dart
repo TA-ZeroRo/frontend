@@ -5,7 +5,7 @@ import 'package:toastification/toastification.dart';
 
 import '../../../core/theme/app_color.dart';
 import '../../../core/theme/app_text_style.dart';
-import '../../../domain/model/post.dart';
+import '../../../domain/model/post/post.dart';
 import '../main/pages/community/state/community_controller.dart';
 
 // Form state model
