@@ -13,7 +13,10 @@
       "Bash(move app_settings.dart app_settings/)",
       "Bash(move profile.dart profile/)",
       "Bash(del profile_model.dart)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Read(//c/Users/parks/Downloads/**)",
+      "mcp__upstash-context-7-mcp__resolve-library-id",
+      "mcp__upstash-context-7-mcp__get-library-docs"
     ],
     "deny": [],
     "ask": []

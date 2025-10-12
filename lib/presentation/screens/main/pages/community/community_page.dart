@@ -35,8 +35,11 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
     return Stack(
       children: [
         Scaffold(
-          backgroundColor: AppColors.background,
-          body: postsAsync.when(
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: AppColors.backgroundGradient,
+            ),
+            child: postsAsync.when(
             data: (posts) => RefreshIndicator(
               onRefresh: _onRefresh,
               color: AppColors.primaryAccent,
@@ -47,7 +50,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
                   SliverAppBar(
-                    backgroundColor: AppColors.background,
+                    backgroundColor: Colors.transparent,
                     elevation: 0,
                     floating: true,
                     snap: true,
@@ -107,11 +110,14 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
               ),
             ),
             loading: () => Scaffold(
-              backgroundColor: AppColors.background,
-              body: CustomScrollView(
+              body: Container(
+                decoration: const BoxDecoration(
+                  gradient: AppColors.backgroundGradient,
+                ),
+                child: CustomScrollView(
                 slivers: [
                   SliverAppBar(
-                    backgroundColor: AppColors.background,
+                    backgroundColor: Colors.transparent,
                     elevation: 0,
                     floating: true,
                     snap: true,
@@ -153,6 +159,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                     ),
                   ),
                 ],
+                ),
               ),
             ),
             error: (error, stack) => RefreshIndicator(
@@ -163,7 +170,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
                   SliverAppBar(
-                    backgroundColor: AppColors.background,
+                    backgroundColor: Colors.transparent,
                     elevation: 0,
                     floating: true,
                     snap: true,
@@ -212,6 +219,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                   ),
                 ],
               ),
+            ),
             ),
           ),
         ),

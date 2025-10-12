@@ -314,9 +314,8 @@ class _VerifyQuizScreenState extends ConsumerState<VerifyQuizScreen>
     final quizState = ref.watch(quizVerificationProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Colors.transparent,
         title: const Text(
           '퀴즈 인증',
           style: TextStyle(
@@ -329,11 +328,16 @@ class _VerifyQuizScreenState extends ConsumerState<VerifyQuizScreen>
         elevation: 0,
         shadowColor: Colors.transparent,
       ),
-      body: _buildBody(quizState),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.backgroundGradient,
+        ),
+        child: _buildBody(quizState),
+      ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: Colors.transparent,
           border: Border(top: BorderSide(color: Colors.grey.shade200)),
           boxShadow: [
             BoxShadow(

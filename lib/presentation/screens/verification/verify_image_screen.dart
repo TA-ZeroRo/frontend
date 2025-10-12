@@ -157,9 +157,8 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
     );
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Colors.transparent,
         title: const Text(
           '사진 인증',
           style: TextStyle(
@@ -196,9 +195,13 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          Column(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.backgroundGradient,
+        ),
+        child: Stack(
+          children: [
+            Column(
             children: [
               Expanded(
                 child: SingleChildScrollView(
@@ -492,7 +495,8 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
                 ),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }

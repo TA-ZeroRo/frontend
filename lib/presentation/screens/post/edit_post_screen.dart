@@ -211,7 +211,6 @@ class _EditPostScreenState extends ConsumerState<EditPostScreen> {
     final isEditMode = widget.post != null;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.cardBackground,
         elevation: 0,
@@ -270,9 +269,13 @@ class _EditPostScreenState extends ConsumerState<EditPostScreen> {
           ),
         ],
       ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.backgroundGradient,
+        ),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -561,6 +564,7 @@ class _EditPostScreenState extends ConsumerState<EditPostScreen> {
               ],
             ),
           ),
+        ),
         ),
       ),
     );

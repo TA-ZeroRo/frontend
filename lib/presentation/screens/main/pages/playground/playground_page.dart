@@ -44,7 +44,9 @@ class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
     return Stack(
       children: [
         Container(
-          color: AppColors.background,
+          decoration: const BoxDecoration(
+            gradient: AppColors.backgroundGradient,
+          ),
           child: RefreshIndicator(
             onRefresh: _onRefresh,
         color: Theme.of(context).primaryColor,
@@ -127,7 +129,9 @@ class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
     return Stack(
       children: [
         Container(
-          color: AppColors.background,
+          decoration: const BoxDecoration(
+            gradient: AppColors.backgroundGradient,
+          ),
           child: RefreshIndicator(
             onRefresh: _onRefresh,
         color: Theme.of(context).primaryColor,
@@ -219,7 +223,9 @@ class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
     return Stack(
       children: [
         Container(
-          color: AppColors.background,
+          decoration: const BoxDecoration(
+            gradient: AppColors.backgroundGradient,
+          ),
           child: CustomScrollView(
         slivers: [
           _buildAppBar(),
@@ -289,7 +295,7 @@ class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
 
   Widget _buildAppBar() {
     return const SliverAppBar(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       floating: true,
       snap: true,

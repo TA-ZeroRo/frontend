@@ -53,9 +53,12 @@ class _SplashScreenState extends State<SplashScreen>
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.backgroundGradient,
+        ),
+        child: Stack(
+          children: [
           // 하단 이미지 (위쪽 모서리 둥글게)
           Positioned(
             bottom: 0,
@@ -87,7 +90,8 @@ class _SplashScreenState extends State<SplashScreen>
               ),
             ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }

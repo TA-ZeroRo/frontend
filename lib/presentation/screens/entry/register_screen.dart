@@ -15,9 +15,8 @@ class RegisterScreen extends ConsumerWidget {
     final notifier = ref.read(registerProvider.notifier);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
           '회원가입',
@@ -27,8 +26,12 @@ class RegisterScreen extends ConsumerWidget {
         ),
         centerTitle: true,
       ),
-      body: SafeArea(
-        child: Padding(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.backgroundGradient,
+        ),
+        child: SafeArea(
+          child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,6 +156,7 @@ class RegisterScreen extends ConsumerWidget {
               const SizedBox(height: 24),
             ],
           ),
+        ),
         ),
       ),
     );
