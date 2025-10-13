@@ -211,73 +211,78 @@ class _EditPostScreenState extends ConsumerState<EditPostScreen> {
     final isEditMode = widget.post != null;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.cardBackground,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.close, color: AppColors.textPrimary),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          isEditMode ? '게시글 수정' : '게시글 작성',
-          style: AppTextStyle.titleMedium.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              child: ElevatedButton(
-                onPressed: formState.isLoading ? null : _handleSubmit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryAccent,
-                  foregroundColor: AppColors.buttonTextColor,
-                  elevation: 0,
-                  shadowColor: Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                ),
-                child: formState.isLoading
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.buttonTextColor,
-                          ),
-                        ),
-                      )
-                    : Text(
-                        '게시',
-                        style: AppTextStyle.labelLarge.copyWith(
-                          color: AppColors.buttonTextColor,
-                        ),
-                      ),
-              ),
-            ),
-          ),
-        ],
-      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: AppColors.backgroundGradient,
         ),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
+        child: SafeArea(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                // Custom AppBar
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.close, color: AppColors.textPrimary),
+                        onPressed: () => context.pop(),
+                      ),
+                      Expanded(
+                        child: Text(
+                          isEditMode ? '게시글 수정' : '게시글 작성',
+                          textAlign: TextAlign.center,
+                          style: AppTextStyle.titleMedium.copyWith(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        child: ElevatedButton(
+                          onPressed: formState.isLoading ? null : _handleSubmit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryAccent,
+                            foregroundColor: AppColors.buttonTextColor,
+                            elevation: 0,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
+                          ),
+                          child: formState.isLoading
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppColors.buttonTextColor,
+                                    ),
+                                  ),
+                                )
+                              : Text(
+                                  '게시',
+                                  style: AppTextStyle.labelLarge.copyWith(
+                                    color: AppColors.buttonTextColor,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Content
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -535,17 +540,17 @@ class _EditPostScreenState extends ConsumerState<EditPostScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryAccent.withValues(alpha: 0.1),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: AppColors.primaryAccent.withValues(alpha: 0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.info_outline,
-                        color: AppColors.primaryAccent,
+                        color: Colors.black,
                         size: 20,
                       ),
                       const SizedBox(width: 12),
@@ -563,8 +568,12 @@ class _EditPostScreenState extends ConsumerState<EditPostScreen> {
                 ),
               ],
             ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );

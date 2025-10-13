@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/theme/app_color.dart';
+import '../../../verification/verify_image_screen.dart';
+import '../../../verification/verify_quiz_screen.dart';
 import 'state/ranking_controller.dart';
 import 'state/mock/mock_ranking_data.dart';
 import 'components/collapsible_leaderboard_section.dart';
@@ -102,20 +104,18 @@ class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
             },
             onOverlayTap: _closeMenu,
             onPhotoVerification: () {
-              // TODO: Navigate to photo verification screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('사진인증 기능은 아직 구현중입니다'),
-                  duration: Duration(seconds: 2),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VerifyImageScreen(),
                 ),
               );
             },
             onQuizVerification: () {
-              // TODO: Navigate to quiz verification screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('퀴즈 인증 기능은 아직 구현중입니다'),
-                  duration: Duration(seconds: 2),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VerifyQuizScreen(),
                 ),
               );
             },
@@ -196,20 +196,18 @@ class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
             },
             onOverlayTap: _closeMenu,
             onPhotoVerification: () {
-              // TODO: Navigate to photo verification screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('사진인증 기능은 아직 구현중입니다'),
-                  duration: Duration(seconds: 2),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VerifyImageScreen(),
                 ),
               );
             },
             onQuizVerification: () {
-              // TODO: Navigate to quiz verification screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('퀴즈 인증 기능은 아직 구현중입니다'),
-                  duration: Duration(seconds: 2),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VerifyQuizScreen(),
                 ),
               );
             },
@@ -270,20 +268,18 @@ class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
             },
             onOverlayTap: _closeMenu,
             onPhotoVerification: () {
-              // TODO: Navigate to photo verification screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('사진인증 기능은 아직 구현중입니다'),
-                  duration: Duration(seconds: 2),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VerifyImageScreen(),
                 ),
               );
             },
             onQuizVerification: () {
-              // TODO: Navigate to quiz verification screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('퀴즈 인증 기능은 아직 구현중입니다'),
-                  duration: Duration(seconds: 2),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VerifyQuizScreen(),
                 ),
               );
             },
