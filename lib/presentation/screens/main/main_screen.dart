@@ -7,20 +7,12 @@ import 'pages/playground/playground_page.dart';
 import 'pages/profile/profile_page.dart';
 import 'state/bottom_nav_controller.dart';
 import 'pages/home/state/chat_controller.dart';
-import '../../../core/animations/page_transition_wrapper.dart';
 
-class MainScreen extends ConsumerStatefulWidget {
+class MainScreen extends ConsumerWidget {
   const MainScreen({super.key});
 
   @override
-  ConsumerState<MainScreen> createState() => _MainScreenState();
-}
-
-class _MainScreenState extends ConsumerState<MainScreen> {
-  BottomNav? _previousNav;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final BottomNav nav = ref.watch(bottomNavProvider);
     final chatViewState = ref.watch(chatViewStateProvider);
 
@@ -31,29 +23,13 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       BottomNav.community => const CommunityPage(),
     };
 
-    // 방향 계산
-    PageTransitionDirection? direction;
-    if (_previousNav != null && _previousNav != nav) {
-      final previousIndex = _previousNav!.index;
-      final currentIndex = nav.index;
-
-      if (currentIndex > previousIndex) {
-        direction = PageTransitionDirection.rightToLeft; // 다음 페이지로 이동
-      } else {
-        direction = PageTransitionDirection.leftToRight; // 이전 페이지로 이동
-      }
-    }
-
-    // 현재 네비게이션을 이전으로 저장
-    _previousNav = nav;
-
     // Hide bottom navigation bar when chat is active on home page
     final shouldShowBottomNav =
         nav != BottomNav.home ||
         chatViewState == ChatViewState.characterVisible;
 
     return Scaffold(
-      body: PageTransitionWrapper(direction: direction, child: page),
+      body: page,
       bottomNavigationBar: shouldShowBottomNav
           ? const _BottomNavigationBar()
           : null,
