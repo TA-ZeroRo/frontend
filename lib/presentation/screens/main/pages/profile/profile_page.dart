@@ -4,6 +4,7 @@ import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/theme/app_text_style.dart';
 import 'components/profile_info_section.dart';
 import 'components/point_chart_section.dart';
+import 'components/user_posts_section.dart';
 import 'settings_dialog.dart' show showSettingsDialog;
 
 class ProfilePage extends ConsumerWidget {
@@ -36,6 +37,15 @@ class ProfilePage extends ConsumerWidget {
                   vertical: 8,
                 ),
                 child: _buildChartCard(),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: _buildUserPostsCard(),
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
@@ -105,6 +115,24 @@ class ProfilePage extends ConsumerWidget {
         ],
       ),
       child: const PointChartSection(),
+    );
+  }
+
+  Widget _buildUserPostsCard() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: AppColors.cardGradient,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.3), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.cardShadow,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: const UserPostsSection(),
     );
   }
 }

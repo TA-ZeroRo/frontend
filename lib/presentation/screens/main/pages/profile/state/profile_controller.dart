@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../../domain/model/profile/profile.dart';
+import '../../../../../../domain/model/profile/profile_model.dart';
+import '../../../../../../domain/model/post/post.dart';
+import '../../community/state/community_controller.dart';
 
 class ProfileNotifier extends Notifier<Profile> {
   @override
@@ -64,3 +66,19 @@ class ProfileNotifier extends Notifier<Profile> {
 final profileProvider = NotifierProvider<ProfileNotifier, Profile>(
   ProfileNotifier.new,
 );
+
+/// 사용자가 작성한 게시글 필터링 Provider
+///
+/// 커뮤니티의 전체 게시글에서 현재 프로필 사용자의 게시글만 필터링
+/// - postsProvider: 커뮤니티 전체 게시글 데이터 소스
+/// - userId: 필터링할 사용자 ID
+///
+/// 백엔드에서 필터링 API가 구현되면 이 Provider를 제거하고
+/// 백엔드 API 호출로 대체 예정
+final userPostsProvider = FutureProvider.family<List<Post>, String>((
+  ref,
+  userId,
+) async {
+  final postsAsync = await ref.watch(postsProvider.future);
+  return postsAsync.where((post) => post.userId == userId).toList();
+});

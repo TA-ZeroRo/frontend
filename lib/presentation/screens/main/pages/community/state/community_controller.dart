@@ -68,10 +68,7 @@ class PostsNotifier extends AsyncNotifier<List<Post>> {
       final currentPosts = state.value ?? [];
       return currentPosts.map((post) {
         if (post.id == postId) {
-          return post.copyWith(
-            title: title,
-            content: content,
-          );
+          return post.copyWith(title: title, content: content);
         }
         return post;
       }).toList();
@@ -84,7 +81,10 @@ final postsProvider = AsyncNotifierProvider<PostsNotifier, List<Post>>(
 );
 
 // Comments provider using FutureProvider.family for simplicity
-final commentsProvider = FutureProvider.family<List<Comment>, int>((ref, postId) async {
+final commentsProvider = FutureProvider.family<List<Comment>, int>((
+  ref,
+  postId,
+) async {
   await Future.delayed(const Duration(milliseconds: 300));
   return mockComments[postId] ?? [];
 });
@@ -94,7 +94,12 @@ class CommentOperationsNotifier extends Notifier<void> {
   @override
   void build() {}
 
-  Future<void> addComment(int postId, String userId, String username, String content) async {
+  Future<void> addComment(
+    int postId,
+    String userId,
+    String username,
+    String content,
+  ) async {
     await Future.delayed(const Duration(milliseconds: 300));
     final currentComments = mockComments[postId] ?? [];
     final newComment = Comment(
@@ -112,11 +117,17 @@ class CommentOperationsNotifier extends Notifier<void> {
   Future<void> deleteComment(int postId, int commentId) async {
     await Future.delayed(const Duration(milliseconds: 300));
     final currentComments = mockComments[postId] ?? [];
-    mockComments[postId] = currentComments.where((comment) => comment.id != commentId).toList();
+    mockComments[postId] = currentComments
+        .where((comment) => comment.id != commentId)
+        .toList();
     ref.invalidate(commentsProvider(postId));
   }
 
-  Future<void> updateComment(int postId, int commentId, String newContent) async {
+  Future<void> updateComment(
+    int postId,
+    int commentId,
+    String newContent,
+  ) async {
     await Future.delayed(const Duration(milliseconds: 300));
     final currentComments = mockComments[postId] ?? [];
     mockComments[postId] = currentComments.map((comment) {
@@ -129,6 +140,7 @@ class CommentOperationsNotifier extends Notifier<void> {
   }
 }
 
-final commentOperationsProvider = NotifierProvider<CommentOperationsNotifier, void>(
-  CommentOperationsNotifier.new,
-);
+final commentOperationsProvider =
+    NotifierProvider<CommentOperationsNotifier, void>(
+      CommentOperationsNotifier.new,
+    );

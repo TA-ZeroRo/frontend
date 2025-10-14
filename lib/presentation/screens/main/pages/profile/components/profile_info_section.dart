@@ -271,7 +271,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with title
+          // Header with title and action buttons
           Row(
             children: [
               Icon(
@@ -287,6 +287,74 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              const Spacer(),
+              // 편집 모드에 따라 버튼 표시
+              if (_isEditing) ...[
+                // 취소 버튼
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.error.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: IconButton(
+                    onPressed: _cancelEdit,
+                    icon: Icon(
+                      Icons.close_rounded,
+                      color: AppColors.error,
+                      size: 20,
+                    ),
+                    tooltip: '취소',
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // 저장 버튼
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: AppColors.primaryGradient,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primaryAccent.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    onPressed: _toggleEdit,
+                    icon: const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    tooltip: '저장',
+                  ),
+                ),
+              ] else
+                // 수정 버튼
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.background.withValues(alpha: 0.8),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.grey.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: IconButton(
+                    onPressed: _toggleEdit,
+                    icon: Icon(
+                      Icons.edit_rounded,
+                      color: AppColors.textPrimary,
+                      size: 20,
+                    ),
+                    tooltip: '편집',
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 20),
@@ -373,130 +441,47 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (_isEditing)
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _usernameController,
-                              style: AppTextStyle.headlineSmall.copyWith(
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: '이름을 입력하세요',
-                                hintStyle: AppTextStyle.headlineSmall.copyWith(
-                                  color: AppColors.textTertiary,
-                                ),
-                                border: UnderlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: AppColors.primaryAccent,
-                                    width: 2,
-                                  ),
-                                ),
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Colors.grey.withValues(alpha: 0.3),
-                                    width: 1,
-                                  ),
-                                ),
-                                focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: AppColors.primaryAccent,
-                                    width: 2,
-                                  ),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
-                              ),
+                      TextField(
+                        controller: _usernameController,
+                        style: AppTextStyle.headlineSmall.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: '이름을 입력하세요',
+                          hintStyle: AppTextStyle.headlineSmall.copyWith(
+                            color: AppColors.textTertiary,
+                          ),
+                          border: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: AppColors.primaryAccent,
+                              width: 2,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          // 편집 모드 버튼들
-                          Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.error.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: AppColors.error.withValues(alpha: 0.3),
-                                width: 1,
-                              ),
-                            ),
-                            child: IconButton(
-                              onPressed: _cancelEdit,
-                              icon: Icon(
-                                Icons.close_rounded,
-                                color: AppColors.error,
-                                size: 20,
-                              ),
-                              tooltip: '취소',
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.grey.withValues(alpha: 0.3),
+                              width: 1,
                             ),
                           ),
-                          const SizedBox(width: 4),
-                          Container(
-                            decoration: BoxDecoration(
-                              gradient: AppColors.primaryGradient,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primaryAccent.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: IconButton(
-                              onPressed: _toggleEdit,
-                              icon: const Icon(
-                                Icons.check_rounded,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              tooltip: '저장',
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: AppColors.primaryAccent,
+                              width: 2,
                             ),
                           ),
-                        ],
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                          ),
+                        ),
                       )
                     else
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              profile.username.isNotEmpty
-                                  ? profile.username
-                                  : '김오띠',
-                              style: AppTextStyle.headlineSmall.copyWith(
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          // 편집 버튼
-                          Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.background.withValues(
-                                alpha: 0.8,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.grey.withValues(alpha: 0.3),
-                                width: 1,
-                              ),
-                            ),
-                            child: IconButton(
-                              onPressed: _toggleEdit,
-                              icon: Icon(
-                                Icons.edit_rounded,
-                                color: AppColors.textPrimary,
-                                size: 20,
-                              ),
-                              tooltip: '편집',
-                            ),
-                          ),
-                        ],
+                      Text(
+                        profile.username,
+                        style: AppTextStyle.headlineSmall.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     const SizedBox(height: 12),
 
