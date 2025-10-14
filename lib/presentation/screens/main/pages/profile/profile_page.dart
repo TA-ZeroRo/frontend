@@ -13,18 +13,9 @@ class ProfilePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: AppColors.background,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.background,
-              AppColors.background.withValues(alpha: 0.8),
-              AppColors.background.withValues(alpha: 0.6),
-            ],
-          ),
+        decoration: const BoxDecoration(
+          gradient: AppColors.backgroundGradient,
         ),
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -66,7 +57,7 @@ class ProfilePage extends ConsumerWidget {
 
   Widget _buildSliverAppBar(BuildContext context) {
     return SliverAppBar(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       floating: true,
       snap: true,

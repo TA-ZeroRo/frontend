@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../../domain/model/profile_model.dart';
-import '../../../../../../domain/model/post.dart';
+import '../../../../../../domain/model/profile/profile_model.dart';
+import '../../../../../../domain/model/post/post.dart';
 import '../../community/state/community_controller.dart';
 
 class ProfileNotifier extends Notifier<Profile> {
@@ -44,12 +44,22 @@ class ProfileNotifier extends Notifier<Profile> {
     DateTime? birthDate,
     String? region,
   }) {
-    state = state.copyWith(
-      username: username,
-      userImg: userImg,
-      birthDate: birthDate,
-      region: region,
-    );
+    Profile updatedProfile = state;
+
+    if (username != null) {
+      updatedProfile = updatedProfile.copyWith(username: username);
+    }
+    if (userImg != null) {
+      updatedProfile = updatedProfile.copyWith(userImg: userImg);
+    }
+    if (birthDate != null) {
+      updatedProfile = updatedProfile.copyWith(birthDate: birthDate);
+    }
+    if (region != null) {
+      updatedProfile = updatedProfile.copyWith(region: region);
+    }
+
+    state = updatedProfile;
   }
 }
 

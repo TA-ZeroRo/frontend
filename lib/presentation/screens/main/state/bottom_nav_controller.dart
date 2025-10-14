@@ -5,7 +5,7 @@ enum BottomNav {
   home('홈', Icons.eco),
   playground('놀이터', Icons.sports_esports),
   community('커뮤니티', Icons.groups),
-  profile('프로필', Icons.account_circle);
+  profile('프로필', Icons.person);
 
   final String title;
   final IconData iconData;

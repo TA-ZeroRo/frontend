@@ -314,45 +314,67 @@ class _VerifyQuizScreenState extends ConsumerState<VerifyQuizScreen>
     final quizState = ref.watch(quizVerificationProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        title: const Text(
-          '퀴즈 인증',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.backgroundGradient,
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Custom AppBar
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.black),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const Expanded(
+                      child: Text(
+                        '퀴즈 인증',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 48), // Balance the back button
+                  ],
+                ),
+              ),
+              // Content
+              Expanded(child: _buildBody(quizState)),
+              // Bottom Info Button
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  border: Border(top: BorderSide(color: Colors.grey.shade200)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      offset: const Offset(0, -2),
+                      blurRadius: 8,
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  children: [
+                    Spacer(),
+                    InfoButton(
+                      title: '퀴즈 인증이란?',
+                      content:
+                          '제시된 지문이 친환경 행동인지 판단하고 OX로 선택해주세요.\n\n정확히 판단할수록 더 많은 포인트를 받을 수 있어요!',
+                      preferenceKey: 'showAuthQuizDialog',
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        shadowColor: Colors.transparent,
-      ),
-      body: _buildBody(quizState),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: AppColors.background,
-          border: Border(top: BorderSide(color: Colors.grey.shade200)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              offset: const Offset(0, -2),
-              blurRadius: 8,
-            ),
-          ],
-        ),
-        child: const Row(
-          children: [
-            Spacer(),
-            InfoButton(
-              title: '퀴즈 인증이란?',
-              content:
-                  '제시된 지문이 친환경 행동인지 판단하고 OX로 선택해주세요.\n\n정확히 판단할수록 더 많은 포인트를 받을 수 있어요!',
-              preferenceKey: 'showAuthQuizDialog',
-            ),
-          ],
         ),
       ),
     );

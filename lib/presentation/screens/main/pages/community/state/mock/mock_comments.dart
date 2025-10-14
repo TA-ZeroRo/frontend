@@ -1,4 +1,4 @@
-import '../../../../../../../domain/model/comment.dart';
+import '../../../../../../../domain/model/comment/comment.dart';
 
 // Mock comments for different posts
 final mockComments = <int, List<Comment>>{

@@ -157,52 +157,63 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
     );
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        title: const Text(
-          '사진 인증',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.backgroundGradient,
         ),
-        centerTitle: true,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: ElevatedButton(
-              onPressed: verificationState.isLoading
-                  ? null
-                  : () => _requestAIAnalysis(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _primaryColor,
-                foregroundColor: Colors.white,
-              ),
-              child: verificationState.isLoading
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.white,
-                        ),
-                      ),
-                    )
-                  : const Text('AI 분석'),
-            ),
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          Column(
+        child: SafeArea(
+          child: Stack(
             children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
+              Column(
+                children: [
+                  // Custom AppBar
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back, color: Colors.black),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        const Expanded(
+                          child: Text(
+                            '사진 인증',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: verificationState.isLoading
+                              ? null
+                              : () => _requestAIAnalysis(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _primaryColor,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: verificationState.isLoading
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                              : const Text('AI 분석'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -436,63 +447,63 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
                       ],
                     ],
                   ),
-                ),
+                    ),
+                  ),
+                  // 하단 정보 버튼
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      border: Border(
+                        top: BorderSide(color: Colors.grey.shade300),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        InfoButton(
+                          title: '사진 인증이란?',
+                          content:
+                              '친환경 활동을 사진으로 증명하고 AI로 인증을 받는 기능입니다.\n\n사진을 첨부하고 카테고리를 선택하면 AI가 친환경 여부를 판단합니다.',
+                          preferenceKey: 'showAuthImageDialog',
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-
-              // 하단 정보 버튼
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  border: Border(
-                    top: BorderSide(color: Colors.grey.shade300),
+              // 분석 중 메시지
+              if (verificationState.isLoading)
+                Positioned(
+                  bottom: 80,
+                  left: 16,
+                  right: 16,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _positiveColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      'AI가 분석 중입니다...',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    InfoButton(
-                      title: '사진 인증이란?',
-                      content:
-                          '친환경 활동을 사진으로 증명하고 AI로 인증을 받는 기능입니다.\n\n사진을 첨부하고 카테고리를 선택하면 AI가 친환경 여부를 판단합니다.',
-                      preferenceKey: 'showAuthImageDialog',
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
-
-          // 분석 중 메시지
-          if (verificationState.isLoading)
-            Positioned(
-              bottom: 80,
-              left: 16,
-              right: 16,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: _positiveColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  'AI가 분석 중입니다...',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }

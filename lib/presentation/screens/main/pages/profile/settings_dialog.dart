@@ -368,21 +368,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                         iconColor: Colors.blue,
                         children: [
                           SettingsToggleTile(
-                            title: '다크모드',
-                            subtitle: '어두운 테마로 변경',
-                            icon: settings.isDarkMode
-                                ? Icons.dark_mode_rounded
-                                : Icons.light_mode_rounded,
-                            iconColor: settings.isDarkMode
-                                ? Colors.indigo
-                                : Colors.orange,
-                            value: settings.isDarkMode,
-                            onChanged: (_) => ref
-                                .read(appSettingsProvider.notifier)
-                                .toggleDarkMode(),
-                          ),
-                          const SizedBox(height: 12),
-                          SettingsToggleTile(
                             title: '알림',
                             subtitle: '푸시 알림 받기',
                             icon: Icons.notifications_active_rounded,

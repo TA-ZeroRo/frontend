@@ -1,4 +1,4 @@
-import '../../../../../../../domain/model/post.dart';
+import '../../../../../../../domain/model/post/post.dart';
 
 final mockPosts = [
   const Post(

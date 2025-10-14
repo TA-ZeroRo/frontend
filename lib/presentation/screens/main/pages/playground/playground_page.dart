@@ -2,36 +2,55 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/theme/app_color.dart';
+import '../../../verification/verify_image_screen.dart';
+import '../../../verification/verify_quiz_screen.dart';
 import 'state/ranking_controller.dart';
 import 'state/mock/mock_ranking_data.dart';
 import 'components/collapsible_leaderboard_section.dart';
-import 'components/activity_verification_section.dart';
+import 'components/daily_quest_section.dart';
+import 'components/activity_verification_fab.dart';
 import 'components/shimmer_widgets.dart';
 
-class PlaygroundPage extends ConsumerWidget {
+class PlaygroundPage extends ConsumerStatefulWidget {
   const PlaygroundPage({super.key});
 
-  Future<void> _onRefresh(WidgetRef ref) async {
+  @override
+  ConsumerState<PlaygroundPage> createState() => _PlaygroundPageState();
+}
+
+class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
+  bool _isMenuExpanded = false;
+  final GlobalKey<ActivityVerificationFabState> _fabKey = GlobalKey<ActivityVerificationFabState>();
+
+  Future<void> _onRefresh() async {
     await ref.read(rankingProvider.notifier).refresh();
   }
 
+  void _closeMenu() {
+    _fabKey.currentState?.close();
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final asyncRankings = ref.watch(rankingProvider);
 
     return asyncRankings.when(
-      data: (rankings) => _buildSuccessView(context, ref, rankings),
+      data: (rankings) => _buildSuccessView(context, rankings),
       loading: () => _buildLoadingView(),
-      error: (error, stack) => _buildErrorView(context, ref),
+      error: (error, stack) => _buildErrorView(context),
     );
   }
 
   Widget _buildSuccessView(
-      BuildContext context, WidgetRef ref, List<RankingItem> rankings) {
-    return Container(
-      color: AppColors.background,
-      child: RefreshIndicator(
-        onRefresh: () => _onRefresh(ref),
+      BuildContext context, List<RankingItem> rankings) {
+    return Stack(
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            gradient: AppColors.backgroundGradient,
+          ),
+          child: RefreshIndicator(
+            onRefresh: _onRefresh,
         color: Theme.of(context).primaryColor,
         backgroundColor: AppColors.background,
         displacement: 40.0,
@@ -50,22 +69,71 @@ class PlaygroundPage extends ConsumerWidget {
               child: SizedBox(height: 24),
             ),
             const SliverToBoxAdapter(
-              child: ActivityVerificationSection(),
+              child: DailyQuestSection(),
             ),
             const SliverToBoxAdapter(
               child: SizedBox(height: 24),
             ),
           ],
         ),
-      ),
+          ),
+        ),
+        // Semi-transparent overlay when menu is expanded
+        Positioned.fill(
+          child: IgnorePointer(
+            ignoring: !_isMenuExpanded,
+            child: GestureDetector(
+              onTap: _closeMenu,
+              child: AnimatedOpacity(
+                opacity: _isMenuExpanded ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 300),
+                child: Container(
+                  color: const Color(0x80000000),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 20,
+          right: 20,
+          child: ActivityVerificationFab(
+            key: _fabKey,
+            onExpandedChanged: (isExpanded) {
+              setState(() => _isMenuExpanded = isExpanded);
+            },
+            onOverlayTap: _closeMenu,
+            onPhotoVerification: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VerifyImageScreen(),
+                ),
+              );
+            },
+            onQuizVerification: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VerifyQuizScreen(),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildErrorView(BuildContext context, WidgetRef ref) {
-    return Container(
-      color: AppColors.background,
-      child: RefreshIndicator(
-        onRefresh: () => _onRefresh(ref),
+  Widget _buildErrorView(BuildContext context) {
+    return Stack(
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            gradient: AppColors.backgroundGradient,
+          ),
+          child: RefreshIndicator(
+            onRefresh: _onRefresh,
         color: Theme.of(context).primaryColor,
         backgroundColor: AppColors.background,
         displacement: 40.0,
@@ -100,14 +168,63 @@ class PlaygroundPage extends ConsumerWidget {
             ),
           ],
         ),
-      ),
+          ),
+        ),
+        // Semi-transparent overlay when menu is expanded
+        Positioned.fill(
+          child: IgnorePointer(
+            ignoring: !_isMenuExpanded,
+            child: GestureDetector(
+              onTap: _closeMenu,
+              child: AnimatedOpacity(
+                opacity: _isMenuExpanded ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 300),
+                child: Container(
+                  color: const Color(0x80000000),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 20,
+          right: 20,
+          child: ActivityVerificationFab(
+            key: _fabKey,
+            onExpandedChanged: (isExpanded) {
+              setState(() => _isMenuExpanded = isExpanded);
+            },
+            onOverlayTap: _closeMenu,
+            onPhotoVerification: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VerifyImageScreen(),
+                ),
+              );
+            },
+            onQuizVerification: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VerifyQuizScreen(),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildLoadingView() {
-    return Container(
-      color: AppColors.background,
-      child: CustomScrollView(
+    return Stack(
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            gradient: AppColors.backgroundGradient,
+          ),
+          child: CustomScrollView(
         slivers: [
           _buildAppBar(),
           const SliverToBoxAdapter(
@@ -117,19 +234,64 @@ class PlaygroundPage extends ConsumerWidget {
             child: SizedBox(height: 24),
           ),
           const SliverToBoxAdapter(
-            child: ActivityVerificationSection(),
+            child: DailyQuestSection(),
           ),
           const SliverToBoxAdapter(
             child: SizedBox(height: 24),
           ),
         ],
-      ),
+          ),
+        ),
+        // Semi-transparent overlay when menu is expanded
+        Positioned.fill(
+          child: IgnorePointer(
+            ignoring: !_isMenuExpanded,
+            child: GestureDetector(
+              onTap: _closeMenu,
+              child: AnimatedOpacity(
+                opacity: _isMenuExpanded ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 300),
+                child: Container(
+                  color: const Color(0x80000000),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 20,
+          right: 20,
+          child: ActivityVerificationFab(
+            key: _fabKey,
+            onExpandedChanged: (isExpanded) {
+              setState(() => _isMenuExpanded = isExpanded);
+            },
+            onOverlayTap: _closeMenu,
+            onPhotoVerification: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VerifyImageScreen(),
+                ),
+              );
+            },
+            onQuizVerification: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VerifyQuizScreen(),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildAppBar() {
     return const SliverAppBar(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       floating: true,
       snap: true,

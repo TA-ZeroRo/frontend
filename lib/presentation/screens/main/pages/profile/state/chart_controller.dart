@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:math' as math;
-import '../../../../../../domain/model/chart_data.dart';
+import '../../../../../../domain/model/chart_data/chart_data.dart';
 
 class ChartNotifier extends Notifier<List<ChartData>> {
   @override

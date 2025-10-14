@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../../domain/model/verification_result.dart';
+import '../../../../../../domain/model/verification_result/verification_result.dart';
 
 // Mock Data
 const _mockVerificationResults = [

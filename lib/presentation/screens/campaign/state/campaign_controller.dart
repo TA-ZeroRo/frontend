@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../domain/model/campaign_recruiting.dart';
+import '../../../../domain/model/campaign_recruiting/campaign_recruiting.dart';
 
 // Mock data for campaign recruitings
 final List<CampaignRecruiting> _mockCampaignRecruitings = [

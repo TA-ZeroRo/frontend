@@ -25,7 +25,7 @@ class AdCarousel extends StatefulWidget {
 class _AdCarouselState extends State<AdCarousel> {
   final PageController _pageController = PageController();
   Timer? _autoPlayTimer;
-  int _currentPage = 0;
+  double _currentPage = 0;
 
   final List<AdItem> _adList = const [
     AdItem(
@@ -60,7 +60,16 @@ class _AdCarouselState extends State<AdCarousel> {
   @override
   void initState() {
     super.initState();
+    _pageController.addListener(_onPageScroll);
     _startAutoPlay();
+  }
+
+  void _onPageScroll() {
+    if (!mounted) return;
+    final page = _pageController.page ?? 0;
+    if (_currentPage != page) {
+      setState(() => _currentPage = page);
+    }
   }
 
   void _startAutoPlay() {
@@ -68,7 +77,7 @@ class _AdCarouselState extends State<AdCarousel> {
     _autoPlayTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
       if (!mounted) return;
 
-      final nextPage = (_currentPage + 1) % _adList.length;
+      final nextPage = (_currentPage.round() + 1) % _adList.length;
       _pageController.animateToPage(
         nextPage,
         duration: const Duration(milliseconds: 300),
@@ -80,6 +89,7 @@ class _AdCarouselState extends State<AdCarousel> {
   @override
   void dispose() {
     _autoPlayTimer?.cancel();
+    _pageController.removeListener(_onPageScroll);
     _pageController.dispose();
     super.dispose();
   }
@@ -136,11 +146,6 @@ class _AdCarouselState extends State<AdCarousel> {
           height: 100,
           child: PageView.builder(
             controller: _pageController,
-            onPageChanged: (index) {
-              if (mounted) {
-                setState(() => _currentPage = index);
-              }
-            },
             itemCount: _adList.length,
             itemBuilder: (context, index) {
               return _buildAdItem(_adList[index]);
@@ -152,17 +157,23 @@ class _AdCarouselState extends State<AdCarousel> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: _adList.asMap().entries.map((entry) {
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                width: _currentPage == entry.key ? 28 : 8,
+              // 현재 페이지와의 거리를 계산하여 활성화 정도를 결정
+              final distance = (_currentPage - entry.key).abs();
+              final activation = (1 - distance).clamp(0.0, 1.0);
+
+              // 너비를 부드럽게 전환 (8 ~ 28)
+              final width = 8 + (28 - 8) * activation;
+
+              return Container(
+                width: width,
                 height: 8,
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(4),
-                  gradient: _currentPage == entry.key
+                  gradient: activation > 0.5
                       ? AppColors.primaryGradient
                       : null,
-                  color: _currentPage == entry.key
+                  color: activation > 0.5
                       ? null
                       : AppColors.textTertiary.withValues(alpha: 0.3),
                 ),

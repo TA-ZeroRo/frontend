@@ -68,7 +68,7 @@ Conventions:
 
 #### JSON Serialization
 - `json_serializable`: Automatic JSON serialization
-- `freezed`: Immutable model generation
+- `freezed`: Immutable model generation. Use "abstract class" to deal with error. 
 
 #### Utility
 - `intl`: Internationalization/date formats
