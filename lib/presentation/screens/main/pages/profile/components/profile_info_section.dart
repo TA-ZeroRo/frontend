@@ -18,6 +18,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
   late TextEditingController _usernameController;
   String? _tempImageUrl;
   String? _tempRegion;
+  DateTime? _tempBirthDate;
 
   @override
   void initState() {
@@ -26,6 +27,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
     _usernameController = TextEditingController(text: profile.username);
     _tempImageUrl = profile.userImg;
     _tempRegion = profile.region;
+    _tempBirthDate = profile.birthDate;
   }
 
   @override
@@ -56,6 +58,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
       notifier.updateProfile(
         username: trimmedName,
         userImg: _tempImageUrl,
+        birthDate: _tempBirthDate,
         region: _tempRegion,
       );
 
@@ -73,6 +76,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
       _usernameController.text = profile.username;
       _tempImageUrl = profile.userImg;
       _tempRegion = profile.region;
+      _tempBirthDate = profile.birthDate;
       setState(() => _isEditing = true);
     }
   }
@@ -84,6 +88,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
       _usernameController.text = profile.username;
       _tempImageUrl = profile.userImg;
       _tempRegion = profile.region;
+      _tempBirthDate = profile.birthDate;
     });
   }
 
@@ -100,6 +105,213 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
     color: AppColors.textPrimary,
     fontWeight: FontWeight.w600,
   );
+
+  Future<void> _selectBirthDate() async {
+    final DateTime now = DateTime.now();
+    int selectedYear = _tempBirthDate?.year ?? (now.year - 20);
+    int selectedMonth = _tempBirthDate?.month ?? 1;
+    int selectedDay = _tempBirthDate?.day ?? 1;
+
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            // 년도 범위 설정 (1900 ~ 현재년도)
+            final List<int> years = List.generate(
+              now.year - 1900 + 1,
+              (index) => now.year - index,
+            );
+
+            // 월 범위 설정 (1 ~ 12)
+            final List<int> months = List.generate(12, (index) => index + 1);
+
+            // 일 범위 설정 (선택된 년월에 따라 달라짐)
+            final int daysInMonth = DateTime(
+              selectedYear,
+              selectedMonth + 1,
+              0,
+            ).day;
+            final List<int> days = List.generate(
+              daysInMonth,
+              (index) => index + 1,
+            );
+
+            // 선택된 일이 해당 월의 일수보다 크면 조정
+            if (selectedDay > daysInMonth) {
+              selectedDay = daysInMonth;
+            }
+
+            int yearIndex = years.indexOf(selectedYear);
+            int monthIndex = months.indexOf(selectedMonth);
+            int dayIndex = days.indexOf(selectedDay);
+
+            if (yearIndex == -1) yearIndex = 0;
+            if (monthIndex == -1) monthIndex = 0;
+            if (dayIndex == -1) dayIndex = 0;
+
+            return Container(
+              height: 350,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+              ),
+              child: Column(
+                children: [
+                  // Header
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Colors.grey.withValues(alpha: 0.2),
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(
+                            '취소',
+                            style: AppTextStyle.bodyLarge.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '생년월일',
+                          style: AppTextStyle.titleLarge.copyWith(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _tempBirthDate = DateTime(
+                                selectedYear,
+                                selectedMonth,
+                                selectedDay,
+                              );
+                            });
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            '완료',
+                            style: AppTextStyle.bodyLarge.copyWith(
+                              color: AppColors.primaryAccent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Picker
+                  Expanded(
+                    child: Row(
+                      children: [
+                        // 년도 picker
+                        Expanded(
+                          child: CupertinoPicker(
+                            scrollController: FixedExtentScrollController(
+                              initialItem: yearIndex,
+                            ),
+                            itemExtent: 40,
+                            onSelectedItemChanged: (int index) {
+                              setModalState(() {
+                                selectedYear = years[index];
+                                // 년도가 바뀌면 해당 년월의 일수 재계산
+                                final int newDaysInMonth = DateTime(
+                                  selectedYear,
+                                  selectedMonth + 1,
+                                  0,
+                                ).day;
+                                if (selectedDay > newDaysInMonth) {
+                                  selectedDay = newDaysInMonth;
+                                }
+                              });
+                            },
+                            children: years.map((int year) {
+                              return Center(
+                                child: Text(
+                                  '${year}년',
+                                  style: _pickerTextStyle,
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        // 월 picker
+                        Expanded(
+                          child: CupertinoPicker(
+                            scrollController: FixedExtentScrollController(
+                              initialItem: monthIndex,
+                            ),
+                            itemExtent: 40,
+                            onSelectedItemChanged: (int index) {
+                              setModalState(() {
+                                selectedMonth = months[index];
+                                // 월이 바뀌면 해당 년월의 일수 재계산
+                                final int newDaysInMonth = DateTime(
+                                  selectedYear,
+                                  selectedMonth + 1,
+                                  0,
+                                ).day;
+                                if (selectedDay > newDaysInMonth) {
+                                  selectedDay = newDaysInMonth;
+                                }
+                              });
+                            },
+                            children: months.map((int month) {
+                              return Center(
+                                child: Text(
+                                  '${month}월',
+                                  style: _pickerTextStyle,
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        // 일 picker
+                        Expanded(
+                          child: CupertinoPicker(
+                            key: ValueKey(
+                              '${selectedYear}-${selectedMonth}',
+                            ), // 년월이 바뀔 때 재생성
+                            scrollController: FixedExtentScrollController(
+                              initialItem: dayIndex,
+                            ),
+                            itemExtent: 40,
+                            onSelectedItemChanged: (int index) {
+                              selectedDay = days[index];
+                            },
+                            children: days.map((int day) {
+                              return Center(
+                                child: Text('${day}일', style: _pickerTextStyle),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   Future<void> _selectRegion() async {
     String selectedProvince = '서울특별시';
@@ -521,6 +733,17 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                 ? Column(
                     children: [
                       const SizedBox(height: 24),
+                      // 생년월일 입력
+                      _buildExpandedInfoField(
+                        label: '생년월일',
+                        icon: Icons.cake_rounded,
+                        onTap: _selectBirthDate,
+                        value: _tempBirthDate != null
+                            ? '${_tempBirthDate!.year}년 ${_tempBirthDate!.month}월 ${_tempBirthDate!.day}일'
+                            : '선택해주세요',
+                        hasValue: _tempBirthDate != null,
+                      ),
+                      const SizedBox(height: 12),
                       // 지역 입력
                       _buildExpandedInfoField(
                         label: '지역',
