@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../../domain/model/profile/profile_model.dart';
+import '../../../../../../domain/model/profile/profile.dart';
 import '../../../../../../domain/model/post/post.dart';
 import '../../community/state/community_controller.dart';
 
