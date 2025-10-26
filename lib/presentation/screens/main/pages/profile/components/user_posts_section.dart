@@ -3,15 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
 import '../../community/widgets/post_widget.dart';
-import '../state/profile_controller.dart';
+import '../state/user_controller.dart';
 
 class UserPostsSection extends ConsumerWidget {
   const UserPostsSection({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.watch(profileProvider);
-    final userPostsAsync = ref.watch(userPostsProvider(profile.userId));
+    final user = ref.watch(userProvider);
+    final userPostsAsync = ref.watch(userPostsProvider(user.id));
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -166,7 +166,7 @@ class UserPostsSection extends ConsumerWidget {
                   const SizedBox(height: 12),
                   ElevatedButton(
                     onPressed: () =>
-                        ref.invalidate(userPostsProvider(profile.userId)),
+                        ref.invalidate(userPostsProvider(user.id)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryAccent,
                       foregroundColor: AppColors.buttonTextColor,

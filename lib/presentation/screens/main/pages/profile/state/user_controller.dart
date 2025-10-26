@@ -1,16 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../../domain/model/profile/profile.dart';
+import '../../../../../../domain/model/user/user.dart';
 import '../../../../../../domain/model/post/post.dart';
 import '../../community/state/community_controller.dart';
 
-class ProfileNotifier extends Notifier<Profile> {
+class UserNotifier extends Notifier<User> {
   @override
-  Profile build() {
-    return const Profile(
-      userId: 'user_001',
+  User build() {
+    return User(
+      id: 'user_001',
       username: '제로로로',
       totalPoints: 1250,
       continuousDays: 7,
+      region: '서울',
+      characters: [],
+      lastActiveAt: DateTime.now(),
+      createdAt: DateTime.now().subtract(const Duration(days: 30)),
     );
   }
 
@@ -30,41 +34,41 @@ class ProfileNotifier extends Notifier<Profile> {
     state = state.copyWith(continuousDays: days);
   }
 
-  void updateBirthDate(DateTime? birthDate) {
-    state = state.copyWith(birthDate: birthDate);
-  }
-
-  void updateRegion(String? region) {
+  void updateRegion(String region) {
     state = state.copyWith(region: region);
   }
 
-  void updateProfile({
+  void updateCharacters(List<String> characters) {
+    state = state.copyWith(characters: characters);
+  }
+
+  void updateUser({
     String? username,
     String? userImg,
-    DateTime? birthDate,
     String? region,
+    List<String>? characters,
   }) {
-    Profile updatedProfile = state;
+    User updatedUser = state;
 
     if (username != null) {
-      updatedProfile = updatedProfile.copyWith(username: username);
+      updatedUser = updatedUser.copyWith(username: username);
     }
     if (userImg != null) {
-      updatedProfile = updatedProfile.copyWith(userImg: userImg);
-    }
-    if (birthDate != null) {
-      updatedProfile = updatedProfile.copyWith(birthDate: birthDate);
+      updatedUser = updatedUser.copyWith(userImg: userImg);
     }
     if (region != null) {
-      updatedProfile = updatedProfile.copyWith(region: region);
+      updatedUser = updatedUser.copyWith(region: region);
+    }
+    if (characters != null) {
+      updatedUser = updatedUser.copyWith(characters: characters);
     }
 
-    state = updatedProfile;
+    state = updatedUser;
   }
 }
 
-final profileProvider = NotifierProvider<ProfileNotifier, Profile>(
-  ProfileNotifier.new,
+final userProvider = NotifierProvider<UserNotifier, User>(
+  UserNotifier.new,
 );
 
 /// 사용자가 작성한 게시글 필터링 Provider

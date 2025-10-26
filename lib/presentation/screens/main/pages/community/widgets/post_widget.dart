@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../domain/model/post/post.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
-import '../../profile/state/profile_controller.dart';
+import '../../profile/state/user_controller.dart';
 import '../state/community_controller.dart';
 import 'comment_dialog.dart';
 import 'like_button.dart';
@@ -62,8 +62,8 @@ class PostWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.watch(profileProvider);
-    final isOwner = profile.userId == post.userId;
+    final user = ref.watch(userProvider);
+    final isOwner = user.id == post.userId;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

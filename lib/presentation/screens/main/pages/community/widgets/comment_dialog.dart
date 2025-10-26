@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../profile/state/profile_controller.dart';
+import '../../profile/state/user_controller.dart';
 import '../state/community_controller.dart';
 import 'comment_card.dart';
 
@@ -24,13 +24,13 @@ class _CommentDialogState extends ConsumerState<CommentDialog> {
 
   void _sendComment() {
     final content = _controller.text.trim();
-    final profile = ref.read(profileProvider);
+    final user = ref.read(userProvider);
 
     if (content.isNotEmpty) {
       ref.read(commentOperationsProvider.notifier).addComment(
         widget.postId,
-        profile.userId,
-        profile.username,
+        user.id,
+        user.username,
         content,
       );
       _controller.clear();
@@ -55,7 +55,7 @@ class _CommentDialogState extends ConsumerState<CommentDialog> {
   @override
   Widget build(BuildContext context) {
     final commentsAsync = ref.watch(commentsProvider(widget.postId));
-    final profile = ref.watch(profileProvider);
+    final user = ref.watch(userProvider);
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -94,7 +94,7 @@ class _CommentDialogState extends ConsumerState<CommentDialog> {
                     itemCount: comments.length,
                     itemBuilder: (context, index) {
                       final comment = comments[index];
-                      final isMyComment = comment.userId == profile.userId;
+                      final isMyComment = comment.userId == user.id;
 
                       return CommentCard(
                         userName: comment.username,
