@@ -11,41 +11,15 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
-
+class _SplashScreenState extends State<SplashScreen>{
   @override
   void initState() {
     super.initState();
-
-    // Fade 애니메이션 설정
-    _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
-      vsync: this,
-    );
-
-    _fadeAnimation = CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeIn,
-    );
-
-    // 애니메이션 시작
-    _fadeController.forward();
-
-    // 2초 후 로그인 화면으로 이동
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         context.go(RoutePath.login);
       }
     });
-  }
-
-  @override
-  void dispose() {
-    _fadeController.dispose();
-    super.dispose();
   }
 
   @override
@@ -78,13 +52,10 @@ class _SplashScreenState extends State<SplashScreen>
               top: screenHeight * 0.28,
               left: 0,
               right: 0,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: Center(
+              child: Center(
                   child: Image.asset(
                     'assets/images/ZeroRo_logo.png',
-                    width: 320,
-                  ),
+                  width: 320,
                 ),
               ),
             ),
