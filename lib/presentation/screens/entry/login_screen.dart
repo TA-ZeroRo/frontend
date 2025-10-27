@@ -25,17 +25,34 @@ class LoginScreen extends ConsumerWidget {
       // 유저 정보가 없으면 회원가입 페이지로 이동
       if (e.toString().contains('USER_NOT_FOUND')) {
         context.go(RoutePath.register);
-      } else {
-        // 기타 에러는 토스트로 표시
-        toastification.show(
-          context: context,
-          type: ToastificationType.error,
-          style: ToastificationStyle.flatColored,
-          title: const Text('로그인 실패'),
-          description: Text(e.toString()),
-          autoCloseDuration: const Duration(seconds: 3),
-        );
+        return;
       }
+
+      // 구글 로그인 취소는 토스트 없이 조용히 처리
+      if (e.toString().contains('Google 로그인이 취소되었습니다')) {
+        return;
+      }
+
+      // 기타 에러는 토스트로 표시
+      String errorMessage = 'Google 로그인에 실패했습니다';
+
+      if (e.toString().contains('Google 인증 토큰')) {
+        errorMessage = '인증 정보를 가져오는데 실패했습니다';
+      } else if (e.toString().contains('사용자 ID')) {
+        errorMessage = '사용자 정보를 가져오는데 실패했습니다';
+      } else if (e.toString().contains('Exception:')) {
+        // "Exception: " 접두사 제거
+        errorMessage = e.toString().replaceFirst('Exception: ', '');
+      }
+
+      toastification.show(
+        context: context,
+        type: ToastificationType.error,
+        style: ToastificationStyle.flatColored,
+        title: const Text('로그인 실패'),
+        description: Text(errorMessage),
+        autoCloseDuration: const Duration(seconds: 3),
+      );
     }
   }
 

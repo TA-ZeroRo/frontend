@@ -74,12 +74,18 @@ class AuthNotifier extends Notifier<AuthState> {
         state = state.copyWith(currentUser: user, isLoading: false);
       } catch (e) {
         // 유저가 없으면 회원가입 필요
+        // Supabase 세션은 유지한 채로 회원가입 페이지로 이동
         state = state.copyWith(isLoading: false);
         throw Exception('USER_NOT_FOUND');
       }
-    } catch (e) {
+    } on Exception catch (e) {
+      // Exception 타입 에러는 그대로 rethrow (Google 로그인 취소 등)
       state = state.copyWith(isLoading: false, error: e.toString());
       rethrow;
+    } catch (e) {
+      // 기타 예상치 못한 에러
+      state = state.copyWith(isLoading: false, error: e.toString());
+      throw Exception('로그인 중 오류가 발생했습니다: ${e.toString()}');
     }
   }
 
@@ -181,16 +187,16 @@ class AuthNotifier extends Notifier<AuthState> {
   /// 세션 체크 및 자동 로그인
   /// SplashScreen에서 호출
   Future<void> checkAndRestoreSession() async {
-    state = state.copyWith(isLoading: true, error: null);
-
     try {
       final session = _supabase.auth.currentSession;
 
       if (session == null) {
-        // 세션 없음
-        state = state.copyWith(isLoading: false);
+        // 세션 없음 - 즉시 리턴 (로딩 상태 불필요)
         return;
       }
+
+      // 세션이 있을 때만 로딩 상태 설정
+      state = state.copyWith(isLoading: true, error: null);
 
       // 세션 만료 확인
       final now = DateTime.now();
