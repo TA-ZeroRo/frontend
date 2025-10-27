@@ -11,7 +11,7 @@ class UserPostsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
-    final userPostsAsync = ref.watch(userPostsProvider(user.id));
+    final userPostsAsync = ref.watch(userPostsProvider(user.value?.id ?? ''));
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -166,7 +166,7 @@ class UserPostsSection extends ConsumerWidget {
                   const SizedBox(height: 12),
                   ElevatedButton(
                     onPressed: () =>
-                        ref.invalidate(userPostsProvider(user.id)),
+                        ref.invalidate(userPostsProvider(user.value?.id ?? '')),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryAccent,
                       foregroundColor: AppColors.buttonTextColor,

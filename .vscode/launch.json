@@ -2,11 +2,12 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Flutter (Android)",
-      "request": "launch",
+      "name": "Flutter (Chrome, 3000)",
       "type": "dart",
-      "deviceId": "android",
-      "program": "lib/main.dart"
+      "request": "launch",
+      "program": "lib/main.dart", 
+      "deviceId": "chrome",
+      "args": ["--web-port=3000", "--web-hostname=localhost"]
     }
   ]
 }

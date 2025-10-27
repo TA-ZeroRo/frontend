@@ -47,6 +47,12 @@ dependencies:
   animations: ^2.0.11
   flutter_dotenv: ^6.0.0
   supabase_flutter: ^2.10.3
+  dio: ^5.4.0
+  injectable: ^2.3.2
+  get_it: ^7.6.4
+  json_annotation: ^4.9.0
+  google_sign_in: ^6.2.1
+  logger: ^2.6.2
 
 dev_dependencies:
   flutter_test:
@@ -55,6 +61,7 @@ dev_dependencies:
   freezed: ^3.2.3
   json_serializable: ^6.11.1
   build_runner: ^2.6.0
+  injectable_generator: ^2.4.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

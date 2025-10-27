@@ -1,9 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
 import '../../../../../../core/constants/regions.dart';
+import '../../../../../../core/di/injection.dart';
+import '../../../../../../data/data_source/storage_service.dart';
 import '../state/user_controller.dart';
 
 class ProfileInfoSection extends ConsumerStatefulWidget {
@@ -15,17 +19,20 @@ class ProfileInfoSection extends ConsumerStatefulWidget {
 
 class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
   bool _isEditing = false;
+  bool _isUploadingImage = false;
   late TextEditingController _usernameController;
   String? _tempImageUrl;
   String? _tempRegion;
+  final ImagePicker _imagePicker = ImagePicker();
+  final StorageService _storageService = getIt<StorageService>();
 
   @override
   void initState() {
     super.initState();
-    final user = ref.read(userProvider);
-    _usernameController = TextEditingController(text: user.username);
-    _tempImageUrl = user.userImg;
-    _tempRegion = user.region;
+    final user = ref.read(userProvider).value;
+    _usernameController = TextEditingController(text: user?.username ?? '');
+    _tempImageUrl = user?.userImg;
+    _tempRegion = user?.region ?? '서울';
   }
 
   @override
@@ -53,7 +60,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
 
       // 이름이 있으면 저장 진행
       final notifier = ref.read(userProvider.notifier);
-      notifier.updateUser(
+      notifier.updateUserInfo(
         username: trimmedName,
         userImg: _tempImageUrl,
         region: _tempRegion,
@@ -69,30 +76,225 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
       setState(() => _isEditing = false);
     } else {
       // 편집 모드 시작 - 현재 값으로 초기화
-      final user = ref.read(userProvider);
-      _usernameController.text = user.username;
-      _tempImageUrl = user.userImg;
-      _tempRegion = user.region;
+      final user = ref.read(userProvider).value;
+      _usernameController.text = user?.username ?? '';
+      _tempImageUrl = user?.userImg;
+      _tempRegion = user?.region ?? '서울';
       setState(() => _isEditing = true);
     }
   }
 
   void _cancelEdit() {
-    final user = ref.read(userProvider);
+    final user = ref.read(userProvider).value;
     setState(() {
       _isEditing = false;
-      _usernameController.text = user.username;
-      _tempImageUrl = user.userImg;
-      _tempRegion = user.region;
+      _usernameController.text = user?.username ?? '';
+      _tempImageUrl = user?.userImg;
+      _tempRegion = user?.region ?? '서울';
     });
   }
 
-  void _toggleAvatar() {
-    setState(() {
-      _tempImageUrl = _tempImageUrl == null
-          ? 'https://picsum.photos/200'
-          : null;
-    });
+  /// 프로필 이미지 선택 바텀시트 표시
+  Future<void> _selectProfileImage() async {
+    if (!_isEditing) return;
+
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Colors.grey.withValues(alpha: 0.2),
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const SizedBox(width: 48),
+                    Text(
+                      '프로필 사진 변경',
+                      style: AppTextStyle.titleLarge.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+              ),
+              // Options
+              _buildImagePickerOption(
+                icon: Icons.camera_alt_rounded,
+                label: '카메라로 촬영',
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImageFromCamera();
+                },
+              ),
+              _buildImagePickerOption(
+                icon: Icons.photo_library_rounded,
+                label: '갤러리에서 선택',
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImageFromGallery();
+                },
+              ),
+              if (_tempImageUrl != null)
+                _buildImagePickerOption(
+                  icon: Icons.delete_outline_rounded,
+                  label: '이미지 제거',
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() => _tempImageUrl = null);
+                  },
+                  isDestructive: true,
+                ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// 이미지 선택 옵션 위젯
+  Widget _buildImagePickerOption({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    bool isDestructive = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isDestructive ? AppColors.error : AppColors.primaryAccent,
+              size: 24,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              label,
+              style: AppTextStyle.bodyLarge.copyWith(
+                color: isDestructive ? AppColors.error : AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 카메라로 이미지 촬영
+  Future<void> _pickImageFromCamera() async {
+    try {
+      final XFile? pickedFile = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80,
+      );
+      if (pickedFile != null) {
+        await _uploadImage(File(pickedFile.path));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('카메라 오류: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  /// 갤러리에서 이미지 선택
+  Future<void> _pickImageFromGallery() async {
+    try {
+      final XFile? pickedFile = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+      if (pickedFile != null) {
+        await _uploadImage(File(pickedFile.path));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('갤러리 오류: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  /// 이미지 업로드
+  Future<void> _uploadImage(File imageFile) async {
+    setState(() => _isUploadingImage = true);
+
+    try {
+      final user = ref.read(userProvider).value;
+      if (user == null) {
+        throw Exception('사용자 정보를 찾을 수 없습니다');
+      }
+
+      // Supabase Storage에 업로드
+      final imageUrl = await _storageService.updateProfileImage(
+        userId: user.id,
+        imageFile: imageFile,
+        oldImageUrl: _tempImageUrl,
+      );
+
+      setState(() {
+        _tempImageUrl = imageUrl;
+        _isUploadingImage = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('프로필 사진이 업로드되었습니다.'),
+            backgroundColor: Color.fromRGBO(116, 205, 124, 1),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isUploadingImage = false);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('업로드 실패: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   /// Picker 아이템 텍스트 스타일 (일관성 유지)
@@ -263,10 +465,13 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(userProvider);
-    final displayImageUrl = _isEditing ? _tempImageUrl : user.userImg;
+    final userAsync = ref.watch(userProvider);
 
-    return Container(
+    return userAsync.when(
+      data: (user) {
+        final displayImageUrl = _isEditing ? _tempImageUrl : user.userImg;
+
+        return Container(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -364,7 +569,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
             children: [
               // 프로필 사진
               GestureDetector(
-                onTap: _isEditing ? _toggleAvatar : null,
+                onTap: _isEditing ? _selectProfileImage : null,
                 child: Stack(
                   children: [
                     Container(
@@ -406,7 +611,24 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                         ),
                       ),
                     ),
-                    if (_isEditing)
+                    // 로딩 인디케이터
+                    if (_isUploadingImage)
+                      Positioned.fill(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 3,
+                            ),
+                          ),
+                        ),
+                      ),
+                    // 편집 모드 카메라 아이콘
+                    if (_isEditing && !_isUploadingImage)
                       Positioned(
                         bottom: 0,
                         right: 0,
@@ -534,6 +756,12 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                 : const SizedBox.shrink(),
           ),
         ],
+      ),
+    );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: Text('오류가 발생했습니다: $error'),
       ),
     );
   }

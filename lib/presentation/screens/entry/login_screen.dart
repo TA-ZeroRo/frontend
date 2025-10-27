@@ -1,13 +1,47 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:toastification/toastification.dart';
 import '../../../core/theme/app_color.dart';
 import '../../routes/router_path.dart';
+import 'state/auth_controller.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
+  Future<void> _handleGoogleLogin(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref.read(authProvider.notifier).loginWithGoogle();
+
+      // Web에서는 리디렉션이 자동으로 페이지를 전환하므로 라우팅 안 함
+      // Mobile에서만 로그인 성공 시 메인 화면으로 이동
+      if (!kIsWeb && context.mounted) {
+        context.go(RoutePath.main);
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+
+      // 유저 정보가 없으면 회원가입 페이지로 이동
+      if (e.toString().contains('USER_NOT_FOUND')) {
+        context.go(RoutePath.register);
+      } else {
+        // 기타 에러는 토스트로 표시
+        toastification.show(
+          context: context,
+          type: ToastificationType.error,
+          style: ToastificationStyle.flatColored,
+          title: const Text('로그인 실패'),
+          description: Text(e.toString()),
+          autoCloseDuration: const Duration(seconds: 3),
+        );
+      }
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authProvider);
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -40,9 +74,9 @@ class LoginScreen extends StatelessWidget {
             height: 56,
             width: 340,
             child: ElevatedButton(
-              onPressed: () {
-                context.go(RoutePath.register);
-              },
+              onPressed: authState.isLoading
+                  ? null
+                  : () => _handleGoogleLogin(context, ref),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.buttonColor,
                 shape: RoundedRectangleBorder(
@@ -51,25 +85,34 @@ class LoginScreen extends StatelessWidget {
                 ),
                 elevation: 2,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/images/google.png',
-                    height: 24,
-                    width: 24,
-                  ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Google 계정으로 빠르게 시작하세요',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+              child: authState.isLoading
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          'assets/images/google.png',
+                          height: 24,
+                          width: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Google 계정으로 빠르게 시작하세요',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
             ),
           ),
 

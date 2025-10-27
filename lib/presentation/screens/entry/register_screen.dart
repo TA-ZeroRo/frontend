@@ -4,17 +4,44 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_color.dart';
 import '../../../core/theme/app_text_style.dart';
 import '../../routes/router_path.dart';
-import 'state/register_controller.dart';
+import 'state/auth_controller.dart';
 
 class RegisterScreen extends ConsumerWidget {
   const RegisterScreen({super.key});
 
+  Future<void> _handleRegister(BuildContext context, WidgetRef ref) async {
+    final authState = ref.read(authProvider);
+
+    try {
+      await ref.read(authProvider.notifier).register(
+            nickname: authState.registerNickname,
+            region: authState.registerLocation,
+          );
+
+      // 회원가입 성공 시 메인 화면으로 이동
+      if (context.mounted) {
+        context.go(RoutePath.main);
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+
+      // 에러 토스트 표시
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('회원가입 실패: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final registerForm = ref.watch(registerProvider);
-    final notifier = ref.read(registerProvider.notifier);
+    final authState = ref.watch(authProvider);
+    final authNotifier = ref.read(authProvider.notifier);
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -64,7 +91,7 @@ class RegisterScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               TextField(
-                onChanged: notifier.updateNickname,
+                onChanged: authNotifier.updateRegisterNickname,
                 style: AppTextStyle.bodyLarge,
                 decoration: InputDecoration(
                   hintText: '닉네임을 입력해주세요',
@@ -102,7 +129,7 @@ class RegisterScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               TextField(
-                onChanged: notifier.updateLocation,
+                onChanged: authNotifier.updateRegisterLocation,
                 style: AppTextStyle.bodyLarge,
                 decoration: InputDecoration(
                   hintText: '예: 서울특별시 강남구',
@@ -129,11 +156,8 @@ class RegisterScreen extends ConsumerWidget {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: notifier.isValid()
-                      ? () {
-                          // TODO: Call backend API for registration
-                          context.go(RoutePath.main);
-                        }
+                  onPressed: authNotifier.isRegisterFormValid() && !authState.isLoading
+                      ? () => _handleRegister(context, ref)
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.buttonColor,
@@ -143,14 +167,24 @@ class RegisterScreen extends ConsumerWidget {
                     ),
                     elevation: 0,
                   ),
-                  child: Text(
-                    '완료',
-                    style: AppTextStyle.labelLarge.copyWith(
-                      color: notifier.isValid()
-                          ? AppColors.buttonTextColor
-                          : AppColors.cardBackground,
-                    ),
-                  ),
+                  child: authState.isLoading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Text(
+                          '완료',
+                          style: AppTextStyle.labelLarge.copyWith(
+                            color: authNotifier.isRegisterFormValid()
+                                ? AppColors.buttonTextColor
+                                : AppColors.cardBackground,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 24),

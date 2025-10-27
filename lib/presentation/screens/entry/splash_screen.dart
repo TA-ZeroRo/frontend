@@ -1,25 +1,57 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_color.dart';
 import '../../routes/router_path.dart';
+import 'state/auth_controller.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>{
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        context.go(RoutePath.login);
-      }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkSession();
     });
+  }
+
+  Future<void> _checkSession() async {
+    // 세션 체크
+    await ref.read(authProvider.notifier).checkAndRestoreSession();
+
+    if (!mounted) return;
+
+    final authState = ref.read(authProvider);
+
+    // 세션 있고 유저 정보도 있으면 메인으로
+    if (authState.currentUser != null) {
+      // 자동 로그인 성공 토스트
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Image.asset('assets/images/google.png', width: 20, height: 20),
+                const SizedBox(width: 12),
+                const Text('자동 로그인 되었습니다'),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+      context.go(RoutePath.main);
+    } else {
+      // 세션 없거나 유저 정보 없으면 로그인으로
+      context.go(RoutePath.login);
+    }
   }
 
   @override
@@ -53,10 +85,7 @@ class _SplashScreenState extends State<SplashScreen>{
               left: 0,
               right: 0,
               child: Center(
-                  child: Image.asset(
-                    'assets/images/ZeroRo_logo.png',
-                  width: 320,
-                ),
+                child: Image.asset('assets/images/ZeroRo_logo.png', width: 320),
               ),
             ),
           ],

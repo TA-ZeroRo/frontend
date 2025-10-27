@@ -1,73 +1,122 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../../core/di/injection.dart';
+import '../../../../../../core/logger/logger.dart';
 import '../../../../../../domain/model/user/user.dart';
 import '../../../../../../domain/model/post/post.dart';
+import '../../../../../../domain/repository/user_repository.dart';
 import '../../community/state/community_controller.dart';
 
-class UserNotifier extends Notifier<User> {
+/// 사용자 정보를 관리하는 AsyncNotifier
+///
+/// UserRepository를 통해 실제 백엔드 API와 통신하여
+/// 사용자 정보를 CRUD 합니다.
+class UserNotifier extends AsyncNotifier<User> {
+  late final UserRepository _userRepository;
+
   @override
-  User build() {
-    return User(
-      id: 'user_001',
-      username: '제로로로',
-      totalPoints: 1250,
-      continuousDays: 7,
-      region: '서울',
-      characters: [],
-      lastActiveAt: DateTime.now(),
-      createdAt: DateTime.now().subtract(const Duration(days: 30)),
-    );
+  Future<User> build() async {
+    _userRepository = getIt<UserRepository>();
+
+    // TODO: 실제 로그인된 사용자 ID로 교체 필요
+    // 현재는 임시로 하드코딩된 ID 사용
+    const tempUserId = 'user_001';
+
+    try {
+      // 백엔드에서 사용자 정보 로드
+      return await _userRepository.getUser(tempUserId);
+    } catch (e) {
+      CustomLogger.logger.e('UserNotifier - 사용자 정보 로드 실패', error: e);
+
+      // 에러 시 기본값 반환 (임시)
+      return User(
+        id: tempUserId,
+        username: '게스트',
+        totalPoints: 0,
+        continuousDays: 0,
+        region: '미설정',
+        characters: [],
+        lastActiveAt: DateTime.now(),
+        createdAt: DateTime.now(),
+      );
+    }
   }
 
-  void updateUsername(String username) {
-    state = state.copyWith(username: username);
+  /// 사용자 정보 새로고침
+  Future<void> refreshUser(String userId) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => _userRepository.getUser(userId));
   }
 
-  void updateUserImage(String? imageUrl) {
-    state = state.copyWith(userImg: imageUrl);
-  }
-
-  void updatePoints(int points) {
-    state = state.copyWith(totalPoints: points);
-  }
-
-  void updateContinuousDays(int days) {
-    state = state.copyWith(continuousDays: days);
-  }
-
-  void updateRegion(String region) {
-    state = state.copyWith(region: region);
-  }
-
-  void updateCharacters(List<String> characters) {
-    state = state.copyWith(characters: characters);
-  }
-
-  void updateUser({
+  /// 사용자 정보 업데이트 (부분 업데이트)
+  ///
+  /// null이 아닌 필드만 서버에 전송되어 업데이트됩니다.
+  Future<void> updateUserInfo({
     String? username,
     String? userImg,
     String? region,
     List<String>? characters,
-  }) {
-    User updatedUser = state;
-
-    if (username != null) {
-      updatedUser = updatedUser.copyWith(username: username);
-    }
-    if (userImg != null) {
-      updatedUser = updatedUser.copyWith(userImg: userImg);
-    }
-    if (region != null) {
-      updatedUser = updatedUser.copyWith(region: region);
-    }
-    if (characters != null) {
-      updatedUser = updatedUser.copyWith(characters: characters);
+  }) async {
+    final currentUser = state.value;
+    if (currentUser == null) {
+      CustomLogger.logger.w('updateUserInfo - 현재 사용자 정보가 없습니다');
+      return;
     }
 
-    state = updatedUser;
+    state = const AsyncValue.loading();
+
+    state = await AsyncValue.guard(() async {
+      return await _userRepository.updateUser(
+        userId: currentUser.id,
+        username: username,
+        userImg: userImg,
+        region: region,
+        characters: characters,
+      );
+    });
+
+    if (state.hasError) {
+      CustomLogger.logger.e(
+        'updateUserInfo - 사용자 정보 업데이트 실패',
+        error: state.error,
+      );
+    } else {
+      CustomLogger.logger.d('updateUserInfo - 사용자 정보 업데이트 성공');
+    }
+  }
+
+  /// 로컬 상태만 업데이트 (서버에 전송하지 않음)
+  ///
+  /// 다른 작업의 결과로 사용자 정보가 변경되었을 때 사용
+  void updateLocalState(User user) {
+    state = AsyncValue.data(user);
+  }
+
+  /// 포인트 증가 (로컬 상태만)
+  ///
+  /// 실제 포인트 변경은 별도 API를 통해 이루어지며,
+  /// 이 메서드는 UI 반영만 담당합니다.
+  void incrementPoints(int points) {
+    final currentUser = state.value;
+    if (currentUser != null) {
+      state = AsyncValue.data(
+        currentUser.copyWith(totalPoints: currentUser.totalPoints + points),
+      );
+    }
+  }
+
+  /// 연속 일수 업데이트 (로컬 상태만)
+  void updateContinuousDays(int days) {
+    final currentUser = state.value;
+    if (currentUser != null) {
+      state = AsyncValue.data(currentUser.copyWith(continuousDays: days));
+    }
   }
 }
 
-final userProvider = NotifierProvider<UserNotifier, User>(
+/// 사용자 정보 Provider
+///
+/// AsyncNotifier를 사용하여 비동기 데이터를 관리합니다.
+final userProvider = AsyncNotifierProvider<UserNotifier, User>(
   UserNotifier.new,
 );
 

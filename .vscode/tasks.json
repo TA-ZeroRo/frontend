@@ -1,0 +1,39 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Runner: Build",
+      "type": "shell",
+      "command": "dart run build_runner build",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build Runner: Watch",
+      "type": "shell",
+      "command": "dart run build_runner watch",
+      "isBackground": true,
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build Runner: Build (Clean)",
+      "type": "shell",
+      "command": "dart run build_runner build --delete-conflicting-outputs",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

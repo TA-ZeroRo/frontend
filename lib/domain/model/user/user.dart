@@ -13,7 +13,7 @@ abstract class User with _$User {
     required int continuousDays,
     required String region,
     required List<String> characters,
-    required DateTime lastActiveAt,
+    DateTime? lastActiveAt,
     required DateTime createdAt,
   }) = _User;
 

@@ -62,8 +62,8 @@ class PostWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(userProvider);
-    final isOwner = user.id == post.userId;
+    final userAsync = ref.watch(userProvider);
+    final isOwner = userAsync.value?.id == post.userId;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

@@ -16,7 +16,9 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
   characters: (json['characters'] as List<dynamic>)
       .map((e) => e as String)
       .toList(),
-  lastActiveAt: DateTime.parse(json['lastActiveAt'] as String),
+  lastActiveAt: json['lastActiveAt'] == null
+      ? null
+      : DateTime.parse(json['lastActiveAt'] as String),
   createdAt: DateTime.parse(json['createdAt'] as String),
 );
 
@@ -28,6 +30,6 @@ Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
   'continuousDays': instance.continuousDays,
   'region': instance.region,
   'characters': instance.characters,
-  'lastActiveAt': instance.lastActiveAt.toIso8601String(),
+  'lastActiveAt': instance.lastActiveAt?.toIso8601String(),
   'createdAt': instance.createdAt.toIso8601String(),
 };

@@ -24,9 +24,9 @@ class _CommentDialogState extends ConsumerState<CommentDialog> {
 
   void _sendComment() {
     final content = _controller.text.trim();
-    final user = ref.read(userProvider);
+    final user = ref.read(userProvider).value;
 
-    if (content.isNotEmpty) {
+    if (content.isNotEmpty && user != null) {
       ref.read(commentOperationsProvider.notifier).addComment(
         widget.postId,
         user.id,
@@ -55,7 +55,7 @@ class _CommentDialogState extends ConsumerState<CommentDialog> {
   @override
   Widget build(BuildContext context) {
     final commentsAsync = ref.watch(commentsProvider(widget.postId));
-    final user = ref.watch(userProvider);
+    final userAsync = ref.watch(userProvider);
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -90,11 +90,12 @@ class _CommentDialogState extends ConsumerState<CommentDialog> {
                       child: Text('아직 댓글이 없습니다.\n첫 번째 댓글을 작성해보세요!'),
                     );
                   }
+                  final currentUserId = userAsync.value?.id;
                   return ListView.builder(
                     itemCount: comments.length,
                     itemBuilder: (context, index) {
                       final comment = comments[index];
-                      final isMyComment = comment.userId == user.id;
+                      final isMyComment = comment.userId == currentUserId;
 
                       return CommentCard(
                         userName: comment.username,
