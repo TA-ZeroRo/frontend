@@ -47,6 +47,22 @@ class UserNotifier extends AsyncNotifier<User> {
     state = await AsyncValue.guard(() => _userRepository.getUser(userId));
   }
 
+  /// 현재 사용자 정보 새로고침 (RefreshIndicator용)
+  Future<void> refresh() async {
+    final currentUser = state.value;
+    if (currentUser == null) {
+      // 사용자 정보가 없으면 build를 재실행
+      state = const AsyncValue.loading();
+      state = await AsyncValue.guard(() => build());
+      return;
+    }
+
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => _userRepository.getUser(currentUser.id),
+    );
+  }
+
   /// 사용자 정보 업데이트 (부분 업데이트)
   ///
   /// null이 아닌 필드만 서버에 전송되어 업데이트됩니다.
