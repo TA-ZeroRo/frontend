@@ -31,6 +31,14 @@ class AppColors {
   static const Color success = Color(0xFF4CAF50);
   static const Color warning = Color(0xFFFF9800);
 
+  // Point change colors (for reports)
+  static const Color pointDecrease = Color(
+    0xFF2196F3,
+  ); // Blue - when points decrease
+  static const Color pointIncrease = Color(
+    0xFFF44336,
+  ); // Red - when points increase
+
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [Color(0xFF00F3A5), Color(0xFF00D896)],
