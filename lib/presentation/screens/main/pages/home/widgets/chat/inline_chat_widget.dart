@@ -80,52 +80,6 @@ class _InlineChatWidgetState extends ConsumerState<InlineChatWidget> {
     }
   }
 
-  void _showAttachmentOptions() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(ChatSpacing.md),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('카메라'),
-                onTap: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('카메라 기능은 곧 추가될 예정입니다')),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('갤러리'),
-                onTap: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('갤러리 기능은 곧 추가될 예정입니다')),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.insert_drive_file),
-                title: const Text('문서'),
-                onTap: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('문서 첨부 기능은 곧 추가될 예정입니다')),
-                  );
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   void _expandChat() {
     ref.read(chatViewStateProvider.notifier).setState(ChatViewState.chatActive);
   }
@@ -165,21 +119,24 @@ class _InlineChatWidgetState extends ConsumerState<InlineChatWidget> {
     final hasMessages = displayItems.isNotEmpty;
 
     return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
+      left: ChatSpacing.md,
+      right: ChatSpacing.md,
+      bottom: ChatSpacing.lg,
       child: Container(
         constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.5,
+          minHeight: hasMessages ? 0 : 64,
+          maxHeight: hasMessages
+              ? MediaQuery.of(context).size.height * 0.5
+              : 64,
         ),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.95),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          color: Colors.white.withValues(alpha: hasMessages ? 0.75 : 0.95),
+          borderRadius: BorderRadius.circular(hasMessages ? 24 : 28),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 20,
-              offset: const Offset(0, -5),
+              offset: hasMessages ? const Offset(0, -5) : const Offset(0, 2),
             ),
           ],
         ),
@@ -235,7 +192,7 @@ class _InlineChatWidgetState extends ConsumerState<InlineChatWidget> {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              Colors.white.withValues(alpha: 0.95),
+                              Colors.white.withValues(alpha: 0.75),
                               Colors.white.withValues(alpha: 0.0),
                             ],
                           ),
@@ -280,27 +237,33 @@ class _InlineChatWidgetState extends ConsumerState<InlineChatWidget> {
 
             // Input area
             Container(
-              padding: const EdgeInsets.all(ChatSpacing.md),
+              padding: hasMessages
+                  ? const EdgeInsets.all(ChatSpacing.md)
+                  : const EdgeInsets.symmetric(
+                      horizontal: ChatSpacing.xs,
+                      vertical: ChatSpacing.xs,
+                    ),
               child: SafeArea(
                 top: false,
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Attachment button
+                    // Expand button (moved to left)
                     IconButton(
-                      icon: const Icon(Icons.attach_file),
-                      onPressed: _showAttachmentOptions,
+                      icon: const Icon(Icons.open_in_full),
+                      onPressed: _expandChat,
                       color: Colors.black87,
-                      tooltip: '파일 첨부',
+                      tooltip: '대화 확장',
+                      iconSize: 20,
                     ),
-                    const SizedBox(width: ChatSpacing.xs),
+                    const SizedBox(width: ChatSpacing.xxs),
 
                     // Text input field
                     Expanded(
                       child: Container(
-                        constraints: const BoxConstraints(
+                        constraints: BoxConstraints(
                           minHeight: 40,
-                          maxHeight: 120,
+                          maxHeight: hasMessages ? 120 : 40,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.grey[100],
@@ -312,7 +275,7 @@ class _InlineChatWidgetState extends ConsumerState<InlineChatWidget> {
                         ),
                         child: TextField(
                           controller: _textController,
-                          maxLines: null,
+                          maxLines: hasMessages ? null : 1,
                           textInputAction: TextInputAction.newline,
                           style: AppTextStyle.bodyLarge,
                           decoration: InputDecoration(
@@ -330,16 +293,7 @@ class _InlineChatWidgetState extends ConsumerState<InlineChatWidget> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: ChatSpacing.xs),
-
-                    // Expand button
-                    IconButton(
-                      icon: const Icon(Icons.open_in_full),
-                      onPressed: _expandChat,
-                      color: Colors.black87,
-                      tooltip: '대화 확장',
-                    ),
-                    const SizedBox(width: ChatSpacing.xs),
+                    const SizedBox(width: ChatSpacing.xxs),
 
                     // Send button
                     AnimatedScale(
@@ -354,6 +308,7 @@ class _InlineChatWidgetState extends ConsumerState<InlineChatWidget> {
                           color: ChatColors.userMessageBg,
                           disabledColor: ChatColors.disabledGray,
                           tooltip: '전송',
+                          iconSize: 20,
                         ),
                       ),
                     ),

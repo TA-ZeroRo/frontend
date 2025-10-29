@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/presentation/routes/router_path.dart';
+import 'package:frontend/presentation/screens/entry/state/auth_controller.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../../core/animations/page_transitions.dart';
 import 'state/settings_controller.dart';
-
-// ============================================================================
-// UI Components - Settings Components (Design Guide 준수)
-// ============================================================================
 
 class SettingsAppBar extends StatelessWidget {
   final VoidCallback onClose;
@@ -229,15 +228,37 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('로그아웃되었습니다. (데모)'),
-                    backgroundColor: Color.fromARGB(255, 116, 205, 124),
-                  ),
-                );
-                Navigator.of(context).maybePop();
+              onPressed: () async {
+                Navigator.of(context).pop(); // 확인 다이얼로그 닫기
+
+                try {
+                  await ref.read(authProvider.notifier).logout();
+
+                  if (context.mounted) {
+                    // 설정 화면 닫기
+                    Navigator.of(context).pop();
+
+                    // 로그인 화면으로 이동 (스택 클리어)
+                    context.go(RoutePath.login);
+
+                    // 성공 메시지
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('로그아웃되었습니다.'),
+                        backgroundColor: Color.fromARGB(255, 116, 205, 124),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('로그아웃 실패: ${e.toString()}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
@@ -307,15 +328,37 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('계정이 삭제되었습니다. (데모)'),
-                    backgroundColor: Color.fromRGBO(255, 86, 69, 1),
-                  ),
-                );
-                Navigator.of(context).maybePop();
+              onPressed: () async {
+                Navigator.of(context).pop(); // 확인 다이얼로그 닫기
+
+                try {
+                  await ref.read(authProvider.notifier).deleteAccount();
+
+                  if (context.mounted) {
+                    // 설정 화면 닫기
+                    Navigator.of(context).pop();
+
+                    // 로그인 화면으로 이동 (스택 클리어)
+                    context.go(RoutePath.login);
+
+                    // 성공 메시지
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('계정이 삭제되었습니다.'),
+                        backgroundColor: Color.fromRGBO(255, 86, 69, 1),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('계정 삭제 실패: ${e.toString()}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
