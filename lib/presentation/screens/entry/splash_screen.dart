@@ -23,7 +23,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   Future<void> _checkSession() async {
     // 세션 체크
-    await ref.read(authProvider.notifier).checkAndRestoreSession();
+    await Future.wait([
+      ref.read(authProvider.notifier).checkAndRestoreSession(),
+      Future.delayed(const Duration(seconds: 1)),
+    ]);
 
     if (!mounted) return;
 
@@ -43,10 +46,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               ],
             ),
             backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
+            duration: const Duration(milliseconds: 1500),
           ),
         );
+
+        // SnackBar가 스플래시 화면에서 보이도록 대기
+        await Future.delayed(const Duration(seconds: 2));
       }
+
+      if (!mounted) return;
       context.go(RoutePath.main);
     } else {
       // 세션 없거나 유저 정보 없으면 로그인으로
