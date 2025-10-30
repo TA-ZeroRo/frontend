@@ -4,7 +4,7 @@ import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/theme/app_text_style.dart';
 import 'components/profile_info_section.dart';
 import 'components/point_chart_section.dart';
-import 'components/user_posts_section.dart';
+import 'components/weekly_report_library_section.dart';
 import 'settings_dialog.dart' show showSettingsDialog;
 import 'state/user_controller.dart';
 
@@ -59,7 +59,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     horizontal: 16,
                     vertical: 8,
                   ),
-                  child: _buildUserPostsCard(),
+                  child: _buildWeeklyReportCard(),
                 ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 24)),
@@ -133,7 +133,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildUserPostsCard() {
+  Widget _buildWeeklyReportCard() {
     return Container(
       decoration: BoxDecoration(
         gradient: AppColors.cardGradient,
@@ -147,7 +147,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ],
       ),
-      child: const UserPostsSection(),
+      child: const WeeklyReportLibrarySection(),
     );
   }
 }
