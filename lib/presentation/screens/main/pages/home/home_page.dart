@@ -103,7 +103,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        color: AppColors.background,
         child: Stack(
           fit: StackFit.expand,
           children: [

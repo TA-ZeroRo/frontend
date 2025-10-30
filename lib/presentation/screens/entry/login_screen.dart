@@ -61,9 +61,7 @@ class LoginScreen extends ConsumerWidget {
     final authState = ref.watch(authProvider);
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.backgroundGradient,
-        ),
+        color: AppColors.background,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -95,7 +93,7 @@ class LoginScreen extends ConsumerWidget {
                   ? null
                   : () => _handleGoogleLogin(context, ref),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.buttonColor,
+                backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                   side: BorderSide(color: Colors.grey.shade400, width: 1),
@@ -123,7 +121,7 @@ class LoginScreen extends ConsumerWidget {
                         const Text(
                           'Google 계정으로 빠르게 시작하세요',
                           style: TextStyle(
-                            color: Colors.black,
+                            color: AppColors.onPrimary,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -158,7 +156,7 @@ class LoginScreen extends ConsumerWidget {
                 context.go(RoutePath.main);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.buttonColor,
+                backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                   side: BorderSide(color: Colors.grey.shade400, width: 1),
@@ -168,13 +166,13 @@ class LoginScreen extends ConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.person_outline, color: Colors.grey[700], size: 24),
+                  Icon(Icons.person_outline, color: AppColors.onPrimary, size: 24),
                   const SizedBox(width: 12),
                   Text(
                     '게스트로 시작하기',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.grey[700],
+                      color: AppColors.onPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

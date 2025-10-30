@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // page background color
-  static const Color background = Color(0xFFDAFFF3);
+  static const Color background = Color(0xffFAF9F5);
+
+  static const Color primary = Color(0xFF5FBB70);
+  static const Color onPrimary = Color(0xffFAF9F5);
 
   // general button color
   static const Color buttonColor = Color(0xFF00F3A5);

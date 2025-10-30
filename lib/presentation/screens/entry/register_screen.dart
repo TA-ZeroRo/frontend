@@ -54,9 +54,7 @@ class RegisterScreen extends ConsumerWidget {
         centerTitle: true,
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.backgroundGradient,
-        ),
+        color: AppColors.primary,
         child: SafeArea(
           child: Padding(
           padding: const EdgeInsets.all(24.0),

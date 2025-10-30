@@ -68,7 +68,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        color: AppColors.background,
         child: Stack(
           children: [
             // 하단 이미지 (윗면 곡선 처리)
