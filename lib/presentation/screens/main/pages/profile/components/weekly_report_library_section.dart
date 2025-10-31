@@ -792,19 +792,14 @@ class _WeeklyReportContent extends StatelessWidget {
       if (points < previousMonthPoints) {
         // 현재 포인트가 저번달보다 적음 → 감소 → 파란색
         pointsColor = AppColors.pointDecrease;
-      } else if (points > previousMonthPoints) {
-        // 현재 포인트가 저번달보다 많음 → 증가 → 빨간색
-        pointsColor = AppColors.pointIncrease;
       } else {
-        // 동일 → 기본색
-        pointsColor = AppColors.textPrimary;
+        // 현재 포인트가 저번달보다 많거나 같음 → 증가/동일 → 빨간색
+        pointsColor = AppColors.pointIncrease;
       }
 
-      // 차이 텍스트 생성 (0이 아닌 경우에만)
-      if (difference != 0) {
-        final sign = difference > 0 ? '+' : '';
-        differenceText = '저번달 대비 $sign$difference';
-      }
+      // 차이 텍스트 생성 (항상 표시)
+      final sign = difference > 0 ? '+' : '';
+      differenceText = '저번달 대비 $sign$difference';
     } else {
       // 저번달 포인트 정보가 없으면 기본색 사용
       pointsColor = AppColors.textPrimary;
