@@ -95,6 +95,7 @@ class _WeeklyReportLibrarySectionState
     if (user == null) return;
 
     final repository = getIt<WeeklyReportRepository>();
+    final service = WeeklyReportService();
 
     // 현재 보고서 목록 확인
     final existingReports = await repository.getWeeklyReports(user.id);
@@ -195,6 +196,7 @@ class _WeeklyReportLibrarySectionState
             previousMonthPoints: previousMonthPoints,
             comparisonMessage: comparisonMessage,
             recommendationMessage: recommendationMessage,
+            environmentalImpact: service.generateEnvironmentalImpact(),
             createdAt: pastMonthStart.add(const Duration(hours: 1)),
           );
 
@@ -227,6 +229,7 @@ class _WeeklyReportLibrarySectionState
     if (user == null) return;
 
     final repository = getIt<WeeklyReportRepository>();
+    final service = WeeklyReportService();
     final allReports = await repository.getWeeklyReports(user.id);
 
     // 날짜순 정렬 (오래된 순)
@@ -234,7 +237,7 @@ class _WeeklyReportLibrarySectionState
 
     bool hasUpdates = false;
 
-    // 모든 보고서를 순회하며 previousMonthPoints 업데이트
+    // 모든 보고서를 순회하며 previousMonthPoints 및 environmentalImpact 업데이트
     for (int i = 0; i < allReports.length; i++) {
       final report = allReports[i];
       int? newPreviousMonthPoints;
@@ -248,11 +251,27 @@ class _WeeklyReportLibrarySectionState
         newPreviousMonthPoints = previousReport.monthlyPointsEarned;
       }
 
-      // previousMonthPoints가 다르면 업데이트
-      if (report.previousMonthPoints != newPreviousMonthPoints) {
-        final updatedReport = report.copyWith(
-          previousMonthPoints: newPreviousMonthPoints,
-        );
+      // environmentalImpact가 없거나 previousMonthPoints가 다르면 업데이트
+      if (report.environmentalImpact == null ||
+          report.previousMonthPoints != newPreviousMonthPoints) {
+        WeeklyReport updatedReport;
+
+        if (report.environmentalImpact == null) {
+          // environmentalImpact가 없으면 추가
+          updatedReport = report.copyWith(
+            previousMonthPoints:
+                report.previousMonthPoints != newPreviousMonthPoints
+                ? newPreviousMonthPoints
+                : null,
+            environmentalImpact: service.generateEnvironmentalImpact(),
+          );
+        } else {
+          // environmentalImpact는 있고 previousMonthPoints만 업데이트
+          updatedReport = report.copyWith(
+            previousMonthPoints: newPreviousMonthPoints,
+          );
+        }
+
         await repository.saveWeeklyReport(updatedReport);
         hasUpdates = true;
       }
@@ -670,6 +689,11 @@ class _WeeklyReportContent extends StatelessWidget {
           points: report.monthlyPointsEarned,
           previousMonthPoints: report.previousMonthPoints,
         ),
+        // 나의 환경 일지
+        if (report.environmentalImpact != null) ...[
+          const SizedBox(height: 16),
+          _buildEnvironmentalImpact(report.environmentalImpact!),
+        ],
         // 환경 TMI 섹션
         const SizedBox(height: 24),
         Container(
@@ -833,6 +857,138 @@ class _WeeklyReportContent extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  /// 환경 일지 섹션 빌드
+  Widget _buildEnvironmentalImpact(EnvironmentalImpact impact) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 제목
+        Row(
+          children: [
+            Icon(Icons.eco_rounded, color: AppColors.primary, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              '나의 환경 일지',
+              style: AppTextStyle.titleMedium.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // 환경 영향 카드들
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.2),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              // CO2 절감
+              _buildImpactCard(
+                icon: Icons.air_rounded,
+                title: 'CO₂ 절감',
+                value: impact.co2Reduced,
+                description: '이산화탄소를 줄였어요',
+              ),
+              const SizedBox(height: 12),
+              // 플라스틱 절약
+              _buildImpactCard(
+                icon: Icons.recycling_rounded,
+                title: '플라스틱 절약',
+                value: impact.plasticSaved,
+                description: '플라스틱 사용을 줄였어요',
+              ),
+              const SizedBox(height: 12),
+              // 나무 환산
+              _buildImpactCard(
+                icon: Icons.park_rounded,
+                title: '나무 환산',
+                value: impact.treesEquivalent,
+                description: '나무를 심은 것과 같아요',
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 환경 영향 개별 카드 빌드
+  Widget _buildImpactCard({
+    required IconData icon,
+    required String title,
+    required String value,
+    required String description,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.1),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: AppColors.primary, size: 24),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTextStyle.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text(
+                      value,
+                      style: AppTextStyle.titleLarge.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        description,
+                        style: AppTextStyle.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
