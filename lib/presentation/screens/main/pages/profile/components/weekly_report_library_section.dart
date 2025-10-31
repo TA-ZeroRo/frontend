@@ -158,31 +158,6 @@ class _WeeklyReportLibrarySectionState
               ? ['한강 플로깅 챌린지', '30일 제로웨이스트 챌린지']
               : ['일주일 비건 챌린지'];
 
-          String? comparisonMessage;
-          String? recommendationMessage;
-
-          if (previousMonthPoints != null) {
-            final difference = monthlyPoints - previousMonthPoints;
-            if (difference > 0) {
-              comparisonMessage =
-                  '저번달보다 ${difference}포인트를 더 많이 획득했어요! 계속 좋은 활동을 이어가세요.';
-              recommendationMessage =
-                  '이번 달의 활동이 인상적이에요. 더 많은 캠페인 참여로 환경 지킴이로 성장해보세요!';
-            } else if (difference < 0) {
-              comparisonMessage =
-                  '저번달보다 ${-difference}포인트가 적어졌네요. 꾸준한 활동이 중요해요.';
-              recommendationMessage =
-                  '일일 미션을 더 완료하시면 포인트를 더 받을 수 있어요. 작은 실천부터 시작해보세요!';
-            } else {
-              comparisonMessage =
-                  '저번달과 동일한 포인트를 획득했어요. 조금만 더 노력하면 더 많은 포인트를 얻을 수 있어요!';
-              recommendationMessage = '다양한 캠페인에 참여하시면 더 많은 포인트를 받을 수 있어요.';
-            }
-          } else {
-            comparisonMessage = '첫 월간보고서입니다. 앞으로의 활동을 기대해요!';
-            recommendationMessage = '일일 미션을 꾸준히 완료하고 캠페인에 참여해보세요.';
-          }
-
           final pastReport = WeeklyReport(
             id: reportId,
             userId: user.id,
@@ -194,8 +169,6 @@ class _WeeklyReportLibrarySectionState
             totalDailyMissions: 30,
             monthlyPointsEarned: monthlyPoints,
             previousMonthPoints: previousMonthPoints,
-            comparisonMessage: comparisonMessage,
-            recommendationMessage: recommendationMessage,
             environmentalImpact: service.generateEnvironmentalImpact(),
             createdAt: pastMonthStart.add(const Duration(hours: 1)),
           );
@@ -680,8 +653,7 @@ class _WeeklyReportContent extends StatelessWidget {
         _buildStatRow(
           icon: Icons.check_circle_outline_rounded,
           label: '일일 퀘스트 완료 횟수',
-          value:
-              '${report.dailyMissionCompletedCount} (${report.missionCompletionRate.toStringAsFixed(1)}%)',
+          value: '${report.dailyMissionCompletedCount}',
         ),
         const SizedBox(height: 16),
         // 월간 획득 포인트 (저번달 대비 색상 및 차이 표기)
