@@ -150,7 +150,7 @@ class _PointChartSectionState extends ConsumerState<PointChartSection>
             children: [
               Icon(
                 Icons.trending_up_rounded,
-                color: AppColors.primaryAccent,
+                color: AppColors.primary,
                 size: 24,
               ),
               const SizedBox(width: 8),
@@ -166,17 +166,17 @@ class _PointChartSectionState extends ConsumerState<PointChartSection>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryAccent.withValues(alpha: 0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: AppColors.primaryAccent.withValues(alpha: 0.3),
+                    color: AppColors.primary.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
                 child: Text(
                   '${_scoreData.length}일간',
                   style: AppTextStyle.bodySmall.copyWith(
-                    color: AppColors.primaryAccent,
+                    color: AppColors.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -192,7 +192,7 @@ class _PointChartSectionState extends ConsumerState<PointChartSection>
               color: AppColors.background.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.grey.withValues(alpha: 0.3),
+                color: AppColors.textTertiary.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -218,7 +218,7 @@ class _PointChartSectionState extends ConsumerState<PointChartSection>
                             angle: _chartScaleAnimation.value * 0.5,
                             child: Icon(
                               Icons.trending_up,
-                              color: AppColors.primaryAccent,
+                              color: AppColors.primary,
                               size: 20 * _chartScaleAnimation.value,
                             ),
                           );
@@ -237,7 +237,9 @@ class _PointChartSectionState extends ConsumerState<PointChartSection>
                           color: AppColors.background.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Colors.grey.withValues(alpha: 0.3),
+                            color: AppColors.textTertiary.withValues(
+                              alpha: 0.3,
+                            ),
                             width: 1,
                           ),
                         ),
@@ -273,7 +275,9 @@ class _PointChartSectionState extends ConsumerState<PointChartSection>
                     : Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Colors.grey.withValues(alpha: 0.4),
+                            color: AppColors.textTertiary.withValues(
+                              alpha: 0.4,
+                            ),
                             width: 1,
                           ),
                           borderRadius: BorderRadius.circular(8),
@@ -291,9 +295,8 @@ class _PointChartSectionState extends ConsumerState<PointChartSection>
                                     decoration: BoxDecoration(
                                       border: Border(
                                         right: BorderSide(
-                                          color: Colors.grey.withValues(
-                                            alpha: 0.4,
-                                          ),
+                                          color: AppColors.textTertiary
+                                              .withValues(alpha: 0.4),
                                           width: 1,
                                         ),
                                       ),
@@ -319,8 +322,9 @@ class _PointChartSectionState extends ConsumerState<PointChartSection>
                                                     value >= 1000
                                                         ? '${(value / 1000).toStringAsFixed(1)}K'
                                                         : value.toString(),
-                                                    style: const TextStyle(
-                                                      color: Colors.black87,
+                                                    style: TextStyle(
+                                                      color:
+                                                          AppColors.textPrimary,
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       fontSize: 10,
@@ -337,9 +341,8 @@ class _PointChartSectionState extends ConsumerState<PointChartSection>
                                           decoration: BoxDecoration(
                                             border: Border(
                                               top: BorderSide(
-                                                color: Colors.grey.withValues(
-                                                  alpha: 0.4,
-                                                ),
+                                                color: AppColors.textTertiary
+                                                    .withValues(alpha: 0.4),
                                                 width: 1,
                                               ),
                                             ),
@@ -458,13 +461,13 @@ class _PointChartSectionState extends ConsumerState<PointChartSection>
                                                               ),
                                                               child: Text(
                                                                 '${scoreData.score}점',
-                                                                style: const TextStyle(
+                                                                style: TextStyle(
                                                                   fontSize: 10,
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .bold,
-                                                                  color: Colors
-                                                                      .black87,
+                                                                  color: AppColors
+                                                                      .textPrimary,
                                                                 ),
                                                               ),
                                                             ),
@@ -510,7 +513,8 @@ class _PointChartSectionState extends ConsumerState<PointChartSection>
                                                 decoration: BoxDecoration(
                                                   border: Border(
                                                     top: BorderSide(
-                                                      color: Colors.grey
+                                                      color: AppColors
+                                                          .textTertiary
                                                           .withValues(
                                                             alpha: 0.4,
                                                           ),
@@ -534,15 +538,14 @@ class _PointChartSectionState extends ConsumerState<PointChartSection>
                                                             DateFormat(
                                                               'M/d',
                                                             ).format(data.date),
-                                                            style:
-                                                                const TextStyle(
-                                                                  color: Colors
-                                                                      .black87,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  fontSize: 10,
-                                                                ),
+                                                            style: TextStyle(
+                                                              color: AppColors
+                                                                  .textPrimary,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 10,
+                                                            ),
                                                           ),
                                                         ),
                                                       ),
@@ -590,7 +593,7 @@ class CustomChartPainter extends CustomPainter {
     if (data.isEmpty) return;
 
     final paint = Paint()
-      ..color = Colors.green
+      ..color = AppColors.primary
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke;
 
@@ -617,14 +620,14 @@ class CustomChartPainter extends CustomPainter {
         point,
         6,
         Paint()
-          ..color = Colors.green
+          ..color = AppColors.primary
           ..style = PaintingStyle.fill,
       );
       canvas.drawCircle(
         point,
         6,
         Paint()
-          ..color = Colors.white
+          ..color = AppColors.cardBackground
           ..strokeWidth = 2
           ..style = PaintingStyle.stroke,
       );
@@ -658,7 +661,7 @@ class HorizontalGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.grey.withValues(alpha: 0.3)
+      ..color = AppColors.textTertiary.withValues(alpha: 0.3)
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
 
@@ -693,7 +696,7 @@ class VerticalGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.grey.withValues(alpha: 0.3)
+      ..color = AppColors.textTertiary.withValues(alpha: 0.3)
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
 

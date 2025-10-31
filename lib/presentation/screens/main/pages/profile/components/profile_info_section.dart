@@ -104,7 +104,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
       builder: (BuildContext context) {
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.cardBackground,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(24),
               topRight: Radius.circular(24),
@@ -119,7 +119,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: Colors.grey.withValues(alpha: 0.2),
+                      color: AppColors.textTertiary.withValues(alpha: 0.2),
                       width: 1,
                     ),
                   ),
@@ -192,7 +192,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
           children: [
             Icon(
               icon,
-              color: isDestructive ? AppColors.error : AppColors.primaryAccent,
+              color: isDestructive ? AppColors.error : AppColors.primary,
               size: 24,
             ),
             const SizedBox(width: 16),
@@ -341,7 +341,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
             return Container(
               height: 350,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.cardBackground,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(24),
                   topRight: Radius.circular(24),
@@ -355,7 +355,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                     decoration: BoxDecoration(
                       border: Border(
                         bottom: BorderSide(
-                          color: Colors.grey.withValues(alpha: 0.2),
+                          color: AppColors.textTertiary.withValues(alpha: 0.2),
                           width: 1,
                         ),
                       ),
@@ -392,7 +392,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                           child: Text(
                             '완료',
                             style: AppTextStyle.bodyLarge.copyWith(
-                              color: AppColors.primaryAccent,
+                              color: AppColors.primary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -481,7 +481,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                 children: [
                   Icon(
                     Icons.person_rounded,
-                    color: AppColors.primaryAccent,
+                    color: AppColors.primary,
                     size: 24,
                   ),
                   const SizedBox(width: 8),
@@ -519,13 +519,11 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                     // 저장 버튼
                     Container(
                       decoration: BoxDecoration(
-                        gradient: AppColors.primaryGradient,
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primaryAccent.withValues(
-                              alpha: 0.3,
-                            ),
+                            color: AppColors.primary.withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -535,7 +533,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                         onPressed: _toggleEdit,
                         icon: const Icon(
                           Icons.check_rounded,
-                          color: Colors.white,
+                          color: AppColors.onPrimary,
                           size: 20,
                         ),
                         tooltip: '저장',
@@ -548,7 +546,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                         color: AppColors.background.withValues(alpha: 0.8),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.grey.withValues(alpha: 0.3),
+                          color: AppColors.textTertiary.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),
@@ -578,13 +576,11 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                           width: 100,
                           height: 100,
                           decoration: BoxDecoration(
-                            gradient: AppColors.primaryGradient,
+                            color: AppColors.primary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primaryAccent.withValues(
-                                  alpha: 0.3,
-                                ),
+                                color: AppColors.primary.withValues(alpha: 0.3),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
@@ -592,10 +588,10 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                           ),
                           child: CircleAvatar(
                             radius: 48,
-                            backgroundColor: Colors.white,
+                            backgroundColor: AppColors.cardBackground,
                             child: CircleAvatar(
                               radius: 45,
-                              backgroundColor: Colors.grey[100],
+                              backgroundColor: AppColors.background,
                               backgroundImage:
                                   (displayImageUrl != null &&
                                       displayImageUrl.isNotEmpty)
@@ -618,12 +614,14 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                           Positioned.fill(
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.5),
+                                color: AppColors.textPrimary.withValues(
+                                  alpha: 0.5,
+                                ),
                                 shape: BoxShape.circle,
                               ),
                               child: const Center(
                                 child: CircularProgressIndicator(
-                                  color: Colors.white,
+                                  color: AppColors.onPrimary,
                                   strokeWidth: 3,
                                 ),
                               ),
@@ -638,10 +636,10 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                gradient: AppColors.primaryGradient,
+                                color: AppColors.primary,
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: Colors.white,
+                                  color: AppColors.cardBackground,
                                   width: 3,
                                 ),
                                 boxShadow: [
@@ -654,7 +652,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                               ),
                               child: const Icon(
                                 Icons.camera_alt,
-                                color: Colors.white,
+                                color: AppColors.onPrimary,
                                 size: 16,
                               ),
                             ),
@@ -681,19 +679,21 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                               ),
                               border: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: AppColors.primaryAccent,
+                                  color: AppColors.primary,
                                   width: 2,
                                 ),
                               ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Colors.grey.withValues(alpha: 0.3),
+                                  color: AppColors.textTertiary.withValues(
+                                    alpha: 0.3,
+                                  ),
                                   width: 1,
                                 ),
                               ),
                               focusedBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: AppColors.primaryAccent,
+                                  color: AppColors.primary,
                                   width: 2,
                                 ),
                               ),
@@ -720,7 +720,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                                 '총 포인트',
                                 '${user.totalPoints}',
                                 Icons.stars_rounded,
-                                AppColors.primaryAccent,
+                                AppColors.primary,
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -729,7 +729,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                                 '연속 일수',
                                 '${user.continuousDays}일',
                                 Icons.calendar_today_rounded,
-                                AppColors.secondaryAccent,
+                                AppColors.primary,
                               ),
                             ),
                           ],
@@ -850,16 +850,16 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.primaryAccent.withValues(alpha: 0.05),
+          color: AppColors.primary.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.grey.withValues(alpha: 0.2),
+            color: AppColors.textTertiary.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.primaryAccent, size: 20),
+            Icon(icon, color: AppColors.primary, size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

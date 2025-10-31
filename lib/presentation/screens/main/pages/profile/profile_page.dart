@@ -24,10 +24,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        color: AppColors.background,
         child: RefreshIndicator(
           onRefresh: _onRefresh,
-          color: AppColors.primaryAccent,
+          color: AppColors.primary,
           backgroundColor: AppColors.cardBackground,
           displacement: 40.0,
           strokeWidth: 3.0,
@@ -102,7 +102,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       decoration: BoxDecoration(
         gradient: AppColors.cardGradient,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.3), width: 1),
+        border: Border.all(
+          color: AppColors.textTertiary.withValues(alpha: 0.3),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: AppColors.cardShadow,
@@ -120,7 +123,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       decoration: BoxDecoration(
         gradient: AppColors.cardGradient,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.3), width: 1),
+        border: Border.all(
+          color: AppColors.textTertiary.withValues(alpha: 0.3),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: AppColors.cardShadow,
@@ -138,7 +144,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       decoration: BoxDecoration(
         gradient: AppColors.cardGradient,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.3), width: 1),
+        border: Border.all(
+          color: AppColors.textTertiary.withValues(alpha: 0.3),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: AppColors.cardShadow,

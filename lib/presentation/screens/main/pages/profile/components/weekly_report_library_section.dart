@@ -307,7 +307,7 @@ class _WeeklyReportLibrarySectionState
             children: [
               Icon(
                 Icons.library_books_rounded,
-                color: AppColors.primaryAccent,
+                color: AppColors.primary,
                 size: 24,
               ),
               const SizedBox(width: 8),
@@ -392,7 +392,7 @@ class _WeeklyReportLibrarySectionState
                   const CircularProgressIndicator(
                     strokeWidth: 3.0,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColors.primaryAccent,
+                      AppColors.primary,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -449,8 +449,8 @@ class _WeeklyReportCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isExpanded
-              ? AppColors.primaryAccent.withValues(alpha: 0.3)
-              : Colors.grey.withValues(alpha: 0.2),
+              ? AppColors.primary.withValues(alpha: 0.3)
+              : AppColors.textTertiary.withValues(alpha: 0.2),
           width: 1,
         ),
         boxShadow: [
@@ -465,7 +465,7 @@ class _WeeklyReportCard extends StatelessWidget {
         children: [
           // Header (항상 표시)
           Material(
-            color: Colors.transparent,
+            color: AppColors.cardBackground,
             child: InkWell(
               onTap: onTap,
               borderRadius: BorderRadius.only(
@@ -488,7 +488,7 @@ class _WeeklyReportCard extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        gradient: AppColors.primaryGradient,
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -497,13 +497,13 @@ class _WeeklyReportCard extends StatelessWidget {
                           Icon(
                             Icons.calendar_today_rounded,
                             size: 16,
-                            color: Colors.white,
+                            color: AppColors.onPrimary,
                           ),
                           const SizedBox(width: 6),
                           Text(
                             report.periodString,
                             style: AppTextStyle.bodySmall.copyWith(
-                              color: Colors.white,
+                              color: AppColors.onPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -535,7 +535,7 @@ class _WeeklyReportCard extends StatelessWidget {
                   Divider(
                     height: 1,
                     thickness: 1,
-                    color: Colors.grey.withValues(alpha: 0.1),
+                    color: AppColors.textTertiary.withValues(alpha: 0.1),
                   ),
                   Container(
                     padding: const EdgeInsets.all(20),
@@ -561,6 +561,26 @@ class _WeeklyReportContent extends StatelessWidget {
   final WeeklyReport report;
 
   const _WeeklyReportContent({required this.report});
+
+  // 환경 관련 TMI 목록
+  static const List<String> _environmentTmiList = [
+    '미세플라스틱은 1주일에 신용카드 한 장 분량씩 인체에 축적됩니다',
+    '대기 오염으로 인한 조기 사망자는 연간 700만 명에 달합니다',
+    '플라스틱 제품의 화학물질은 호르몬 이상, 불임 등을 유발할 수 있습니다',
+    '버려진 담배꽁초는 1개당 물 500L를 1시간만에 오염시킵니다',
+    '숲 1헥타르는 연간 6톤의 CO2를 흡수하고 산소를 생성합니다',
+    '하루 평균 2만 번 숨쉬는데, 대기 오염은 폐 기능을 20% 감소시킬 수 있습니다',
+    '재활용되지 않은 플라스틱은 해양 생물을 통해 다시 우리 식탁으로 돌아옵니다',
+    '살충제와 제초제는 장기적인 노출 시 신경계 질환을 유발할 수 있습니다',
+    '불필요한 전력 소비는 미세먼지 배출의 주원인 중 하나입니다',
+    '일회용 컵 1개는 500년이 지나도 분해되지 않습니다',
+    '친환경 라이프스타일은 심혈관 질환 발병률을 30% 감소시킵니다',
+    '대기 중 오존은 천식과 폐 기능 저하의 주요 원인입니다',
+  ];
+
+  String _getRandomTmi() {
+    return _environmentTmiList[report.id.hashCode % _environmentTmiList.length];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -591,12 +611,12 @@ class _WeeklyReportContent extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primaryAccent.withValues(alpha: 0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 Icons.campaign_rounded,
-                color: AppColors.primaryAccent,
+                color: AppColors.primary,
                 size: 20,
               ),
             ),
@@ -640,7 +660,7 @@ class _WeeklyReportContent extends StatelessWidget {
         const SizedBox(height: 16),
         _buildStatRow(
           icon: Icons.check_circle_outline_rounded,
-          label: '일일 미션 충족 횟수',
+          label: '일일 퀘스트 완료 횟수',
           value:
               '${report.dailyMissionCompletedCount} (${report.missionCompletionRate.toStringAsFixed(1)}%)',
         ),
@@ -650,54 +670,39 @@ class _WeeklyReportContent extends StatelessWidget {
           points: report.monthlyPointsEarned,
           previousMonthPoints: report.previousMonthPoints,
         ),
-        if (report.comparisonMessage != null) ...[
-          const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.primaryAccent.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppColors.primaryAccent.withValues(alpha: 0.3),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.trending_up_rounded,
-                  color: AppColors.primaryAccent,
-                  size: 20,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        report.comparisonMessage!,
-                        style: AppTextStyle.bodyMedium.copyWith(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      if (report.recommendationMessage != null) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          report.recommendationMessage!,
-                          style: AppTextStyle.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
+        // 환경 TMI 섹션
+        const SizedBox(height: 24),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.success.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppColors.success.withValues(alpha: 0.2),
+              width: 1,
             ),
           ),
-        ],
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.lightbulb_outline_rounded,
+                color: AppColors.success,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  _getRandomTmi(),
+                  style: AppTextStyle.bodySmall.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -712,10 +717,10 @@ class _WeeklyReportContent extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.primaryAccent.withValues(alpha: 0.1),
+            color: AppColors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: AppColors.primaryAccent, size: 20),
+          child: Icon(icon, color: AppColors.primary, size: 20),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -786,14 +791,10 @@ class _WeeklyReportContent extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.primaryAccent.withValues(alpha: 0.1),
+            color: AppColors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
-            Icons.stars_rounded,
-            color: AppColors.primaryAccent,
-            size: 20,
-          ),
+          child: Icon(Icons.stars_rounded, color: AppColors.primary, size: 20),
         ),
         const SizedBox(width: 12),
         Expanded(
