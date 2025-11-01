@@ -810,14 +810,13 @@ class _WeeklyReportContent extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: categoryCounts.entries.map((entry) {
-                  final categoryName = _getCategoryDisplayName(entry.key);
-                  return _buildCategoryChip(categoryName, entry.value);
-                }).toList(),
-              ),
+              ...categoryCounts.entries.map((entry) {
+                final categoryName = _getCategoryDisplayName(entry.key);
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _buildCategoryChip(categoryName, entry.value),
+                );
+              }),
             ],
           ),
         ),
@@ -827,34 +826,108 @@ class _WeeklyReportContent extends StatelessWidget {
 
   /// 카테고리 칩 위젯
   Widget _buildCategoryChip(String categoryName, int? count) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '$categoryName',
-            style: AppTextStyle.bodyMedium.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          if (count != null) ...[
-            const SizedBox(width: 4),
-            Text(
-              '$count개',
-              style: AppTextStyle.bodyMedium.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 카테고리 텍스트 너비 계산
+        final categoryTextStyle = AppTextStyle.bodySmall.copyWith(
+          color: AppColors.primary,
+          fontWeight: FontWeight.bold,
+        );
+        final categoryTextPainter = TextPainter(
+          text: TextSpan(text: categoryName, style: categoryTextStyle),
+          textDirection: TextDirection.ltr,
+        );
+        categoryTextPainter.layout();
+        final categoryWidth = categoryTextPainter.width;
+
+        // 숫자 텍스트 스타일 정의
+        final countTextStyle = AppTextStyle.bodyMedium.copyWith(
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.bold,
+        );
+
+        // • 너비 계산
+        final dotTextStyle = AppTextStyle.bodySmall.copyWith(
+          color: AppColors.textSecondary.withValues(alpha: 0.3),
+          letterSpacing: 2,
+        );
+        final dotTextPainter = TextPainter(
+          text: TextSpan(text: '•', style: dotTextStyle),
+          textDirection: TextDirection.ltr,
+        );
+        dotTextPainter.layout();
+        final dotWidth = dotTextPainter.width;
+
+        // 카테고리 컨테이너 padding 포함 너비 계산
+        const categoryPadding = 16.0; // horizontal: 8 * 2
+        final categoryTotalWidth = categoryWidth + categoryPadding;
+
+        // 가장 큰 숫자 너비 계산 (한 자리/두 자리 등 모든 경우 고려)
+        // 대략적으로 최대 숫자 너비를 미리 계산
+        final maxCountText = '999개'; // 충분히 큰 숫자
+        final maxCountTextPainter = TextPainter(
+          text: TextSpan(text: maxCountText, style: countTextStyle),
+          textDirection: TextDirection.ltr,
+        );
+        maxCountTextPainter.layout();
+        final maxCountWidth = maxCountTextPainter.width;
+
+        // 사용 가능한 너비 계산 (최대 숫자 너비 사용)
+        final availableWidth =
+            constraints.maxWidth -
+            8 - // 카테고리와 • 사이 간격
+            4 - // •와 숫자 사이 간격
+            categoryTotalWidth -
+            maxCountWidth;
+
+        // • 개수 계산
+        final dotCount = dotWidth > 0
+            ? (availableWidth / dotWidth).floor().clamp(0, 1000)
+            : 0;
+
+        return SizedBox(
+          width: constraints.maxWidth,
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '$categoryName',
+                  style: AppTextStyle.bodySmall.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            ),
-          ],
-        ],
-      ),
+              if (count != null && dotCount > 0) ...[
+                const SizedBox(width: 8),
+                Text(
+                  '•' * dotCount,
+                  style: AppTextStyle.bodySmall.copyWith(
+                    color: AppColors.textSecondary.withValues(alpha: 0.3),
+                    letterSpacing: 2,
+                  ),
+                ),
+                const SizedBox(width: 4),
+              ] else if (count != null) ...[
+                const SizedBox(width: 8),
+              ],
+              if (count != null)
+                Text(
+                  '$count개',
+                  style: AppTextStyle.bodyMedium.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 
