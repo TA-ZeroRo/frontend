@@ -4,6 +4,18 @@ part 'weekly_report.freezed.dart';
 part 'weekly_report.g.dart';
 
 @freezed
+abstract class EnvironmentalImpact with _$EnvironmentalImpact {
+  const factory EnvironmentalImpact({
+    required String co2Reduced, // 절감한 CO2 (예: "12.5kg")
+    required String plasticSaved, // 절약한 플라스틱 (예: "23개")
+    required String treesEquivalent, // 나무 환산 (예: "0.8그루")
+  }) = _EnvironmentalImpact;
+
+  factory EnvironmentalImpact.fromJson(Map<String, dynamic> json) =>
+      _$EnvironmentalImpactFromJson(json);
+}
+
+@freezed
 abstract class WeeklyReport with _$WeeklyReport {
   const WeeklyReport._();
 
@@ -20,6 +32,8 @@ abstract class WeeklyReport with _$WeeklyReport {
     int? previousMonthPoints, // 저번달 포인트
     String? comparisonMessage,
     String? recommendationMessage,
+    EnvironmentalImpact? environmentalImpact, // 환경 일지 데이터
+    Map<String, int>? missionCategoryCounts, // 카테고리별 클리어한 미션 개수
     required DateTime createdAt,
   }) = _WeeklyReport;
 

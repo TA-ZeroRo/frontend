@@ -4,6 +4,7 @@ import 'package:frontend/presentation/routes/router_path.dart';
 import 'package:frontend/presentation/screens/entry/state/auth_controller.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/animations/page_transitions.dart';
+import '../../../../../core/theme/app_color.dart';
 import 'state/settings_controller.dart';
 
 class SettingsAppBar extends StatelessWidget {
@@ -54,8 +55,8 @@ class SettingsSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.black12),
+        color: AppColors.cardBackground,
+        border: Border.all(color: AppColors.cardShadow),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -102,7 +103,7 @@ class SettingsToggleTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.grey[50],
+      color: AppColors.background,
       borderRadius: BorderRadius.circular(12),
       child: ListTile(
         leading: Icon(icon, color: iconColor),
@@ -135,10 +136,12 @@ class SettingsActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = isDanger ? Colors.red.withOpacity(0.06) : Colors.grey[50];
+    final bgColor = isDanger
+        ? AppColors.error.withOpacity(0.06)
+        : AppColors.background;
     final titleStyle = TextStyle(
       fontWeight: FontWeight.w600,
-      color: isDanger ? Colors.red : Colors.black,
+      color: isDanger ? AppColors.error : AppColors.textPrimary,
     );
 
     return Material(
@@ -208,7 +211,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          icon: const Icon(Icons.logout_rounded, color: Colors.red, size: 48),
+          icon: const Icon(
+            Icons.logout_rounded,
+            color: AppColors.error,
+            size: 48,
+          ),
           title: const Text(
             '로그아웃',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
@@ -222,9 +229,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text(
+              child: Text(
                 '취소',
-                style: TextStyle(color: Colors.grey, fontSize: 16),
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
               ),
             ),
             ElevatedButton(
@@ -254,15 +261,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('로그아웃 실패: ${e.toString()}'),
-                        backgroundColor: Colors.red,
+                        backgroundColor: AppColors.error,
                       ),
                     );
                   }
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.error,
+                foregroundColor: AppColors.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -284,13 +291,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          icon: const Icon(Icons.warning_rounded, color: Colors.red, size: 48),
+          icon: const Icon(
+            Icons.warning_rounded,
+            color: AppColors.error,
+            size: 48,
+          ),
           title: const Text(
             '계정 삭제',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 20,
-              color: Colors.red,
+              color: AppColors.error,
             ),
           ),
           content: const Column(
@@ -304,7 +315,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
               SizedBox(height: 12),
               Text(
                 '• 모든 개인 정보\n• 저장된 데이터\n• 앱 사용 기록',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
+                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
               ),
               SizedBox(height: 16),
               Text(
@@ -312,7 +323,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.red,
+                  color: AppColors.error,
                 ),
               ),
             ],
@@ -322,9 +333,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text(
+              child: Text(
                 '취소',
-                style: TextStyle(color: Colors.grey, fontSize: 16),
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
               ),
             ),
             ElevatedButton(
@@ -354,15 +365,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('계정 삭제 실패: ${e.toString()}'),
-                        backgroundColor: Colors.red,
+                        backgroundColor: AppColors.error,
                       ),
                     );
                   }
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.error,
+                foregroundColor: AppColors.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -381,13 +392,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
 
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.white, Colors.grey[50]!, Colors.grey[100]!],
-          ),
-        ),
+        color: AppColors.background,
         child: FadeTransition(
           opacity: _fadeAnimation,
           child: Column(
@@ -408,13 +413,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                       SettingsSection(
                         title: '앱 설정',
                         icon: Icons.settings_rounded,
-                        iconColor: Colors.blue,
+                        iconColor: AppColors.primary,
                         children: [
                           SettingsToggleTile(
                             title: '알림',
                             subtitle: '푸시 알림 받기',
                             icon: Icons.notifications_active_rounded,
-                            iconColor: Colors.teal,
+                            iconColor: AppColors.primary,
                             value: settings.notificationsEnabled,
                             onChanged: (_) => ref
                                 .read(appSettingsProvider.notifier)
@@ -426,13 +431,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                       SettingsSection(
                         title: '계정',
                         icon: Icons.person_rounded,
-                        iconColor: Colors.teal,
+                        iconColor: AppColors.primary,
                         children: [
                           SettingsActionTile(
                             title: '개인정보 보호',
                             subtitle: '개인정보 처리방침',
                             icon: Icons.privacy_tip_rounded,
-                            iconColor: Colors.red,
+                            iconColor: AppColors.error,
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -454,7 +459,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                             title: '로그아웃',
                             subtitle: '로그아웃 하기',
                             icon: Icons.logout_rounded,
-                            iconColor: Colors.red,
+                            iconColor: AppColors.error,
                             onTap: _showLogoutConfirmDialog,
                             isDanger: true,
                           ),
@@ -463,7 +468,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                             title: '계정 탈퇴',
                             subtitle: '계정을 영구 삭제',
                             icon: Icons.delete_forever_rounded,
-                            iconColor: Colors.red,
+                            iconColor: AppColors.error,
                             onTap: _showDeleteAccountConfirmDialog,
                             isDanger: true,
                           ),
@@ -473,13 +478,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                       SettingsSection(
                         title: '정보',
                         icon: Icons.info_rounded,
-                        iconColor: Colors.indigo,
+                        iconColor: AppColors.secondaryAccent,
                         children: [
                           SettingsActionTile(
                             title: '버전 정보',
                             subtitle: 'ZeroRo v1.0.0-beta',
                             icon: Icons.info_outline_rounded,
-                            iconColor: Colors.grey,
+                            iconColor: AppColors.textSecondary,
                             onTap: () {
                               showAboutDialog(
                                 context: context,
@@ -488,7 +493,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                                 applicationIcon: const Icon(
                                   Icons.eco,
                                   size: 48,
-                                  color: Colors.green,
+                                  color: AppColors.primary,
                                 ),
                                 children: const [
                                   Text(
@@ -503,7 +508,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                             title: '피드백 보내기',
                             subtitle: '의견을 들려주세요',
                             icon: Icons.feedback_rounded,
-                            iconColor: Colors.green,
+                            iconColor: AppColors.primary,
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
