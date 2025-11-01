@@ -33,6 +33,7 @@ abstract class WeeklyReport with _$WeeklyReport {
     String? comparisonMessage,
     String? recommendationMessage,
     EnvironmentalImpact? environmentalImpact, // 환경 일지 데이터
+    Map<String, int>? missionCategoryCounts, // 카테고리별 클리어한 미션 개수
     required DateTime createdAt,
   }) = _WeeklyReport;
 

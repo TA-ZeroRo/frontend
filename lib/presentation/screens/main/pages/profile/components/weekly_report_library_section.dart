@@ -68,6 +68,16 @@ class _WeeklyReportLibrarySectionState
     final totalDailyMissions = dailyQuestState.quests.length;
     final dailyMissionCompletedCount = completedQuestCount;
 
+    // 카테고리별 클리어한 미션 개수 계산
+    final missionCategoryCounts = <String, int>{};
+    for (final quest in dailyQuestState.quests.where(
+      (quest) => quest.isCompleted,
+    )) {
+      final backendCategory = _mapCategoryToBackend(quest.category);
+      missionCategoryCounts[backendCategory] =
+          (missionCategoryCounts[backendCategory] ?? 0) + 1;
+    }
+
     // 목데이터: 월간 포인트 설정 (실제 데이터가 있으면 실제 데이터 사용)
     // 저번달(1개월 전: 450)보다 적게 설정하여 색상 변화 확인 가능
     final calculatedPoints = dailyQuestState.quests
@@ -83,6 +93,7 @@ class _WeeklyReportLibrarySectionState
       dailyMissionCompletedCount: dailyMissionCompletedCount,
       totalDailyMissions: totalDailyMissions,
       monthlyPointsEarned: monthlyPointsEarned,
+      missionCategoryCounts: missionCategoryCounts,
     );
 
     // 보고서 생성/업데이트 후 목록 새로고침
@@ -157,6 +168,11 @@ class _WeeklyReportLibrarySectionState
               ? ['한강 플로깅 챌린지', '30일 제로웨이스트 챌린지']
               : ['일주일 비건 챌린지'];
 
+          // 목데이터: 카테고리별 미션 개수
+          final missionCategoryCounts = i == 1
+              ? {'ZERO_WASTE': 5, 'TRANSPORTATION': 3, 'RECYCLING': 14}
+              : {'ZERO_WASTE': 3, 'TRANSPORTATION': 1, 'RECYCLING': 14};
+
           final pastReport = WeeklyReport(
             id: reportId,
             userId: user.id,
@@ -168,6 +184,7 @@ class _WeeklyReportLibrarySectionState
             totalDailyMissions: 30,
             monthlyPointsEarned: monthlyPoints,
             previousMonthPoints: previousMonthPoints,
+            missionCategoryCounts: missionCategoryCounts,
             createdAt: pastMonthStart.add(const Duration(hours: 1)),
           );
 
@@ -398,6 +415,19 @@ class _WeeklyReportLibrarySectionState
         ],
       ),
     );
+  }
+
+  /// 로컬 카테고리를 백엔드 카테고리로 매핑
+  String _mapCategoryToBackend(String localCategory) {
+    const categoryMap = {
+      'recycle': 'RECYCLING', // 재활용/분리수거
+      'transport': 'TRANSPORTATION', // 대중교통/자전거
+      'energy': 'ENERGY', // 에너지 절약
+      'reusable': 'ZERO_WASTE', // 제로웨이스트/다회용기
+      'plastic': 'ZERO_WASTE', // 제로웨이스트/다회용기
+      'food': 'CONSERVATION', // 자연보호/환경정화
+    };
+    return categoryMap[localCategory] ?? 'OTHER';
   }
 }
 
@@ -631,12 +661,12 @@ class _WeeklyReportContent extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        _buildStatRow(
-          icon: Icons.check_circle_outline_rounded,
-          label: '일일 퀘스트 완료 횟수',
-          value: '${report.dailyMissionCompletedCount}',
-        ),
-        const SizedBox(height: 16),
+        // 카테고리별 클리어한 미션 목록
+        if (report.missionCategoryCounts != null &&
+            report.missionCategoryCounts!.isNotEmpty) ...[
+          _buildMissionCategorySection(report.missionCategoryCounts!),
+          const SizedBox(height: 16),
+        ],
         // 월간 획득 포인트 (저번달 대비 색상 및 차이 표기)
         _buildMonthlyPointsRow(
           points: report.monthlyPointsEarned,
@@ -670,47 +700,6 @@ class _WeeklyReportContent extends StatelessWidget {
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w500,
                   ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatRow({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, color: AppColors.primary, size: 20),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: AppTextStyle.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: AppTextStyle.titleMedium.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
@@ -801,5 +790,98 @@ class _WeeklyReportContent extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// 카테고리별 클리어한 미션 표시
+  Widget _buildMissionCategorySection(Map<String, int> categoryCounts) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            Icons.emoji_events_rounded,
+            color: AppColors.primary,
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '클리어한 미션',
+                style: AppTextStyle.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: categoryCounts.entries.map((entry) {
+                  final categoryName = _getCategoryDisplayName(entry.key);
+                  return _buildCategoryChip(categoryName, entry.value);
+                }).toList(),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 카테고리 칩 위젯
+  Widget _buildCategoryChip(String categoryName, int count) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '$categoryName',
+            style: AppTextStyle.bodyMedium.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '$count개',
+            style: AppTextStyle.bodyMedium.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 백엔드 카테고리를 한글로 표시
+  String _getCategoryDisplayName(String backendCategory) {
+    const categoryNames = {
+      'RECYCLING': '재활용/분리수거',
+      'TRANSPORTATION': '대중교통/자전거',
+      'ENERGY': '에너지 절약',
+      'ZERO_WASTE': '제로웨이스트',
+      'CONSERVATION': '자연보호/환경정화',
+      'EDUCATION': '교육/세미나',
+      'OTHER': '기타',
+    };
+    return categoryNames[backendCategory] ?? backendCategory;
   }
 }

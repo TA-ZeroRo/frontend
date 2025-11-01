@@ -292,6 +292,7 @@ mixin _$WeeklyReport {
  int get dailyMissionCompletedCount; int get totalDailyMissions; int get monthlyPointsEarned;// 월간 획득 포인트
  int? get previousMonthPoints;// 저번달 포인트
  String? get comparisonMessage; String? get recommendationMessage; EnvironmentalImpact? get environmentalImpact;// 환경 일지 데이터
+ Map<String, int>? get missionCategoryCounts;// 카테고리별 클리어한 미션 개수
  DateTime get createdAt;
 /// Create a copy of WeeklyReport
 /// with the given fields replaced by the non-null parameter values.
@@ -305,16 +306,16 @@ $WeeklyReportCopyWith<WeeklyReport> get copyWith => _$WeeklyReportCopyWithImpl<W
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is WeeklyReport&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.username, username) || other.username == username)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&const DeepCollectionEquality().equals(other.campaignList, campaignList)&&(identical(other.dailyMissionCompletedCount, dailyMissionCompletedCount) || other.dailyMissionCompletedCount == dailyMissionCompletedCount)&&(identical(other.totalDailyMissions, totalDailyMissions) || other.totalDailyMissions == totalDailyMissions)&&(identical(other.monthlyPointsEarned, monthlyPointsEarned) || other.monthlyPointsEarned == monthlyPointsEarned)&&(identical(other.previousMonthPoints, previousMonthPoints) || other.previousMonthPoints == previousMonthPoints)&&(identical(other.comparisonMessage, comparisonMessage) || other.comparisonMessage == comparisonMessage)&&(identical(other.recommendationMessage, recommendationMessage) || other.recommendationMessage == recommendationMessage)&&(identical(other.environmentalImpact, environmentalImpact) || other.environmentalImpact == environmentalImpact)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is WeeklyReport&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.username, username) || other.username == username)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&const DeepCollectionEquality().equals(other.campaignList, campaignList)&&(identical(other.dailyMissionCompletedCount, dailyMissionCompletedCount) || other.dailyMissionCompletedCount == dailyMissionCompletedCount)&&(identical(other.totalDailyMissions, totalDailyMissions) || other.totalDailyMissions == totalDailyMissions)&&(identical(other.monthlyPointsEarned, monthlyPointsEarned) || other.monthlyPointsEarned == monthlyPointsEarned)&&(identical(other.previousMonthPoints, previousMonthPoints) || other.previousMonthPoints == previousMonthPoints)&&(identical(other.comparisonMessage, comparisonMessage) || other.comparisonMessage == comparisonMessage)&&(identical(other.recommendationMessage, recommendationMessage) || other.recommendationMessage == recommendationMessage)&&(identical(other.environmentalImpact, environmentalImpact) || other.environmentalImpact == environmentalImpact)&&const DeepCollectionEquality().equals(other.missionCategoryCounts, missionCategoryCounts)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,username,startDate,endDate,const DeepCollectionEquality().hash(campaignList),dailyMissionCompletedCount,totalDailyMissions,monthlyPointsEarned,previousMonthPoints,comparisonMessage,recommendationMessage,environmentalImpact,createdAt);
+int get hashCode => Object.hash(runtimeType,id,userId,username,startDate,endDate,const DeepCollectionEquality().hash(campaignList),dailyMissionCompletedCount,totalDailyMissions,monthlyPointsEarned,previousMonthPoints,comparisonMessage,recommendationMessage,environmentalImpact,const DeepCollectionEquality().hash(missionCategoryCounts),createdAt);
 
 @override
 String toString() {
-  return 'WeeklyReport(id: $id, userId: $userId, username: $username, startDate: $startDate, endDate: $endDate, campaignList: $campaignList, dailyMissionCompletedCount: $dailyMissionCompletedCount, totalDailyMissions: $totalDailyMissions, monthlyPointsEarned: $monthlyPointsEarned, previousMonthPoints: $previousMonthPoints, comparisonMessage: $comparisonMessage, recommendationMessage: $recommendationMessage, environmentalImpact: $environmentalImpact, createdAt: $createdAt)';
+  return 'WeeklyReport(id: $id, userId: $userId, username: $username, startDate: $startDate, endDate: $endDate, campaignList: $campaignList, dailyMissionCompletedCount: $dailyMissionCompletedCount, totalDailyMissions: $totalDailyMissions, monthlyPointsEarned: $monthlyPointsEarned, previousMonthPoints: $previousMonthPoints, comparisonMessage: $comparisonMessage, recommendationMessage: $recommendationMessage, environmentalImpact: $environmentalImpact, missionCategoryCounts: $missionCategoryCounts, createdAt: $createdAt)';
 }
 
 
@@ -325,7 +326,7 @@ abstract mixin class $WeeklyReportCopyWith<$Res>  {
   factory $WeeklyReportCopyWith(WeeklyReport value, $Res Function(WeeklyReport) _then) = _$WeeklyReportCopyWithImpl;
 @useResult
 $Res call({
- String id, String userId, String username, DateTime startDate, DateTime endDate, List<String> campaignList, int dailyMissionCompletedCount, int totalDailyMissions, int monthlyPointsEarned, int? previousMonthPoints, String? comparisonMessage, String? recommendationMessage, EnvironmentalImpact? environmentalImpact, DateTime createdAt
+ String id, String userId, String username, DateTime startDate, DateTime endDate, List<String> campaignList, int dailyMissionCompletedCount, int totalDailyMissions, int monthlyPointsEarned, int? previousMonthPoints, String? comparisonMessage, String? recommendationMessage, EnvironmentalImpact? environmentalImpact, Map<String, int>? missionCategoryCounts, DateTime createdAt
 });
 
 
@@ -342,7 +343,7 @@ class _$WeeklyReportCopyWithImpl<$Res>
 
 /// Create a copy of WeeklyReport
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? username = null,Object? startDate = null,Object? endDate = null,Object? campaignList = null,Object? dailyMissionCompletedCount = null,Object? totalDailyMissions = null,Object? monthlyPointsEarned = null,Object? previousMonthPoints = freezed,Object? comparisonMessage = freezed,Object? recommendationMessage = freezed,Object? environmentalImpact = freezed,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? username = null,Object? startDate = null,Object? endDate = null,Object? campaignList = null,Object? dailyMissionCompletedCount = null,Object? totalDailyMissions = null,Object? monthlyPointsEarned = null,Object? previousMonthPoints = freezed,Object? comparisonMessage = freezed,Object? recommendationMessage = freezed,Object? environmentalImpact = freezed,Object? missionCategoryCounts = freezed,Object? createdAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -357,7 +358,8 @@ as int,previousMonthPoints: freezed == previousMonthPoints ? _self.previousMonth
 as int?,comparisonMessage: freezed == comparisonMessage ? _self.comparisonMessage : comparisonMessage // ignore: cast_nullable_to_non_nullable
 as String?,recommendationMessage: freezed == recommendationMessage ? _self.recommendationMessage : recommendationMessage // ignore: cast_nullable_to_non_nullable
 as String?,environmentalImpact: freezed == environmentalImpact ? _self.environmentalImpact : environmentalImpact // ignore: cast_nullable_to_non_nullable
-as EnvironmentalImpact?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as EnvironmentalImpact?,missionCategoryCounts: freezed == missionCategoryCounts ? _self.missionCategoryCounts : missionCategoryCounts // ignore: cast_nullable_to_non_nullable
+as Map<String, int>?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }
@@ -455,10 +457,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId,  String username,  DateTime startDate,  DateTime endDate,  List<String> campaignList,  int dailyMissionCompletedCount,  int totalDailyMissions,  int monthlyPointsEarned,  int? previousMonthPoints,  String? comparisonMessage,  String? recommendationMessage,  EnvironmentalImpact? environmentalImpact,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId,  String username,  DateTime startDate,  DateTime endDate,  List<String> campaignList,  int dailyMissionCompletedCount,  int totalDailyMissions,  int monthlyPointsEarned,  int? previousMonthPoints,  String? comparisonMessage,  String? recommendationMessage,  EnvironmentalImpact? environmentalImpact,  Map<String, int>? missionCategoryCounts,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WeeklyReport() when $default != null:
-return $default(_that.id,_that.userId,_that.username,_that.startDate,_that.endDate,_that.campaignList,_that.dailyMissionCompletedCount,_that.totalDailyMissions,_that.monthlyPointsEarned,_that.previousMonthPoints,_that.comparisonMessage,_that.recommendationMessage,_that.environmentalImpact,_that.createdAt);case _:
+return $default(_that.id,_that.userId,_that.username,_that.startDate,_that.endDate,_that.campaignList,_that.dailyMissionCompletedCount,_that.totalDailyMissions,_that.monthlyPointsEarned,_that.previousMonthPoints,_that.comparisonMessage,_that.recommendationMessage,_that.environmentalImpact,_that.missionCategoryCounts,_that.createdAt);case _:
   return orElse();
 
 }
@@ -476,10 +478,10 @@ return $default(_that.id,_that.userId,_that.username,_that.startDate,_that.endDa
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId,  String username,  DateTime startDate,  DateTime endDate,  List<String> campaignList,  int dailyMissionCompletedCount,  int totalDailyMissions,  int monthlyPointsEarned,  int? previousMonthPoints,  String? comparisonMessage,  String? recommendationMessage,  EnvironmentalImpact? environmentalImpact,  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId,  String username,  DateTime startDate,  DateTime endDate,  List<String> campaignList,  int dailyMissionCompletedCount,  int totalDailyMissions,  int monthlyPointsEarned,  int? previousMonthPoints,  String? comparisonMessage,  String? recommendationMessage,  EnvironmentalImpact? environmentalImpact,  Map<String, int>? missionCategoryCounts,  DateTime createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _WeeklyReport():
-return $default(_that.id,_that.userId,_that.username,_that.startDate,_that.endDate,_that.campaignList,_that.dailyMissionCompletedCount,_that.totalDailyMissions,_that.monthlyPointsEarned,_that.previousMonthPoints,_that.comparisonMessage,_that.recommendationMessage,_that.environmentalImpact,_that.createdAt);case _:
+return $default(_that.id,_that.userId,_that.username,_that.startDate,_that.endDate,_that.campaignList,_that.dailyMissionCompletedCount,_that.totalDailyMissions,_that.monthlyPointsEarned,_that.previousMonthPoints,_that.comparisonMessage,_that.recommendationMessage,_that.environmentalImpact,_that.missionCategoryCounts,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -496,10 +498,10 @@ return $default(_that.id,_that.userId,_that.username,_that.startDate,_that.endDa
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId,  String username,  DateTime startDate,  DateTime endDate,  List<String> campaignList,  int dailyMissionCompletedCount,  int totalDailyMissions,  int monthlyPointsEarned,  int? previousMonthPoints,  String? comparisonMessage,  String? recommendationMessage,  EnvironmentalImpact? environmentalImpact,  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId,  String username,  DateTime startDate,  DateTime endDate,  List<String> campaignList,  int dailyMissionCompletedCount,  int totalDailyMissions,  int monthlyPointsEarned,  int? previousMonthPoints,  String? comparisonMessage,  String? recommendationMessage,  EnvironmentalImpact? environmentalImpact,  Map<String, int>? missionCategoryCounts,  DateTime createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _WeeklyReport() when $default != null:
-return $default(_that.id,_that.userId,_that.username,_that.startDate,_that.endDate,_that.campaignList,_that.dailyMissionCompletedCount,_that.totalDailyMissions,_that.monthlyPointsEarned,_that.previousMonthPoints,_that.comparisonMessage,_that.recommendationMessage,_that.environmentalImpact,_that.createdAt);case _:
+return $default(_that.id,_that.userId,_that.username,_that.startDate,_that.endDate,_that.campaignList,_that.dailyMissionCompletedCount,_that.totalDailyMissions,_that.monthlyPointsEarned,_that.previousMonthPoints,_that.comparisonMessage,_that.recommendationMessage,_that.environmentalImpact,_that.missionCategoryCounts,_that.createdAt);case _:
   return null;
 
 }
@@ -511,7 +513,7 @@ return $default(_that.id,_that.userId,_that.username,_that.startDate,_that.endDa
 @JsonSerializable()
 
 class _WeeklyReport extends WeeklyReport {
-  const _WeeklyReport({required this.id, required this.userId, required this.username, required this.startDate, required this.endDate, required final  List<String> campaignList, required this.dailyMissionCompletedCount, required this.totalDailyMissions, required this.monthlyPointsEarned, this.previousMonthPoints, this.comparisonMessage, this.recommendationMessage, this.environmentalImpact, required this.createdAt}): _campaignList = campaignList,super._();
+  const _WeeklyReport({required this.id, required this.userId, required this.username, required this.startDate, required this.endDate, required final  List<String> campaignList, required this.dailyMissionCompletedCount, required this.totalDailyMissions, required this.monthlyPointsEarned, this.previousMonthPoints, this.comparisonMessage, this.recommendationMessage, this.environmentalImpact, final  Map<String, int>? missionCategoryCounts, required this.createdAt}): _campaignList = campaignList,_missionCategoryCounts = missionCategoryCounts,super._();
   factory _WeeklyReport.fromJson(Map<String, dynamic> json) => _$WeeklyReportFromJson(json);
 
 @override final  String id;
@@ -537,6 +539,17 @@ class _WeeklyReport extends WeeklyReport {
 @override final  String? recommendationMessage;
 @override final  EnvironmentalImpact? environmentalImpact;
 // 환경 일지 데이터
+ final  Map<String, int>? _missionCategoryCounts;
+// 환경 일지 데이터
+@override Map<String, int>? get missionCategoryCounts {
+  final value = _missionCategoryCounts;
+  if (value == null) return null;
+  if (_missionCategoryCounts is EqualUnmodifiableMapView) return _missionCategoryCounts;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
+// 카테고리별 클리어한 미션 개수
 @override final  DateTime createdAt;
 
 /// Create a copy of WeeklyReport
@@ -552,16 +565,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _WeeklyReport&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.username, username) || other.username == username)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&const DeepCollectionEquality().equals(other._campaignList, _campaignList)&&(identical(other.dailyMissionCompletedCount, dailyMissionCompletedCount) || other.dailyMissionCompletedCount == dailyMissionCompletedCount)&&(identical(other.totalDailyMissions, totalDailyMissions) || other.totalDailyMissions == totalDailyMissions)&&(identical(other.monthlyPointsEarned, monthlyPointsEarned) || other.monthlyPointsEarned == monthlyPointsEarned)&&(identical(other.previousMonthPoints, previousMonthPoints) || other.previousMonthPoints == previousMonthPoints)&&(identical(other.comparisonMessage, comparisonMessage) || other.comparisonMessage == comparisonMessage)&&(identical(other.recommendationMessage, recommendationMessage) || other.recommendationMessage == recommendationMessage)&&(identical(other.environmentalImpact, environmentalImpact) || other.environmentalImpact == environmentalImpact)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _WeeklyReport&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.username, username) || other.username == username)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&const DeepCollectionEquality().equals(other._campaignList, _campaignList)&&(identical(other.dailyMissionCompletedCount, dailyMissionCompletedCount) || other.dailyMissionCompletedCount == dailyMissionCompletedCount)&&(identical(other.totalDailyMissions, totalDailyMissions) || other.totalDailyMissions == totalDailyMissions)&&(identical(other.monthlyPointsEarned, monthlyPointsEarned) || other.monthlyPointsEarned == monthlyPointsEarned)&&(identical(other.previousMonthPoints, previousMonthPoints) || other.previousMonthPoints == previousMonthPoints)&&(identical(other.comparisonMessage, comparisonMessage) || other.comparisonMessage == comparisonMessage)&&(identical(other.recommendationMessage, recommendationMessage) || other.recommendationMessage == recommendationMessage)&&(identical(other.environmentalImpact, environmentalImpact) || other.environmentalImpact == environmentalImpact)&&const DeepCollectionEquality().equals(other._missionCategoryCounts, _missionCategoryCounts)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,username,startDate,endDate,const DeepCollectionEquality().hash(_campaignList),dailyMissionCompletedCount,totalDailyMissions,monthlyPointsEarned,previousMonthPoints,comparisonMessage,recommendationMessage,environmentalImpact,createdAt);
+int get hashCode => Object.hash(runtimeType,id,userId,username,startDate,endDate,const DeepCollectionEquality().hash(_campaignList),dailyMissionCompletedCount,totalDailyMissions,monthlyPointsEarned,previousMonthPoints,comparisonMessage,recommendationMessage,environmentalImpact,const DeepCollectionEquality().hash(_missionCategoryCounts),createdAt);
 
 @override
 String toString() {
-  return 'WeeklyReport(id: $id, userId: $userId, username: $username, startDate: $startDate, endDate: $endDate, campaignList: $campaignList, dailyMissionCompletedCount: $dailyMissionCompletedCount, totalDailyMissions: $totalDailyMissions, monthlyPointsEarned: $monthlyPointsEarned, previousMonthPoints: $previousMonthPoints, comparisonMessage: $comparisonMessage, recommendationMessage: $recommendationMessage, environmentalImpact: $environmentalImpact, createdAt: $createdAt)';
+  return 'WeeklyReport(id: $id, userId: $userId, username: $username, startDate: $startDate, endDate: $endDate, campaignList: $campaignList, dailyMissionCompletedCount: $dailyMissionCompletedCount, totalDailyMissions: $totalDailyMissions, monthlyPointsEarned: $monthlyPointsEarned, previousMonthPoints: $previousMonthPoints, comparisonMessage: $comparisonMessage, recommendationMessage: $recommendationMessage, environmentalImpact: $environmentalImpact, missionCategoryCounts: $missionCategoryCounts, createdAt: $createdAt)';
 }
 
 
@@ -572,7 +585,7 @@ abstract mixin class _$WeeklyReportCopyWith<$Res> implements $WeeklyReportCopyWi
   factory _$WeeklyReportCopyWith(_WeeklyReport value, $Res Function(_WeeklyReport) _then) = __$WeeklyReportCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String userId, String username, DateTime startDate, DateTime endDate, List<String> campaignList, int dailyMissionCompletedCount, int totalDailyMissions, int monthlyPointsEarned, int? previousMonthPoints, String? comparisonMessage, String? recommendationMessage, EnvironmentalImpact? environmentalImpact, DateTime createdAt
+ String id, String userId, String username, DateTime startDate, DateTime endDate, List<String> campaignList, int dailyMissionCompletedCount, int totalDailyMissions, int monthlyPointsEarned, int? previousMonthPoints, String? comparisonMessage, String? recommendationMessage, EnvironmentalImpact? environmentalImpact, Map<String, int>? missionCategoryCounts, DateTime createdAt
 });
 
 
@@ -589,7 +602,7 @@ class __$WeeklyReportCopyWithImpl<$Res>
 
 /// Create a copy of WeeklyReport
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? username = null,Object? startDate = null,Object? endDate = null,Object? campaignList = null,Object? dailyMissionCompletedCount = null,Object? totalDailyMissions = null,Object? monthlyPointsEarned = null,Object? previousMonthPoints = freezed,Object? comparisonMessage = freezed,Object? recommendationMessage = freezed,Object? environmentalImpact = freezed,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? username = null,Object? startDate = null,Object? endDate = null,Object? campaignList = null,Object? dailyMissionCompletedCount = null,Object? totalDailyMissions = null,Object? monthlyPointsEarned = null,Object? previousMonthPoints = freezed,Object? comparisonMessage = freezed,Object? recommendationMessage = freezed,Object? environmentalImpact = freezed,Object? missionCategoryCounts = freezed,Object? createdAt = null,}) {
   return _then(_WeeklyReport(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -604,7 +617,8 @@ as int,previousMonthPoints: freezed == previousMonthPoints ? _self.previousMonth
 as int?,comparisonMessage: freezed == comparisonMessage ? _self.comparisonMessage : comparisonMessage // ignore: cast_nullable_to_non_nullable
 as String?,recommendationMessage: freezed == recommendationMessage ? _self.recommendationMessage : recommendationMessage // ignore: cast_nullable_to_non_nullable
 as String?,environmentalImpact: freezed == environmentalImpact ? _self.environmentalImpact : environmentalImpact // ignore: cast_nullable_to_non_nullable
-as EnvironmentalImpact?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as EnvironmentalImpact?,missionCategoryCounts: freezed == missionCategoryCounts ? _self._missionCategoryCounts : missionCategoryCounts // ignore: cast_nullable_to_non_nullable
+as Map<String, int>?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }

@@ -43,6 +43,10 @@ _WeeklyReport _$WeeklyReportFromJson(Map<String, dynamic> json) =>
           : EnvironmentalImpact.fromJson(
               json['environmentalImpact'] as Map<String, dynamic>,
             ),
+      missionCategoryCounts:
+          (json['missionCategoryCounts'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(k, (e as num).toInt()),
+          ),
       createdAt: DateTime.parse(json['createdAt'] as String),
     );
 
@@ -61,5 +65,6 @@ Map<String, dynamic> _$WeeklyReportToJson(_WeeklyReport instance) =>
       'comparisonMessage': instance.comparisonMessage,
       'recommendationMessage': instance.recommendationMessage,
       'environmentalImpact': instance.environmentalImpact,
+      'missionCategoryCounts': instance.missionCategoryCounts,
       'createdAt': instance.createdAt.toIso8601String(),
     };

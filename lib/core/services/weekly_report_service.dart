@@ -43,6 +43,7 @@ class WeeklyReportService {
     int dailyMissionCompletedCount = 0,
     int totalDailyMissions = 30, // 월간 기준으로 변경 (대략)
     int monthlyPointsEarned = 0,
+    Map<String, int>? missionCategoryCounts,
   }) async {
     try {
       // 이번 달 보고서가 이미 생성되었는지 확인
@@ -89,6 +90,7 @@ class WeeklyReportService {
         totalDailyMissions: totalDailyMissions,
         monthlyPointsEarned: monthlyPointsEarned,
         previousMonthPoints: previousMonthPoints,
+        missionCategoryCounts: missionCategoryCounts,
         createdAt: DateTime.now(),
       );
 
