@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/di/injection.dart';
 import '../../../../../../core/logger/logger.dart';
-import '../../../../../../core/services/weekly_report_service.dart';
 import '../../../../../../domain/model/weekly_report/weekly_report.dart';
 import '../../../../../../domain/repository/weekly_report_repository.dart';
 import 'user_controller.dart';
@@ -9,12 +8,10 @@ import 'user_controller.dart';
 /// 주간보고서 목록을 관리하는 AsyncNotifier
 class WeeklyReportsNotifier extends AsyncNotifier<List<WeeklyReport>> {
   late final WeeklyReportRepository _repository;
-  late final WeeklyReportService _service;
 
   @override
   Future<List<WeeklyReport>> build() async {
     _repository = getIt<WeeklyReportRepository>();
-    _service = WeeklyReportService();
 
     final user = ref.read(userProvider).value;
     if (user == null) {
@@ -66,7 +63,6 @@ class WeeklyReportsNotifier extends AsyncNotifier<List<WeeklyReport>> {
       totalDailyMissions: totalDailyMissions,
       monthlyPointsEarned: monthlyPointsEarned,
       previousMonthPoints: previousMonthPoints,
-      environmentalImpact: _service.generateEnvironmentalImpact(),
       createdAt: DateTime.now(),
     );
 

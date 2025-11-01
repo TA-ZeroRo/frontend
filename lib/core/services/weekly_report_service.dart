@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/logger/logger.dart';
@@ -7,28 +6,6 @@ import '../../../domain/repository/weekly_report_repository.dart';
 
 class WeeklyReportService {
   final WeeklyReportRepository _repository = getIt<WeeklyReportRepository>();
-  final Random _random = Random();
-
-  /// 환경일지 데이터 생성 (랜덤 범위로 실시간 계산)
-  /// 백엔드 연동 시에는 실제 데이터로 교체될 예정
-  EnvironmentalImpact generateEnvironmentalImpact() {
-    // CO2 절감: 10.0 ~ 50.0 kg (소수점 첫째자리)
-    final co2Reduced = (10.0 + _random.nextDouble() * 40.0).toStringAsFixed(1);
-
-    // 플라스틱 절약: 10 ~ 100개
-    final plasticSaved = (10 + _random.nextInt(91)).toString();
-
-    // 나무 환산: 0.5 ~ 5.0그루 (소수점 첫째자리)
-    final treesEquivalent = (0.5 + _random.nextDouble() * 4.5).toStringAsFixed(
-      1,
-    );
-
-    return EnvironmentalImpact(
-      co2Reduced: '${co2Reduced}kg',
-      plasticSaved: '${plasticSaved}개',
-      treesEquivalent: '${treesEquivalent}그루',
-    );
-  }
 
   /// 현재 월의 시작일과 종료일 계산 (매월 1일 ~ 마지막 날)
   ({DateTime start, DateTime end}) getCurrentMonthRange() {
@@ -112,7 +89,6 @@ class WeeklyReportService {
         totalDailyMissions: totalDailyMissions,
         monthlyPointsEarned: monthlyPointsEarned,
         previousMonthPoints: previousMonthPoints,
-        environmentalImpact: generateEnvironmentalImpact(),
         createdAt: DateTime.now(),
       );
 
