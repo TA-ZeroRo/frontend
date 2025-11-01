@@ -643,18 +643,7 @@ class _WeeklyReportContent extends StatelessWidget {
                       ),
                     )
                   else
-                    ...report.campaignList.map(
-                      (campaign) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Text(
-                          '• $campaign',
-                          style: AppTextStyle.titleMedium.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
+                    _buildCampaignListByCategory(report.campaignList),
                 ],
               ),
             ),
@@ -837,16 +826,12 @@ class _WeeklyReportContent extends StatelessWidget {
   }
 
   /// 카테고리 칩 위젯
-  Widget _buildCategoryChip(String categoryName, int count) {
+  Widget _buildCategoryChip(String categoryName, int? count) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.3),
-          width: 1,
-        ),
+        color: AppColors.primary.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -855,20 +840,161 @@ class _WeeklyReportContent extends StatelessWidget {
             '$categoryName',
             style: AppTextStyle.bodyMedium.copyWith(
               color: AppColors.primary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            '$count개',
-            style: AppTextStyle.bodyMedium.copyWith(
-              color: AppColors.primary,
               fontWeight: FontWeight.bold,
             ),
           ),
+          if (count != null) ...[
+            const SizedBox(width: 4),
+            Text(
+              '$count개',
+              style: AppTextStyle.bodyMedium.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ],
       ),
     );
+  }
+
+  /// 캠페인 목록을 카테고리별로 그룹화하여 표시
+  Widget _buildCampaignListByCategory(List<String> campaignList) {
+    // 캠페인을 카테고리별로 그룹화
+    final Map<String, List<String>> groupedCampaigns = {};
+
+    for (final campaign in campaignList) {
+      final category = _getCampaignCategory(campaign);
+      if (!groupedCampaigns.containsKey(category)) {
+        groupedCampaigns[category] = [];
+      }
+      groupedCampaigns[category]!.add(campaign);
+    }
+
+    // 카테고리 순서 정렬 (백엔드 카테고리 순서)
+    final categoryOrder = [
+      'RECYCLING',
+      'TRANSPORTATION',
+      'ENERGY',
+      'ZERO_WASTE',
+      'CONSERVATION',
+      'EDUCATION',
+      'OTHER',
+    ];
+
+    final sortedCategories = groupedCampaigns.keys.toList()
+      ..sort((a, b) {
+        final aIndex = categoryOrder.indexOf(a);
+        final bIndex = categoryOrder.indexOf(b);
+        if (aIndex == -1 && bIndex == -1) return a.compareTo(b);
+        if (aIndex == -1) return 1;
+        if (bIndex == -1) return -1;
+        return aIndex.compareTo(bIndex);
+      });
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: sortedCategories.map((category) {
+        final campaigns = groupedCampaigns[category]!;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                _getCategoryDisplayName(category),
+                style: AppTextStyle.bodySmall.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            ...campaigns.map(
+              (campaign) => Padding(
+                padding: const EdgeInsets.only(left: 8, bottom: 2),
+                child: Text(
+                  '• $campaign',
+                  style: AppTextStyle.titleMedium.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        );
+      }).toList(),
+    );
+  }
+
+  /// 캠페인명으로 카테고리 판별
+  String _getCampaignCategory(String campaignName) {
+    final lowerName = campaignName.toLowerCase();
+
+    // 플로깅, 환경정화, 청소 관련
+    if (lowerName.contains('플로깅') ||
+        lowerName.contains('환경정화') ||
+        lowerName.contains('청소') ||
+        lowerName.contains('정화')) {
+      return 'CONSERVATION'; // 자연보호/환경정화
+    }
+
+    // 제로웨이스트, 다회용기, 텀블러 관련
+    if (lowerName.contains('제로웨이스트') ||
+        lowerName.contains('다회용기') ||
+        lowerName.contains('텀블러') ||
+        lowerName.contains('일회용품') ||
+        lowerName.contains('비닐')) {
+      return 'ZERO_WASTE'; // 제로웨이스트/다회용기
+    }
+
+    // 대중교통, 자전거 관련
+    if (lowerName.contains('대중교통') ||
+        lowerName.contains('자전거') ||
+        lowerName.contains('도보') ||
+        lowerName.contains('걷기') ||
+        lowerName.contains('바이크')) {
+      return 'TRANSPORTATION'; // 대중교통/자전거
+    }
+
+    // 분리수거, 재활용 관련
+    if (lowerName.contains('분리수거') ||
+        lowerName.contains('재활용') ||
+        lowerName.contains('리사이클')) {
+      return 'RECYCLING'; // 재활용/분리수거
+    }
+
+    // 전기, 에너지 관련
+    if (lowerName.contains('전기') ||
+        lowerName.contains('에너지') ||
+        lowerName.contains('절전') ||
+        lowerName.contains('캠페인')) {
+      return 'ENERGY'; // 에너지 절약
+    }
+
+    // 교육, 세미나 관련
+    if (lowerName.contains('교육') ||
+        lowerName.contains('세미나') ||
+        lowerName.contains('강의') ||
+        lowerName.contains('워크샵')) {
+      return 'EDUCATION'; // 교육/세미나
+    }
+
+    // 비건, 식물 관련
+    if (lowerName.contains('비건') ||
+        lowerName.contains('채식') ||
+        lowerName.contains('식물')) {
+      return 'CONSERVATION'; // 자연보호/환경정화
+    }
+
+    // 기본값
+    return 'OTHER';
   }
 
   /// 백엔드 카테고리를 한글로 표시
