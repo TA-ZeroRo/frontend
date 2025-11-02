@@ -7,6 +7,7 @@ import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
 import '../../../../../../core/constants/regions.dart';
 import '../../../../../../core/di/injection.dart';
+import '../../../../../../core/utils/toast_helper.dart';
 import '../../../../../../data/data_source/storage_service.dart';
 import '../state/user_controller.dart';
 
@@ -48,13 +49,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
 
       if (trimmedName.isEmpty) {
         // 이름이 비어있으면 경고 문구 표시하고 편집 모드 유지
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('이름을 입력해주세요.'),
-            backgroundColor: Color.fromRGBO(255, 86, 69, 1),
-            duration: Duration(seconds: 2),
-          ),
-        );
+        ToastHelper.showWarning('이름을 입력해주세요.');
         return; // 편집 모드 유지
       }
 
@@ -66,12 +61,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
         region: _tempRegion,
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('프로필이 업데이트되었습니다.'),
-          backgroundColor: Color.fromRGBO(116, 205, 124, 1),
-        ),
-      );
+      ToastHelper.showSuccess('프로필이 업데이트되었습니다.');
 
       setState(() => _isEditing = false);
     } else {
@@ -221,12 +211,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('카메라 오류: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showError('카메라 오류: $e');
       }
     }
   }
@@ -243,12 +228,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('갤러리 오류: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showError('갤러리 오류: $e');
       }
     }
   }
@@ -276,23 +256,13 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('프로필 사진이 업로드되었습니다.'),
-            backgroundColor: Color.fromRGBO(116, 205, 124, 1),
-          ),
-        );
+        ToastHelper.showSuccess('프로필 사진이 업로드되었습니다.');
       }
     } catch (e) {
       setState(() => _isUploadingImage = false);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('업로드 실패: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showError('업로드 실패: $e');
       }
     }
   }

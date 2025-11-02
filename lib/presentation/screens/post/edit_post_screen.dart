@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:toastification/toastification.dart';
 
 import '../../../core/theme/app_color.dart';
 import '../../../core/theme/app_text_style.dart';
+import '../../../core/utils/toast_helper.dart';
 import '../../../domain/model/post/post.dart';
 import '../main/pages/community/state/community_controller.dart';
 
@@ -113,10 +113,7 @@ final postFormProvider = NotifierProvider<PostFormNotifier, PostFormState>(
 class EditPostScreen extends ConsumerStatefulWidget {
   final Post? post; // null for creating new post, non-null for editing
 
-  const EditPostScreen({
-    super.key,
-    this.post,
-  });
+  const EditPostScreen({super.key, this.post});
 
   @override
   ConsumerState<EditPostScreen> createState() => _EditPostScreenState();
@@ -126,7 +123,6 @@ class _EditPostScreenState extends ConsumerState<EditPostScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final double appBarHeight = 60;
 
   @override
   void initState() {
@@ -156,17 +152,18 @@ class _EditPostScreenState extends ConsumerState<EditPostScreen> {
       try {
         if (widget.post != null) {
           // Update existing post
-          await ref.read(postsProvider.notifier).updatePost(
+          await ref
+              .read(postsProvider.notifier)
+              .updatePost(
                 widget.post!.id,
                 _titleController.text,
                 _contentController.text,
               );
         } else {
           // Create new post
-          await ref.read(postsProvider.notifier).createPost(
-                _titleController.text,
-                _contentController.text,
-              );
+          await ref
+              .read(postsProvider.notifier)
+              .createPost(_titleController.text, _contentController.text);
         }
 
         if (mounted) {
@@ -176,14 +173,7 @@ class _EditPostScreenState extends ConsumerState<EditPostScreen> {
       } catch (e) {
         formNotifier.setError(e.toString());
         if (mounted) {
-          toastification.show(
-            margin: EdgeInsets.only(top: appBarHeight),
-            alignment: Alignment.topCenter,
-            style: ToastificationStyle.flatColored,
-            title: Text('오류가 발생했습니다: ${e.toString()}'),
-            autoCloseDuration: const Duration(seconds: 2),
-            primaryColor: AppColors.error,
-          );
+          ToastHelper.showError('오류가 발생했습니다: ${e.toString()}');
         }
       } finally {
         if (mounted) {
@@ -195,14 +185,7 @@ class _EditPostScreenState extends ConsumerState<EditPostScreen> {
 
   void _handleImagePicker() {
     // TODO: Image picker implementation
-    toastification.show(
-      margin: EdgeInsets.only(top: appBarHeight),
-      alignment: Alignment.topCenter,
-      style: ToastificationStyle.flatColored,
-      title: const Text('이미지 선택 기능은 아직 구현되지 않았습니다.'),
-      autoCloseDuration: const Duration(seconds: 2),
-      primaryColor: AppColors.success,
-    );
+    ToastHelper.showInfo('이미지 선택 기능은 아직 구현되지 않았습니다.');
   }
 
   @override
@@ -212,9 +195,7 @@ class _EditPostScreenState extends ConsumerState<EditPostScreen> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
         child: SafeArea(
           child: Form(
             key: _formKey,
@@ -222,7 +203,10 @@ class _EditPostScreenState extends ConsumerState<EditPostScreen> {
               children: [
                 // Custom AppBar
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   child: Row(
                     children: [
                       IconButton(
@@ -283,291 +267,324 @@ class _EditPostScreenState extends ConsumerState<EditPostScreen> {
                   child: SingleChildScrollView(
                     child: Padding(
                       padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title input card
-                Card(
-                  elevation: 0,
-                  color: AppColors.cardBackground,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: AppColors.textTertiary.withValues(alpha: 0.3)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.title,
-                              color: AppColors.primaryAccent,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '제목',
-                              style: AppTextStyle.titleMedium.copyWith(
-                                color: AppColors.textPrimary,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Title input card
+                          Card(
+                            elevation: 0,
+                            color: AppColors.cardBackground,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(
+                                color: AppColors.textTertiary.withValues(
+                                  alpha: 0.3,
+                                ),
                               ),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _titleController,
-                          onChanged: (value) {
-                            ref.read(postFormProvider.notifier).updateTitle(value);
-                          },
-                          decoration: InputDecoration(
-                            hintText: '제목을 입력하세요',
-                            hintStyle: AppTextStyle.bodyMedium.copyWith(
-                              color: AppColors.textTertiary,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: AppColors.textTertiary.withValues(alpha: 0.3),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.title,
+                                        color: AppColors.primaryAccent,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '제목',
+                                        style: AppTextStyle.titleMedium
+                                            .copyWith(
+                                              color: AppColors.textPrimary,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextFormField(
+                                    controller: _titleController,
+                                    onChanged: (value) {
+                                      ref
+                                          .read(postFormProvider.notifier)
+                                          .updateTitle(value);
+                                    },
+                                    decoration: InputDecoration(
+                                      hintText: '제목을 입력하세요',
+                                      hintStyle: AppTextStyle.bodyMedium
+                                          .copyWith(
+                                            color: AppColors.textTertiary,
+                                          ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: BorderSide(
+                                          color: AppColors.textTertiary
+                                              .withValues(alpha: 0.3),
+                                        ),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: BorderSide(
+                                          color: AppColors.textTertiary
+                                              .withValues(alpha: 0.3),
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: const BorderSide(
+                                          color: AppColors.primaryAccent,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 12,
+                                          ),
+                                      filled: true,
+                                      fillColor: AppColors.background,
+                                    ),
+                                    style: AppTextStyle.bodyMedium.copyWith(
+                                      color: AppColors.textPrimary,
+                                    ),
+                                    maxLength: 50,
+                                    validator: (value) {
+                                      if (value == null ||
+                                          value.trim().isEmpty) {
+                                        return '제목을 입력해주세요';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ],
                               ),
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: AppColors.textTertiary.withValues(alpha: 0.3),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(
-                                color: AppColors.primaryAccent,
-                                width: 2,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            filled: true,
-                            fillColor: AppColors.background,
                           ),
-                          style: AppTextStyle.bodyMedium.copyWith(
-                            color: AppColors.textPrimary,
+
+                          const SizedBox(height: 16),
+
+                          // Content input card
+                          Card(
+                            elevation: 0,
+                            color: AppColors.cardBackground,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(
+                                color: AppColors.textTertiary.withValues(
+                                  alpha: 0.3,
+                                ),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.description,
+                                        color: AppColors.primaryAccent,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '내용',
+                                        style: AppTextStyle.titleMedium
+                                            .copyWith(
+                                              color: AppColors.textPrimary,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextFormField(
+                                    controller: _contentController,
+                                    onChanged: (value) {
+                                      ref
+                                          .read(postFormProvider.notifier)
+                                          .updateContent(value);
+                                    },
+                                    decoration: InputDecoration(
+                                      hintText: '내용을 입력하세요',
+                                      hintStyle: AppTextStyle.bodyMedium
+                                          .copyWith(
+                                            color: AppColors.textTertiary,
+                                          ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: BorderSide(
+                                          color: AppColors.textTertiary
+                                              .withValues(alpha: 0.3),
+                                        ),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: BorderSide(
+                                          color: AppColors.textTertiary
+                                              .withValues(alpha: 0.3),
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: const BorderSide(
+                                          color: AppColors.primaryAccent,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 12,
+                                          ),
+                                      filled: true,
+                                      fillColor: AppColors.background,
+                                    ),
+                                    style: AppTextStyle.bodyMedium.copyWith(
+                                      color: AppColors.textPrimary,
+                                    ),
+                                    maxLines: 8,
+                                    minLines: 5,
+                                    validator: (value) {
+                                      if (value == null ||
+                                          value.trim().isEmpty) {
+                                        return '내용을 입력해주세요';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          maxLength: 50,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return '제목을 입력해주세요';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
 
-                const SizedBox(height: 16),
+                          const SizedBox(height: 16),
 
-                // Content input card
-                Card(
-                  elevation: 0,
-                  color: AppColors.cardBackground,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: AppColors.textTertiary.withValues(alpha: 0.3)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.description,
-                              color: AppColors.primaryAccent,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '내용',
-                              style: AppTextStyle.titleMedium.copyWith(
-                                color: AppColors.textPrimary,
+                          // Image upload card
+                          Card(
+                            elevation: 0,
+                            color: AppColors.cardBackground,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(
+                                color: AppColors.textTertiary.withValues(
+                                  alpha: 0.3,
+                                ),
                               ),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _contentController,
-                          onChanged: (value) {
-                            ref.read(postFormProvider.notifier).updateContent(value);
-                          },
-                          decoration: InputDecoration(
-                            hintText: '내용을 입력하세요',
-                            hintStyle: AppTextStyle.bodyMedium.copyWith(
-                              color: AppColors.textTertiary,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: AppColors.textTertiary.withValues(alpha: 0.3),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.image,
+                                        color: AppColors.primaryAccent,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '사진',
+                                        style: AppTextStyle.titleMedium
+                                            .copyWith(
+                                              color: AppColors.textPrimary,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  InkWell(
+                                    onTap: _handleImagePicker,
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 20,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: AppColors.textTertiary
+                                              .withValues(alpha: 0.3),
+                                          style: BorderStyle.solid,
+                                        ),
+                                        color: AppColors.background,
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Icon(
+                                            Icons.add_photo_alternate_outlined,
+                                            size: 32,
+                                            color: AppColors.textSecondary,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            '사진 추가',
+                                            style: AppTextStyle.bodyMedium
+                                                .copyWith(
+                                                  color:
+                                                      AppColors.textSecondary,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            '1장만 업로드 가능',
+                                            style: AppTextStyle.bodySmall
+                                                .copyWith(
+                                                  color: AppColors.textTertiary,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: AppColors.textTertiary.withValues(alpha: 0.3),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(
-                                color: AppColors.primaryAccent,
-                                width: 2,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            filled: true,
-                            fillColor: AppColors.background,
                           ),
-                          style: AppTextStyle.bodyMedium.copyWith(
-                            color: AppColors.textPrimary,
-                          ),
-                          maxLines: 8,
-                          minLines: 5,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return '내용을 입력해주세요';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
 
-                const SizedBox(height: 16),
+                          const SizedBox(height: 24),
 
-                // Image upload card
-                Card(
-                  elevation: 0,
-                  color: AppColors.cardBackground,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: AppColors.textTertiary.withValues(alpha: 0.3)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.image,
-                              color: AppColors.primaryAccent,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '사진',
-                              style: AppTextStyle.titleMedium.copyWith(
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        InkWell(
-                          onTap: _handleImagePicker,
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
+                          // Info message
+                          Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 20,
-                            ),
+                            padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: AppColors.textTertiary.withValues(alpha: 0.3),
-                                style: BorderStyle.solid,
+                                color: Colors.black.withValues(alpha: 0.3),
                               ),
-                              color: AppColors.background,
                             ),
-                            child: Column(
+                            child: Row(
                               children: [
                                 Icon(
-                                  Icons.add_photo_alternate_outlined,
-                                  size: 32,
-                                  color: AppColors.textSecondary,
+                                  Icons.info_outline,
+                                  color: Colors.black,
+                                  size: 20,
                                 ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '사진 추가',
-                                  style: AppTextStyle.bodyMedium.copyWith(
-                                    color: AppColors.textSecondary,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '1장만 업로드 가능',
-                                  style: AppTextStyle.bodySmall.copyWith(
-                                    color: AppColors.textTertiary,
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    '부적절한 게시글은 삭제될 수 있습니다.',
+                                    style: AppTextStyle.bodySmall.copyWith(
+                                      color: AppColors.textPrimary,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Info message
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Colors.black.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: Colors.black,
-                        size: 20,
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          '부적절한 게시글은 삭제될 수 있습니다.',
-                          style: AppTextStyle.bodySmall.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
                     ),
                   ),
                 ),

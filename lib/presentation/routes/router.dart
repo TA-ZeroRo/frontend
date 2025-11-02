@@ -51,9 +51,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: RoutePath.editPost,
       name: 'editPost',
-      builder: (context, state) => EditPostScreen(
-        post: state.extra as Post?,
-      ),
+      builder: (context, state) => EditPostScreen(post: state.extra as Post?),
     ),
     GoRoute(
       path: RoutePath.campaignRecruiting,

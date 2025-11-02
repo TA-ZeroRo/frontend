@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_color.dart';
+import '../../../core/utils/toast_helper.dart';
 import '../../routes/router_path.dart';
 import 'state/auth_controller.dart';
 
@@ -36,21 +37,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     if (authState.currentUser != null) {
       // 자동 로그인 성공 토스트
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                Image.asset('assets/images/google.png', width: 20, height: 20),
-                const SizedBox(width: 12),
-                const Text('자동 로그인 되었습니다'),
-              ],
-            ),
-            backgroundColor: Colors.green,
-            duration: const Duration(milliseconds: 1500),
-          ),
-        );
-
-        // SnackBar가 스플래시 화면에서 보이도록 대기
+        ToastHelper.showSuccess('자동 로그인 되었습니다');
         await Future.delayed(const Duration(seconds: 2));
       }
 

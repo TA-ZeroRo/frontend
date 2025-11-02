@@ -5,6 +5,7 @@ import 'package:frontend/presentation/screens/entry/state/auth_controller.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/animations/page_transitions.dart';
 import '../../../../../core/theme/app_color.dart';
+import '../../../../../core/utils/toast_helper.dart';
 import 'state/settings_controller.dart';
 
 class SettingsAppBar extends StatelessWidget {
@@ -249,21 +250,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                     context.go(RoutePath.login);
 
                     // 성공 메시지
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('로그아웃되었습니다.'),
-                        backgroundColor: Color.fromARGB(255, 116, 205, 124),
-                      ),
-                    );
+                    ToastHelper.showSuccess('로그아웃되었습니다.');
                   }
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('로그아웃 실패: ${e.toString()}'),
-                        backgroundColor: AppColors.error,
-                      ),
-                    );
+                    ToastHelper.showError('로그아웃 실패: ${e.toString()}');
                   }
                 }
               },
@@ -353,21 +344,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                     context.go(RoutePath.login);
 
                     // 성공 메시지
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('계정이 삭제되었습니다.'),
-                        backgroundColor: Color.fromRGBO(255, 86, 69, 1),
-                      ),
-                    );
+                    ToastHelper.showInfo('계정이 삭제되었습니다.');
                   }
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('계정 삭제 실패: ${e.toString()}'),
-                        backgroundColor: AppColors.error,
-                      ),
-                    );
+                    ToastHelper.showError('계정 삭제 실패: ${e.toString()}');
                   }
                 }
               },
@@ -439,18 +420,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                             icon: Icons.privacy_tip_rounded,
                             iconColor: AppColors.error,
                             onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    '개인정보 처리방침 페이지를 준비 중입니다. 잠시만 기다려 주세요!',
-                                  ),
-                                  backgroundColor: Color.fromARGB(
-                                    255,
-                                    116,
-                                    205,
-                                    124,
-                                  ),
-                                ),
+                              ToastHelper.showInfo(
+                                '개인정보 처리방침 페이지를 준비 중입니다. 잠시만 기다려 주세요!',
                               );
                             },
                           ),
@@ -510,18 +481,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                             icon: Icons.feedback_rounded,
                             iconColor: AppColors.primary,
                             onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    '홈 화면 - 사진 인증 - 카테고리 - 건의하기에서 피드백 기능을 사용할 수 있어요!',
-                                  ),
-                                  backgroundColor: Color.fromARGB(
-                                    255,
-                                    116,
-                                    205,
-                                    124,
-                                  ),
-                                ),
+                              ToastHelper.showInfo(
+                                '홈 화면 - 사진 인증 - 카테고리 - 건의하기에서 피드백 기능을 사용할 수 있어요!',
                               );
                             },
                           ),
