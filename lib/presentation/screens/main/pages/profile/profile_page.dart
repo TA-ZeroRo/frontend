@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/theme/app_text_style.dart';
 import 'components/profile_info_section.dart';
-import 'components/point_chart_section.dart';
 import 'components/weekly_report_library_section.dart';
 import 'settings_dialog.dart' show showSettingsDialog;
 import 'state/user_controller.dart';
@@ -16,6 +15,46 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
+  final DraggableScrollableController _bottomSheetController =
+      DraggableScrollableController();
+  bool _isBottomSheetExpanded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // 초기 상태는 접혀있음 (1/3)
+    _bottomSheetController.addListener(() {
+      final size = _bottomSheetController.size;
+      setState(() {
+        _isBottomSheetExpanded = size > 0.6; // 중간 지점(0.6)을 기준으로 열림/닫힘 판단
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _bottomSheetController.dispose();
+    super.dispose();
+  }
+
+  void _toggleBottomSheet() {
+    if (_isBottomSheetExpanded) {
+      // 닫기 (1/3로)
+      _bottomSheetController.animateTo(
+        0.33,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      // 열기 (거의 전체로)
+      _bottomSheetController.animateTo(
+        0.95,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
   Future<void> _onRefresh() async {
     await ref.read(userProvider.notifier).refresh();
   }
@@ -23,49 +62,77 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        color: AppColors.background,
-        child: RefreshIndicator(
-          onRefresh: _onRefresh,
-          color: AppColors.primary,
-          backgroundColor: AppColors.cardBackground,
-          displacement: 40.0,
-          strokeWidth: 3.0,
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              _buildSliverAppBar(context),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return Stack(
+            children: [
+              // Main content
+              Container(
+                color: AppColors.background,
+                child: RefreshIndicator(
+                  onRefresh: _onRefresh,
+                  color: AppColors.primary,
+                  backgroundColor: AppColors.cardBackground,
+                  displacement: 40.0,
+                  strokeWidth: 3.0,
+                  child: CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      _buildSliverAppBar(context),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: _buildProfileInfoCard(),
+                        ),
+                      ),
+                      // 바텀시트가 아래쪽을 차지하므로 여유 공간 확보 (높이 조정)
+                      SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: constraints.maxHeight * 0.28 + 24,
+                        ),
+                      ),
+                    ],
                   ),
-                  child: _buildProfileInfoCard(),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+              // Bottom sheet - 항상 표시
+              // Positioned.fill을 사용하여 전체 영역을 차지하도록 함
+              Positioned.fill(
+                child: DraggableScrollableSheet(
+                  controller: _bottomSheetController,
+                  initialChildSize: 0.28, // 헤더 통합으로 공간 절약
+                  minChildSize: 0.28, // 최소 크기 조정
+                  maxChildSize: 0.95, // 최대 크기는 거의 전체
+                  snap: false, // 클릭으로 제어하므로 snap 비활성화
+                  builder: (context, scrollController) => Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(24),
+                        topRight: Radius.circular(24),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, -2),
+                        ),
+                      ],
+                    ),
+                    child: WeeklyReportLibrarySection(
+                      scrollController: scrollController,
+                      onToggleTap: _toggleBottomSheet,
+                      isExpanded: _isBottomSheetExpanded,
+                    ),
                   ),
-                  child: _buildChartCard(),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: _buildWeeklyReportCard(),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -115,48 +182,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ],
       ),
       child: const ProfileInfoSection(),
-    );
-  }
-
-  Widget _buildChartCard() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: AppColors.cardGradient,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.textTertiary.withValues(alpha: 0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.cardShadow,
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: const PointChartSection(),
-    );
-  }
-
-  Widget _buildWeeklyReportCard() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: AppColors.cardGradient,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.textTertiary.withValues(alpha: 0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.cardShadow,
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: const WeeklyReportLibrarySection(),
     );
   }
 }
