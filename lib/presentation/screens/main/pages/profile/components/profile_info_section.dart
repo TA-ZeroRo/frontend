@@ -543,8 +543,8 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                     child: Stack(
                       children: [
                         Container(
-                          width: 100,
-                          height: 100,
+                          width: 72,
+                          height: 72,
                           decoration: BoxDecoration(
                             color: AppColors.primary,
                             shape: BoxShape.circle,
@@ -557,10 +557,10 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                             ],
                           ),
                           child: CircleAvatar(
-                            radius: 48,
+                            radius: 34,
                             backgroundColor: AppColors.cardBackground,
                             child: CircleAvatar(
-                              radius: 45,
+                              radius: 32,
                               backgroundColor: AppColors.background,
                               backgroundImage:
                                   (displayImageUrl != null &&
@@ -572,7 +572,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                                       displayImageUrl.isEmpty)
                                   ? Icon(
                                       Icons.person,
-                                      size: 50,
+                                      size: 36,
                                       color: AppColors.textSecondary,
                                     )
                                   : null,
@@ -603,14 +603,14 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                             bottom: 0,
                             right: 0,
                             child: Container(
-                              width: 32,
-                              height: 32,
+                              width: 24,
+                              height: 24,
                               decoration: BoxDecoration(
                                 color: AppColors.primary,
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                   color: AppColors.cardBackground,
-                                  width: 3,
+                                  width: 2,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
@@ -623,17 +623,18 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                               child: const Icon(
                                 Icons.camera_alt,
                                 color: AppColors.onPrimary,
-                                size: 16,
+                                size: 12,
                               ),
                             ),
                           ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 24),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         if (_isEditing)
                           TextField(
@@ -680,55 +681,43 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        const SizedBox(height: 12),
-
-                        // Stats cards
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildStatCard(
-                                '총 포인트',
-                                '${user.totalPoints}',
-                                Icons.stars_rounded,
-                                AppColors.primary,
+                        const SizedBox(height: 8),
+                        // 지역 표시 (편집 모드가 아닐 때는 읽기 전용, 편집 모드일 때는 클릭 가능)
+                        GestureDetector(
+                          onTap: _isEditing ? _selectRegion : null,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.location_on_rounded,
+                                size: 14,
+                                color: _isEditing
+                                    ? AppColors.primary
+                                    : AppColors.textSecondary,
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _buildStatCard(
-                                '연속 일수',
-                                '${user.continuousDays}일',
-                                Icons.calendar_today_rounded,
-                                AppColors.primary,
+                              const SizedBox(width: 4),
+                              Text(
+                                _isEditing
+                                    ? (_tempRegion?.isNotEmpty == true
+                                          ? _tempRegion!
+                                          : '지역 선택')
+                                    : (user.region.isNotEmpty
+                                          ? user.region
+                                          : '미설정'),
+                                style: AppTextStyle.bodySmall.copyWith(
+                                  color: _isEditing
+                                      ? AppColors.primary
+                                      : AppColors.textSecondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ],
-              ),
-
-              // 추가 정보 섹션 (펼쳐지는 애니메이션)
-              AnimatedSize(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutCubic,
-                child: _isEditing
-                    ? Column(
-                        children: [
-                          const SizedBox(height: 24),
-                          // 지역 입력
-                          _buildExpandedInfoField(
-                            label: '지역',
-                            icon: Icons.location_on_rounded,
-                            onTap: _selectRegion,
-                            value: _tempRegion ?? '선택해주세요',
-                            hasValue: _tempRegion != null,
-                          ),
-                        ],
-                      )
-                    : const SizedBox.shrink(),
               ),
             ],
           ),
@@ -759,37 +748,18 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                 Row(
                   children: [
                     // 프로필 사진 영역 (공간만 차지, 동일한 크기)
-                    SizedBox(width: 100, height: 100),
-                    const SizedBox(width: 24),
+                    SizedBox(width: 72, height: 72),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // 사용자명 영역 (동일한 높이 유지)
                           SizedBox(height: 32),
-                          const SizedBox(height: 12),
-                          // Stats cards 영역 (동일한 구조와 크기)
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  constraints: const BoxConstraints(
-                                    minHeight: 60,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  constraints: const BoxConstraints(
-                                    minHeight: 60,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                          const SizedBox(height: 8),
+                          // 지역 영역
+                          SizedBox(height: 20),
                         ],
                       ),
                     ),
@@ -805,106 +775,6 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
         ),
       ),
       error: (error, stack) => Center(child: Text('오류가 발생했습니다: $error')),
-    );
-  }
-
-  Widget _buildExpandedInfoField({
-    required String label,
-    required IconData icon,
-    required VoidCallback onTap,
-    required String value,
-    required bool hasValue,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: AppColors.textTertiary.withValues(alpha: 0.2),
-            width: 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: AppColors.primary, size: 20),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: AppTextStyle.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    value,
-                    style: AppTextStyle.bodyMedium.copyWith(
-                      color: hasValue
-                          ? AppColors.textPrimary
-                          : AppColors.textTertiary,
-                      fontWeight: hasValue
-                          ? FontWeight.w600
-                          : FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              color: AppColors.textTertiary,
-              size: 16,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatCard(
-    String label,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 16),
-              const SizedBox(width: 4),
-              Text(
-                label,
-                style: AppTextStyle.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: AppTextStyle.titleMedium.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
