@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/chat_colors.dart';
 import 'package:frontend/core/theme/chat_spacing.dart';
 import 'package:frontend/core/theme/app_text_style.dart';
+import 'package:frontend/core/utils/toast_helper.dart';
 import 'package:frontend/presentation/screens/main/pages/home/state/chat_controller.dart';
 
 class MessageInputArea extends ConsumerStatefulWidget {
@@ -72,9 +73,7 @@ class _MessageInputAreaState extends ConsumerState<MessageInputArea> {
                 onTap: () {
                   Navigator.pop(context);
                   // TODO: Implement camera functionality
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('카메라 기능은 곧 추가될 예정입니다')),
-                  );
+                  ToastHelper.showInfo('카메라 기능은 곧 추가될 예정입니다');
                 },
               ),
               ListTile(
@@ -83,9 +82,7 @@ class _MessageInputAreaState extends ConsumerState<MessageInputArea> {
                 onTap: () {
                   Navigator.pop(context);
                   // TODO: Implement gallery functionality
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('갤러리 기능은 곧 추가될 예정입니다')),
-                  );
+                  ToastHelper.showInfo('갤러리 기능은 곧 추가될 예정입니다');
                 },
               ),
               ListTile(
@@ -94,9 +91,7 @@ class _MessageInputAreaState extends ConsumerState<MessageInputArea> {
                 onTap: () {
                   Navigator.pop(context);
                   // TODO: Implement document functionality
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('문서 첨부 기능은 곧 추가될 예정입니다')),
-                  );
+                  ToastHelper.showInfo('문서 첨부 기능은 곧 추가될 예정입니다');
                 },
               ),
             ],
@@ -144,10 +139,7 @@ class _MessageInputAreaState extends ConsumerState<MessageInputArea> {
                 decoration: BoxDecoration(
                   color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: ChatColors.inputBorder,
-                    width: 1,
-                  ),
+                  border: Border.all(color: ChatColors.inputBorder, width: 1),
                 ),
                 child: TextField(
                   controller: _textController,

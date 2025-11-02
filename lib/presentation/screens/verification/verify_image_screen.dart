@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_color.dart';
+import 'package:frontend/core/utils/toast_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:toastification/toastification.dart';
 
 import 'components/category_selector.dart';
 import 'components/result_dialog.dart';
@@ -28,11 +28,6 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
 
   SubCategory? _selectedSubCategory;
   String? _selectedImageSource; // 'camera' or 'gallery'
-
-  // Hardcoded colors
-  static const Color _primaryColor = Color(0xFF30E836);
-  static const Color _errorColor = Color(0xFFFF5645);
-  static const Color _positiveColor = Color(0xFF74CD7C);
 
   @override
   void initState() {
@@ -110,23 +105,13 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
     }
 
     // Trigger verification
-    await ref.read(imageVerificationProvider.notifier).verifyImage(
-          _selectedImages.first,
-          _selectedSubCategory!.id,
-        );
+    await ref
+        .read(imageVerificationProvider.notifier)
+        .verifyImage(_selectedImages.first, _selectedSubCategory!.id);
   }
 
   void _showWarning(String message) {
-    const double appBarHeight = 60;
-
-    toastification.show(
-      margin: const EdgeInsets.only(top: appBarHeight),
-      alignment: Alignment.topCenter,
-      style: ToastificationStyle.flatColored,
-      title: Text(message),
-      autoCloseDuration: const Duration(seconds: 2),
-      primaryColor: _errorColor,
-    );
+    ToastHelper.showError(message);
   }
 
   @override
@@ -134,33 +119,31 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
     final verificationState = ref.watch(imageVerificationProvider);
 
     // Listen to verification result
-    ref.listen<ImageVerificationState>(
-      imageVerificationProvider,
-      (previous, next) {
-        if (next.result != null && !next.isLoading) {
-          showDialog(
-            context: context,
-            builder: (context) => VerificationResultDialog(
-              isValid: next.result!.isValid,
-              confidence: next.result!.confidence,
-              reason: next.result!.reason,
-              onConfirm: () {
-                Navigator.of(context).pop();
-                ref.read(imageVerificationProvider.notifier).reset();
-              },
-            ),
-          );
-        } else if (next.error != null) {
-          _showWarning('분석 중 오류가 발생했습니다.');
-        }
-      },
-    );
+    ref.listen<ImageVerificationState>(imageVerificationProvider, (
+      previous,
+      next,
+    ) {
+      if (next.result != null && !next.isLoading) {
+        showDialog(
+          context: context,
+          builder: (context) => VerificationResultDialog(
+            isValid: next.result!.isValid,
+            confidence: next.result!.confidence,
+            reason: next.result!.reason,
+            onConfirm: () {
+              Navigator.of(context).pop();
+              ref.read(imageVerificationProvider.notifier).reset();
+            },
+          ),
+        );
+      } else if (next.error != null) {
+        _showWarning('분석 중 오류가 발생했습니다.');
+      }
+    });
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
         child: SafeArea(
           child: Stack(
             children: [
@@ -168,11 +151,17 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
                 children: [
                   // Custom AppBar
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     child: Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back, color: Colors.black),
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.black,
+                          ),
                           onPressed: () => Navigator.pop(context),
                         ),
                         const Expanded(
@@ -191,7 +180,7 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
                               ? null
                               : () => _requestAIAnalysis(),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _primaryColor,
+                            backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
                           ),
                           child: verificationState.isLoading
@@ -214,239 +203,249 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 카테고리 선택 섹션
-                      const Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.category, size: 20, color: Colors.grey),
-                          SizedBox(width: 8),
-                          Text(
-                            '카테고리 선택',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          // 카테고리 선택 섹션
+                          const Row(
+                            children: [
+                              Icon(
+                                Icons.category,
+                                size: 20,
+                                color: Colors.grey,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                '카테고리 선택',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      CategorySelector(
-                        onSubCategorySelected: (subCategory) {
-                          setState(() => _selectedSubCategory = subCategory);
-                        },
-                        onSuggestionTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SuggestionPage(),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 32),
+                          const SizedBox(height: 12),
+                          CategorySelector(
+                            onSubCategorySelected: (subCategory) {
+                              setState(
+                                () => _selectedSubCategory = subCategory,
+                              );
+                            },
+                            onSuggestionTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SuggestionPage(),
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 32),
 
-                      // 사진 첨부 섹션
-                      const Row(
-                        children: [
-                          Icon(
-                            Icons.photo_camera,
-                            size: 20,
-                            color: Colors.grey,
+                          // 사진 첨부 섹션
+                          const Row(
+                            children: [
+                              Icon(
+                                Icons.photo_camera,
+                                size: 20,
+                                color: Colors.grey,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                '사진 첨부',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(width: 8),
-                          Text(
-                            '사진 첨부',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
+                          const SizedBox(height: 12),
 
-                      // 사진 표시 영역
-                      if (_selectedImages.isNotEmpty) ...[
-                        SizedBox(
-                          height: 200,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: _selectedImages.length,
-                            itemBuilder: (context, index) => Container(
-                              margin: const EdgeInsets.only(right: 12),
-                              child: Stack(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Image.file(
-                                      File(_selectedImages[index]),
-                                      width: 160,
-                                      height: 200,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: 8,
-                                    right: 8,
-                                    child: GestureDetector(
-                                      onTap: () => _removeImage(index),
-                                      child: Container(
-                                        padding: const EdgeInsets.all(6),
-                                        decoration: const BoxDecoration(
-                                          color: Colors.black54,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.close,
-                                          color: Colors.white,
-                                          size: 18,
+                          // 사진 표시 영역
+                          if (_selectedImages.isNotEmpty) ...[
+                            SizedBox(
+                              height: 200,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: _selectedImages.length,
+                                itemBuilder: (context, index) => Container(
+                                  margin: const EdgeInsets.only(right: 12),
+                                  child: Stack(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.file(
+                                          File(_selectedImages[index]),
+                                          width: 160,
+                                          height: 200,
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
+                                      Positioned(
+                                        top: 8,
+                                        right: 8,
+                                        child: GestureDetector(
+                                          onTap: () => _removeImage(index),
+                                          child: Container(
+                                            padding: const EdgeInsets.all(6),
+                                            decoration: const BoxDecoration(
+                                              color: Colors.black54,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(
+                                              Icons.close,
+                                              color: Colors.white,
+                                              size: 18,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            // 추가 사진 버튼들 (이미지가 있을 때)
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: _pickFromCamera,
+                                    icon: const Icon(Icons.camera_alt_outlined),
+                                    label: const Text('카메라'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          _selectedImageSource == 'camera'
+                                          ? Colors.white
+                                          : AppColors.primary,
+                                      foregroundColor:
+                                          _selectedImageSource == 'camera'
+                                          ? AppColors.primary
+                                          : Colors.white,
+                                      side: BorderSide(
+                                        color: AppColors.primary,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: _pickFromGallery,
+                                    icon: const Icon(
+                                      Icons.photo_library_outlined,
+                                    ),
+                                    label: const Text('갤러리'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          _selectedImageSource == 'gallery'
+                                          ? Colors.white
+                                          : AppColors.primary,
+                                      foregroundColor:
+                                          _selectedImageSource == 'gallery'
+                                          ? AppColors.primary
+                                          : Colors.white,
+                                      side: BorderSide(
+                                        color: AppColors.primary,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ] else ...[
+                            // 사진 없을 때 표시할 영역
+                            Container(
+                              height: 200,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[50],
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.grey.shade300,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.add_photo_alternate_outlined,
+                                    size: 48,
+                                    color: Colors.grey[400],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    '친환경 활동 사진을 첨부해주세요',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // 추가 사진 버튼들 (이미지가 있을 때)
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: _pickFromCamera,
-                                icon: const Icon(Icons.camera_alt_outlined),
-                                label: const Text('카메라'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      _selectedImageSource == 'camera'
-                                          ? Colors.white
-                                          : _primaryColor,
-                                  foregroundColor:
-                                      _selectedImageSource == 'camera'
-                                          ? _primaryColor
-                                          : Colors.white,
-                                  side: BorderSide(color: _primaryColor),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                            const SizedBox(height: 16),
+                            // 사진 선택 버튼들 (이미지가 없을 때)
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: _pickFromCamera,
+                                    icon: const Icon(Icons.camera_alt_outlined),
+                                    label: const Text('카메라로 촬영'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: _pickFromGallery,
-                                icon: const Icon(
-                                  Icons.photo_library_outlined,
-                                ),
-                                label: const Text('갤러리'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      _selectedImageSource == 'gallery'
-                                          ? Colors.white
-                                          : _primaryColor,
-                                  foregroundColor:
-                                      _selectedImageSource == 'gallery'
-                                          ? _primaryColor
-                                          : Colors.white,
-                                  side: BorderSide(color: _primaryColor),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: _pickFromGallery,
+                                    icon: const Icon(
+                                      Icons.photo_library_outlined,
+                                    ),
+                                    label: const Text('갤러리에서 선택'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
                           ],
-                        ),
-                      ] else ...[
-                        // 사진 없을 때 표시할 영역
-                        Container(
-                          height: 200,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[50],
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Colors.grey.shade300,
-                              width: 2,
-                            ),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.add_photo_alternate_outlined,
-                                size: 48,
-                                color: Colors.grey[400],
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                '친환경 활동 사진을 첨부해주세요',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // 사진 선택 버튼들 (이미지가 없을 때)
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: _pickFromCamera,
-                                icon: const Icon(Icons.camera_alt_outlined),
-                                label: const Text('카메라로 촬영'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: _primaryColor,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: _pickFromGallery,
-                                icon: const Icon(
-                                  Icons.photo_library_outlined,
-                                ),
-                                label: const Text('갤러리에서 선택'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: _primaryColor,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
+                        ],
+                      ),
                     ),
                   ),
                   // 하단 정보 버튼
@@ -487,7 +486,7 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
                       horizontal: 16,
                     ),
                     decoration: BoxDecoration(
-                      color: _positiveColor,
+                      color: AppColors.success,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(

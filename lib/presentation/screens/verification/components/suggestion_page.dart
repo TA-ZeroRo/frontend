@@ -3,8 +3,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:toastification/toastification.dart';
 
+import '../../../../core/theme/app_color.dart';
+import '../../../../core/utils/toast_helper.dart';
 import 'gallery_picker.dart';
 import 'info_dialog.dart';
 import 'info_button.dart';
@@ -20,10 +21,6 @@ class _SuggestionPageState extends State<SuggestionPage> {
   final TextEditingController _contentController = TextEditingController();
   final List<String> _selectedImages = [];
   final GalleryPicker _galleryPicker = GalleryPicker();
-
-  // Hardcoded colors
-  static const Color _primaryColor = Color(0xFF30E836);
-  static const Color _errorColor = Color(0xFFFF5645);
 
   @override
   void initState() {
@@ -87,29 +84,11 @@ class _SuggestionPageState extends State<SuggestionPage> {
   }
 
   void _showWarning(String message) {
-    const double appBarHeight = 60;
-
-    toastification.show(
-      margin: const EdgeInsets.only(top: appBarHeight),
-      alignment: Alignment.topCenter,
-      style: ToastificationStyle.flatColored,
-      title: Text(message),
-      autoCloseDuration: const Duration(seconds: 2),
-      primaryColor: _errorColor,
-    );
+    ToastHelper.showError(message);
   }
 
   void _showsuccessMessage(String message) {
-    const double appBarHeight = 60;
-
-    toastification.show(
-      margin: const EdgeInsets.only(top: appBarHeight),
-      alignment: Alignment.topCenter,
-      style: ToastificationStyle.flatColored,
-      title: Text(message),
-      autoCloseDuration: const Duration(seconds: 2),
-      primaryColor: _primaryColor,
-    );
+    ToastHelper.showSuccess(message);
   }
 
   @override
@@ -127,7 +106,7 @@ class _SuggestionPageState extends State<SuggestionPage> {
             child: ElevatedButton(
               onPressed: _submitSuggestion,
               style: ElevatedButton.styleFrom(
-                backgroundColor: _primaryColor,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
               ),
               child: const Text('제출'),
@@ -158,8 +137,10 @@ class _SuggestionPageState extends State<SuggestionPage> {
                   if (_selectedImages.isNotEmpty) ...[
                     const Text(
                       '첨부된 이미지',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
@@ -191,8 +172,11 @@ class _SuggestionPageState extends State<SuggestionPage> {
                                       color: Colors.black54,
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(Icons.close,
-                                        color: Colors.white, size: 16),
+                                    child: const Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
                                   ),
                                 ),
                               ),

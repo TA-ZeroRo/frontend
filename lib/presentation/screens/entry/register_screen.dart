@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_color.dart';
 import '../../../core/theme/app_text_style.dart';
 import '../../../core/constants/regions.dart';
+import '../../../core/utils/toast_helper.dart';
 import '../../routes/router_path.dart';
 import 'state/auth_controller.dart';
 
@@ -41,12 +42,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       if (!context.mounted) return;
 
       // 에러 토스트 표시
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('회원가입 실패: ${e.toString()}'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      ToastHelper.showError('회원가입 실패: ${e.toString()}');
     }
   }
 
@@ -331,12 +327,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('카메라 오류: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showError('카메라 오류: $e');
       }
     }
   }
@@ -354,12 +345,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('갤러리 오류: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ToastHelper.showError('갤러리 오류: $e');
       }
     }
   }
