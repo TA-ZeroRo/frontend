@@ -37,9 +37,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
       children: [
         Scaffold(
           body: Container(
-            decoration: const BoxDecoration(
-              gradient: AppColors.backgroundGradient,
-            ),
+            color: AppColors.background,
             child: postsAsync.when(
               data: (posts) => RefreshIndicator(
                 onRefresh: _onRefresh,

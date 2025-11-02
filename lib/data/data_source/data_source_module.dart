@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:injectable/injectable.dart';
 
+import '../interceptors/error_handler_interceptor.dart';
+
 @module
 abstract class DioModule {
   @lazySingleton
@@ -34,6 +36,9 @@ abstract class DioModule {
         error: true,
       ),
     );
+
+    // Add error handler interceptor to convert all DioExceptions
+    dio.interceptors.add(ErrorHandlerInterceptor());
 
     return dio;
   }

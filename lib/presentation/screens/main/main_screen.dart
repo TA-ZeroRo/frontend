@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/app_color.dart';
 import 'pages/community/community_page.dart';
 import 'pages/home/home_page.dart';
 import 'pages/playground/playground_page.dart';
@@ -14,7 +15,6 @@ class MainScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final BottomNav nav = ref.watch(bottomNavProvider);
-    final chatViewState = ref.watch(chatViewStateProvider);
 
     final Widget page = switch (nav) {
       BottomNav.home => const HomePage(),
@@ -23,16 +23,18 @@ class MainScreen extends ConsumerWidget {
       BottomNav.community => const CommunityPage(),
     };
 
-    // Hide bottom navigation bar when chat is active on home page
-    final shouldShowBottomNav =
-        nav != BottomNav.home ||
-        chatViewState == ChatViewState.characterVisible;
-
     return Scaffold(
-      body: page,
-      bottomNavigationBar: shouldShowBottomNav
-          ? const _BottomNavigationBar()
-          : null,
+      body: Stack(
+        children: [
+          page,
+          Positioned(
+            bottom: 20,
+            left: 15,
+            right: 15,
+            child: const _BottomNavigationBar(),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -44,30 +46,9 @@ class _BottomNavigationBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final nav = ref.watch(bottomNavProvider);
     return Container(
-      decoration: const BoxDecoration(
-        boxShadow: [
-          BoxShadow(color: Colors.black26, spreadRadius: 0, blurRadius: 10),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(30),
-          topLeft: Radius.circular(30),
-        ),
-        child: BottomNavigationBar(
-          currentIndex: nav.index,
-          onTap: (index) =>
-              ref.read(bottomNavProvider.notifier).setIndex(index),
-          showUnselectedLabels: false,
-          type: BottomNavigationBarType.fixed,
-          items: List.generate(
-            BottomNav.values.length,
-            (index) => BottomNavigationBarItem(
-              icon: BottomNav.values[index].icon,
-              label: BottomNav.values[index].title,
-            ),
-          ),
-        ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        color: AppColors.primary,
       ),
     );
   }

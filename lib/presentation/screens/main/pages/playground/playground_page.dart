@@ -20,7 +20,8 @@ class PlaygroundPage extends ConsumerStatefulWidget {
 
 class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
   bool _isMenuExpanded = false;
-  final GlobalKey<ActivityVerificationFabState> _fabKey = GlobalKey<ActivityVerificationFabState>();
+  final GlobalKey<ActivityVerificationFabState> _fabKey =
+      GlobalKey<ActivityVerificationFabState>();
 
   Future<void> _onRefresh() async {
     await ref.read(rankingProvider.notifier).refresh();
@@ -41,41 +42,32 @@ class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
     );
   }
 
-  Widget _buildSuccessView(
-      BuildContext context, List<RankingItem> rankings) {
+  Widget _buildSuccessView(BuildContext context, List<RankingItem> rankings) {
     return Stack(
       children: [
         Container(
-          decoration: const BoxDecoration(
-            gradient: AppColors.backgroundGradient,
-          ),
+          color: AppColors.background,
           child: RefreshIndicator(
             onRefresh: _onRefresh,
-        color: Theme.of(context).primaryColor,
-        backgroundColor: AppColors.background,
-        displacement: 40.0,
-        strokeWidth: 2.5,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            _buildAppBar(),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 16.0),
-                child: CollapsibleLeaderboardSection(rankings: rankings),
-              ),
+            color: Theme.of(context).primaryColor,
+            backgroundColor: AppColors.background,
+            displacement: 40.0,
+            strokeWidth: 2.5,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                _buildAppBar(),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: CollapsibleLeaderboardSection(rankings: rankings),
+                  ),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                const SliverToBoxAdapter(child: DailyQuestSection()),
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              ],
             ),
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 24),
-            ),
-            const SliverToBoxAdapter(
-              child: DailyQuestSection(),
-            ),
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 24),
-            ),
-          ],
-        ),
           ),
         ),
         // Semi-transparent overlay when menu is expanded
@@ -87,9 +79,7 @@ class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
               child: AnimatedOpacity(
                 opacity: _isMenuExpanded ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 300),
-                child: Container(
-                  color: const Color(0x80000000),
-                ),
+                child: Container(color: const Color(0x80000000)),
               ),
             ),
           ),
@@ -134,40 +124,47 @@ class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
           ),
           child: RefreshIndicator(
             onRefresh: _onRefresh,
-        color: Theme.of(context).primaryColor,
-        backgroundColor: AppColors.background,
-        displacement: 40.0,
-        strokeWidth: 2.5,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            _buildAppBar(),
-            SliverFillRemaining(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
-                    const SizedBox(height: 16),
-                    const Text(
-                      '랭킹을 불러올 수 없어요',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.red,
-                        fontWeight: FontWeight.w500,
-                      ),
+            color: Theme.of(context).primaryColor,
+            backgroundColor: AppColors.background,
+            displacement: 40.0,
+            strokeWidth: 2.5,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                _buildAppBar(),
+                SliverFillRemaining(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.red[300],
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          '랭킹을 불러올 수 없어요',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.red,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '아래로 당겨서 새로고침해보세요',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '아래로 당겨서 새로고침해보세요',
-                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
           ),
         ),
         // Semi-transparent overlay when menu is expanded
@@ -179,9 +176,7 @@ class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
               child: AnimatedOpacity(
                 opacity: _isMenuExpanded ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 300),
-                child: Container(
-                  color: const Color(0x80000000),
-                ),
+                child: Container(color: const Color(0x80000000)),
               ),
             ),
           ),
@@ -225,21 +220,13 @@ class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
             gradient: AppColors.backgroundGradient,
           ),
           child: CustomScrollView(
-        slivers: [
-          _buildAppBar(),
-          const SliverToBoxAdapter(
-            child: PlaygroundShimmer(),
-          ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 24),
-          ),
-          const SliverToBoxAdapter(
-            child: DailyQuestSection(),
-          ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 24),
-          ),
-        ],
+            slivers: [
+              _buildAppBar(),
+              const SliverToBoxAdapter(child: PlaygroundShimmer()),
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              const SliverToBoxAdapter(child: DailyQuestSection()),
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            ],
           ),
         ),
         // Semi-transparent overlay when menu is expanded
@@ -251,9 +238,7 @@ class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
               child: AnimatedOpacity(
                 opacity: _isMenuExpanded ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 300),
-                child: Container(
-                  color: const Color(0x80000000),
-                ),
+                child: Container(color: const Color(0x80000000)),
               ),
             ),
           ),
@@ -306,5 +291,4 @@ class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
       centerTitle: true,
     );
   }
-
 }
