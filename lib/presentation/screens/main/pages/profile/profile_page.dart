@@ -23,49 +23,84 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        color: AppColors.background,
-        child: RefreshIndicator(
-          onRefresh: _onRefresh,
-          color: AppColors.primary,
-          backgroundColor: AppColors.cardBackground,
-          displacement: 40.0,
-          strokeWidth: 3.0,
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              _buildSliverAppBar(context),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return Stack(
+            children: [
+              // Main content
+              Container(
+                color: AppColors.background,
+                child: RefreshIndicator(
+                  onRefresh: _onRefresh,
+                  color: AppColors.primary,
+                  backgroundColor: AppColors.cardBackground,
+                  displacement: 40.0,
+                  strokeWidth: 3.0,
+                  child: CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      _buildSliverAppBar(context),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: _buildProfileInfoCard(),
+                        ),
+                      ),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: _buildChartCard(),
+                        ),
+                      ),
+                      // 바텀시트가 아래쪽 1/3를 차지하므로 여유 공간 확보
+                      SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: constraints.maxHeight * 0.33 + 24,
+                        ),
+                      ),
+                    ],
                   ),
-                  child: _buildProfileInfoCard(),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+              // Bottom sheet - 항상 표시
+              // Positioned.fill을 사용하여 전체 영역을 차지하도록 함
+              Positioned.fill(
+                child: DraggableScrollableSheet(
+                  initialChildSize: 0.33, // 화면 아래 1/3 (초기 위치)
+                  minChildSize: 0.33, // 최소 크기도 1/3 (더 이상 내려가지 않음)
+                  maxChildSize: 0.95, // 최대 크기는 거의 전체
+                  snap: true,
+                  snapSizes: const [0.33, 0.95],
+                  builder: (context, scrollController) => Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(24),
+                        topRight: Radius.circular(24),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, -2),
+                        ),
+                      ],
+                    ),
+                    child: WeeklyReportLibrarySection(
+                      scrollController: scrollController,
+                    ),
                   ),
-                  child: _buildChartCard(),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: _buildWeeklyReportCard(),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -136,27 +171,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ],
       ),
       child: const PointChartSection(),
-    );
-  }
-
-  Widget _buildWeeklyReportCard() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: AppColors.cardGradient,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.textTertiary.withValues(alpha: 0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.cardShadow,
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: const WeeklyReportLibrarySection(),
     );
   }
 }
