@@ -794,36 +794,10 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection>
       },
       loading: () => Container(
         padding: const EdgeInsets.all(24),
-        child: Stack(
-          children: [
-            Row(
-              children: [
-                // 프로필 사진 영역 (공간만 차지, 동일한 크기)
-                SizedBox(width: 72, height: 72),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // 사용자명 영역 (동일한 높이 유지)
-                      SizedBox(height: 32),
-                      const SizedBox(height: 8),
-                      // 지역 영역
-                      SizedBox(height: 20),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                SizedBox(width: 48), // 편집 버튼 공간
-              ],
-            ),
-            // 로딩 인디케이터를 중앙에 오버레이로 표시
-            const Positioned.fill(
-              child: Center(child: CircularProgressIndicator(strokeWidth: 3)),
-            ),
-          ],
+        constraints: const BoxConstraints(
+          minHeight: 320, // 프로필 정보 + 차트 영역을 포함한 최소 높이
         ),
+        child: const Center(child: CircularProgressIndicator(strokeWidth: 3)),
       ),
       error: (error, stack) => Center(child: Text('오류가 발생했습니다: $error')),
     );

@@ -309,39 +309,46 @@ class _WeeklyReportLibrarySectionState
     return widget.scrollController != null
         ? Column(
             children: [
-              // Toggle handle - 클릭 가능 (스크롤되지 않음)
-              GestureDetector(
-                onTap: widget.onToggleTap,
-                child: Container(
-                  margin: const EdgeInsets.only(top: 2),
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  child: Icon(
-                    widget.isExpanded
-                        ? Icons.keyboard_arrow_down_rounded
-                        : Icons.keyboard_arrow_up_rounded,
-                    size: 32,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
-              // Header - 고정 (스크롤되지 않음)
+              // Toggle handle with header - 바텀시트 상단 중앙에 배치, 헤더와 동일 선상
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-                child: Row(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    Icon(
-                      Icons.library_books_rounded,
-                      color: AppColors.primary,
-                      size: 20,
+                    // 헤더 - 왼쪽에 배치
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.library_books_rounded,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '월간보고서',
+                            style: AppTextStyle.titleLarge.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '월간보고서',
-                      style: AppTextStyle.titleLarge.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
+                    // 드래그 핸들 - 중앙에 배치
+                    GestureDetector(
+                      onTap: widget.onToggleTap,
+                      child: Icon(
+                        widget.isExpanded
+                            ? Icons.keyboard_arrow_down_rounded
+                            : Icons.keyboard_arrow_up_rounded,
+                        size: 32,
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -394,7 +401,7 @@ class _WeeklyReportLibrarySectionState
                       controller: widget.scrollController,
                       physics: const ClampingScrollPhysics(),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
+                        horizontal: 16,
                         vertical: 8,
                       ),
                       children: reports.map((report) {

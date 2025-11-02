@@ -88,10 +88,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           child: _buildProfileInfoCard(),
                         ),
                       ),
-                      // 바텀시트가 아래쪽 1/3를 차지하므로 여유 공간 확보
+                      // 바텀시트가 아래쪽을 차지하므로 여유 공간 확보 (높이 조정)
                       SliverToBoxAdapter(
                         child: SizedBox(
-                          height: constraints.maxHeight * 0.33 + 24,
+                          height: constraints.maxHeight * 0.28 + 24,
                         ),
                       ),
                     ],
@@ -103,8 +103,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               Positioned.fill(
                 child: DraggableScrollableSheet(
                   controller: _bottomSheetController,
-                  initialChildSize: 0.33, // 화면 아래 1/3 (초기 위치)
-                  minChildSize: 0.33, // 최소 크기도 1/3 (더 이상 내려가지 않음)
+                  initialChildSize: 0.28, // 헤더 통합으로 공간 절약
+                  minChildSize: 0.28, // 최소 크기 조정
                   maxChildSize: 0.95, // 최대 크기는 거의 전체
                   snap: false, // 클릭으로 제어하므로 snap 비활성화
                   builder: (context, scrollController) => Container(
