@@ -11,5 +11,5 @@ Map<String, dynamic> _$CreateUserRequestToJson(CreateUserRequest instance) =>
       'id': instance.id,
       'username': instance.username,
       'region': instance.region,
-      'userImg': instance.userImg,
+      'user_img': instance.userImg,
     };

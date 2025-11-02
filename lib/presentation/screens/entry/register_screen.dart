@@ -80,6 +80,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(24),
+                        topRight: Radius.circular(24),
+                      ),
                       border: Border(
                         bottom: BorderSide(
                           color: AppColors.textTertiary.withValues(alpha: 0.2),
@@ -90,23 +95,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        TextButton(
+                        IconButton(
                           onPressed: () => Navigator.pop(context),
-                          child: Text(
-                            '취소',
-                            style: AppTextStyle.bodyLarge.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
+                          icon: Icon(
+                            Icons.close_rounded,
+                            color: AppColors.onPrimary,
                           ),
                         ),
                         Text(
                           '지역',
                           style: AppTextStyle.titleLarge.copyWith(
-                            color: AppColors.textPrimary,
+                            color: AppColors.onPrimary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        TextButton(
+                        IconButton(
                           onPressed: () {
                             setState(() {
                               _selectedLocation = KoreanRegions.getFullAddress(
@@ -119,12 +122,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             });
                             Navigator.pop(context);
                           },
-                          child: Text(
-                            '완료',
-                            style: AppTextStyle.bodyLarge.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          icon: Icon(
+                            Icons.check_rounded,
+                            color: AppColors.onPrimary,
                           ),
                         ),
                       ],
@@ -223,6 +223,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
                   border: Border(
                     bottom: BorderSide(
                       color: AppColors.textTertiary.withValues(alpha: 0.2),
@@ -237,7 +242,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     Text(
                       '프로필 사진 선택',
                       style: AppTextStyle.titleLarge.copyWith(
-                        color: AppColors.textPrimary,
+                        color: AppColors.onPrimary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -358,33 +363,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.primary,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => Navigator.pop(context),
-          color: AppColors.textPrimary,
+          onPressed: () => context.go(RoutePath.login),
+          color: AppColors.onPrimary,
         ),
         title: Text(
           '회원가입',
           style: AppTextStyle.headlineSmall.copyWith(
-            color: AppColors.textPrimary,
+            color: AppColors.onPrimary,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.primary.withValues(alpha: 0.05),
-              AppColors.background,
-            ],
-          ),
-        ),
+        decoration: BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -413,11 +409,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 // Profile Image Section
                 Center(
-                  child: Stack(
-                    children: [
-                      GestureDetector(
-                        onTap: _showImagePicker,
-                        child: Container(
+                  child: GestureDetector(
+                    onTap: _showImagePicker,
+                    child: Stack(
+                      children: [
+                        Container(
                           width: 100,
                           height: 100,
                           decoration: BoxDecoration(
@@ -451,29 +447,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   ),
                           ),
                         ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppColors.primary,
-                            border: Border.all(
-                              color: AppColors.background,
-                              width: 2,
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.primary,
+                              border: Border.all(
+                                color: AppColors.background,
+                                width: 2,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.add_rounded,
+                              size: 18,
+                              color: AppColors.onPrimary,
                             ),
                           ),
-                          child: Icon(
-                            Icons.add_rounded,
-                            size: 18,
-                            color: AppColors.onPrimary,
-                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
 

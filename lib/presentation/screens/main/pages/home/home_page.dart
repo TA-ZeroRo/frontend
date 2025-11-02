@@ -232,12 +232,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
               ),
 
-            // Chat overlay
-            const ChatOverlay(),
+            // // Chat overlay
+            // const ChatOverlay(),
 
-            // Inline chat widget (only visible when character is visible)
-            if (viewState == ChatViewState.characterVisible)
-              const InlineChatWidget(),
+            // // Inline chat widget (only visible when character is visible)
+            // if (viewState == ChatViewState.characterVisible)
+            //   const InlineChatWidget(),
           ],
         ),
       ),

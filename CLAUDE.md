@@ -22,5 +22,7 @@ Do not include full details here—only instructions on where to find them or wh
 
 ## Notes
 
+- Don't use withOpacity() , instead use withValues(alpha: )
+- Don't use Navigator() , instead use go_router package
 - Keep this file lightweight; it is meant to route you to the right resources.
 - Update the references here whenever new documents or MCPs are introduced.

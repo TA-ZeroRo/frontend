@@ -14,6 +14,7 @@ class CreateUserRequest {
   final String region;
 
   /// 사용자 프로필 이미지
+  @JsonKey(name: 'user_img')
   final String? userImg;
 
   const CreateUserRequest({

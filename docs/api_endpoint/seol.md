@@ -4,22 +4,43 @@
 
 - **URL**: /leaderBoard/ranking
 - **Method**: GET
-- **Response**
+- 기본 limit 값(50)으로 상위 50명의 사용자를 조회
+- total_points가 동점일 시 continuous_days 순으로 rank 결정
+- **Response (200 OK)**
 
 ```bash
-  {
-    "ranking": [
-      {
-     "id": "7332782a-a109-4c8a-8187-f5d154eab3fe",
-      "username": "ZeroRo Dev",
-      "user_img": "https://aldghxocvhbscghaztfk.supabase.co/storage/v1/object/public/zeroro-post-bucket//zeroro_icon.png",
-      "total_points": 0,
-      "continuous_days": 0,
+{
+  "leaderboard": [
+    {
+      "id": "f8d96697-c125-4715-8be9-524231057496",
+      "username": "재우",
+      "user_img": null,
+      "total_points": 20,
+      "continuous_days": 2,
       "rank": 1
-      },
-    ]
-  }
+    },
+    {
+      "id": "fa77a1bc-57da-457a-8130-b048918d03fe",
+      "username": "홍길동",
+      "user_img": null,
+      "total_points": 20,
+      "continuous_days": 2,
+      "rank": 2
+    },
+    {
+      "id": "0a6b92bf-9e2e-4ac5-9ad8-98fa7f9e102e",
+      "username": "string",
+      "user_img": "string",
+      "total_points": 10,
+      "continuous_days": 0,
+      "rank": 3
+    }
+  ]
+}
 ```
+
+- **Error Responses**
+  - `500` : 리더보드 데이터를 가져올 수 없습니다
 
 ---
 
@@ -57,15 +78,54 @@
   - user_id (UUID)
 - **Response**
 
+```bash
+  [
+    {
+      "date": "2024-03-15",
+      "score": 150
+    },
+    {
+      "date": "2024-03-16",
+      "score": 200
+    }
+    ...
+  ]
+```
+
 ---
 
 ## **📚 User API 명세서**
 
 ### **1. `유저 생성`**
 
-- **URL**: /users
+- **URL**: /users/
 - **Method**: POST
 - **Request Body**
+
+```bash
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",  // Required (str)
+  "username": "홍길동",  // Required (string)
+  "region": "서울",  // Required (string)
+  "user_img": "https://example.com/profile.jpg",  // Optional
+  "total_points": 100,  // Optional (기본값: 0)
+  "continuous_days": 5,  // Optional (기본값: 0)
+  "characters": ["캐릭터1", "캐릭터2"],  // Optional
+  "last_active_at": "2024-01-01T10:00:00Z"  // Optional (기본값: 현재 시각)
+}
+```
+
+- **최소 Request Body**
+
+```bash
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "username": "홍길동",
+  "region": "서울"
+}
+```
+
+- **Response (201 Created)**
 
 ```bash
 {
@@ -76,25 +136,8 @@
   "continuous_days": 5,
   "region": "서울",
   "characters": ["캐릭터1", "캐릭터2"],
-  "last_active_at": "2024-01-01T10:00:00Z"
-}
-```
-
-- **Response**
-
-```bash
-{
-  "user": {
-    "id": "123e4567-e89b-12d3-a456-426614174000",
-    "username": "홍길동",
-    "user_img": "https://example.com/profile.jpg",
-    "total_points": 100,
-    "continuous_days": 5,
-    "region": "서울",
-    "characters": ["캐릭터1", "캐릭터2"],
-    "last_active_at": "2024-01-01T10:00:00Z",
-    "created_at": "2024-01-01T10:00:00Z"
-  }
+  "last_active_at": "2024-01-01T10:00:00Z",
+  "created_at": "2024-01-01T10:00:00Z"
 }
 ```
 
@@ -104,23 +147,26 @@
 
 - **URL**: /users/{user_id}
 - **Method**: GET
-- **Response**
+- **Path Parameters**
+  - `user_id` (UUID, Required): 조회할 유저의 ID
+- **Response (200 OK)**
 
 ```bash
 {
-  "user": {
-    "id": "123e4567-e89b-12d3-a456-426614174000",
-    "username": "홍길동",
-    "user_img": "https://example.com/profile.jpg",
-    "total_points": 150,
-    "continuous_days": 7,
-    "region": "서울",
-    "characters": ["캐릭터1", "캐릭터2"],
-    "last_active_at": "2024-01-01T12:00:00Z",
-    "created_at": "2024-01-01T10:00:00Z"
-  }
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "username": "홍길동",
+  "user_img": "https://example.com/profile.jpg",
+  "total_points": 150,
+  "continuous_days": 7,
+  "region": "서울",
+  "characters": ["캐릭터1", "캐릭터2"],
+  "last_active_at": "2024-01-01T12:00:00Z",
+  "created_at": "2024-01-01T10:00:00Z"
 }
 ```
+
+- **Error Responses**
+  - `404 Not Found`: 해당 user를 찾을 수 없습니다.
 
 ---
 
@@ -128,51 +174,76 @@
 
 - **URL**: /users/{user_id}
 - **Method**: PUT
-- **Request Body**
+- **Path Parameters**
+  - `user_id` (UUID, Required): 수정할 유저의 ID
+- **Request Body** (모든 필드 Optional)
 
 ```bash
 {
+  "username": "새로운이름",  // Optional
+  "user_img": "https://example.com/new-profile.jpg",  // Optional
+  "total_points": 200,  // Optional
+  "region": "부산",  // Optional
+  "characters": ["새캐릭터1", "새캐릭터2"],  // Optional
+  "last_active_at": "2024-01-01T15:00:00Z"  // Optional (미제공 시 서버에서 자동 설정)
+}
+```
+
+- **부분수정예시**
+
+```bash
+{
+  "username": "새이름"
+}
+```
+
+- **Response (200 OK)**
+
+```bash
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
   "username": "새로운이름",
   "user_img": "https://example.com/new-profile.jpg",
   "total_points": 200,
   "continuous_days": 10,
   "region": "부산",
   "characters": ["새캐릭터1", "새캐릭터2"],
-  "last_active_at": "2024-01-01T15:00:00Z"
+  "last_active_at": "2024-01-01T15:30:00Z",
+  "created_at": "2024-01-01T10:00:00Z"
 }
 ```
 
-- **Response**
+- **Error Responses**
+  - `400 Bad Request`: 업데이트할 데이터가 없습니다.
+  - `500 Internal Server Error`: 유저 수정에 실패했습니다.
 
-```bash
-{
-  "user": {
-    "id": "123e4567-e89b-12d3-a456-426614174000",
-    "username": "새로운이름",
-    "user_img": "https://example.com/new-profile.jpg",
-    "total_points": 200,
-    "continuous_days": 10,
-    "region": "부산",
-    "characters": ["새캐릭터1", "새캐릭터2"],
-    "last_active_at": "2024-01-01T15:00:00Z",
-    "created_at": "2024-01-01T10:00:00Z"
-  }
-}
-```
+**⚠️ 제약사항:**
+
+- `continuous_days`는 요청에 포함할 수 없음 (시스템 자동 관리)
+- `last_active_at`을 명시하지 않으면 서버에서 자동으로 현재 시각으로 설정
 
 ---
 
 ### **4. `유저 삭제`**
 
-- **URL**: /users/{user_id}
-- **Method**: DELETE
-- **Response**
+- **URL**: `/users/{user_id}`
+- **Method**: `DELETE`
+- **Path Parameters**
+  - `user_id` (UUID, Required): 삭제할 유저의 ID
+- **Response (200 OK)**
 
 ```bash
-  {
-    "message": "유저가 성공적으로 삭제되었습니다."
-  }
-
+{
+  "message": "유저가 성공적으로 삭제되었습니다."
+}
 ```
 
+- **Error Responses**
+  - `500 Internal Server Error`: 유저 삭제에 실패했습니다.
+
 ---
+
+### **⚠️ 참고사항**
+
+- 이상하면 수정하셈
+- 나한테 요청하지 마셈 . D지기 싫으면.

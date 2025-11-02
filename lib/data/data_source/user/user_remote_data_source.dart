@@ -15,10 +15,7 @@ class UserRemoteDataSource {
   /// POST /users
   Future<UserDto> createUser(CreateUserRequest request) async {
     try {
-      final response = await _dio.post(
-        '/users',
-        data: request.toJson(),
-      );
+      final response = await _dio.post('/users/', data: request.toJson());
       return UserDto.fromJson(response.data);
     } on DioException catch (e) {
       throw _handleError(e);
@@ -40,10 +37,7 @@ class UserRemoteDataSource {
   /// PUT /users/{user_id}
   Future<UserDto> updateUser(String userId, UpdateUserRequest request) async {
     try {
-      final response = await _dio.put(
-        '/users/$userId',
-        data: request.toJson(),
-      );
+      final response = await _dio.put('/users/$userId', data: request.toJson());
       return UserDto.fromJson(response.data);
     } on DioException catch (e) {
       throw _handleError(e);
@@ -65,7 +59,9 @@ class UserRemoteDataSource {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return Exception('Connection timeout. Please check your internet connection.');
+        return Exception(
+          'Connection timeout. Please check your internet connection.',
+        );
       case DioExceptionType.badResponse:
         final statusCode = error.response?.statusCode;
 
