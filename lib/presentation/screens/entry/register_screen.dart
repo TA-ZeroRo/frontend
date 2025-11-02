@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_color.dart';
 import '../../../core/theme/app_text_style.dart';
 import '../../../core/constants/regions.dart';
@@ -17,6 +19,8 @@ class RegisterScreen extends ConsumerStatefulWidget {
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   String? _selectedLocation;
+  File? _selectedImage;
+  final ImagePicker _imagePicker = ImagePicker();
 
   Future<void> _handleRegister(BuildContext context, WidgetRef ref) async {
     final authState = ref.read(authProvider);
@@ -203,6 +207,163 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
+  void _showImagePicker() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: AppColors.textTertiary.withValues(alpha: 0.2),
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const SizedBox(width: 48),
+                    Text(
+                      '프로필 사진 선택',
+                      style: AppTextStyle.titleLarge.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+              ),
+              // Options
+              _buildImagePickerOption(
+                icon: Icons.camera_alt_rounded,
+                label: '카메라로 촬영',
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImageFromCamera();
+                },
+              ),
+              _buildImagePickerOption(
+                icon: Icons.photo_library_rounded,
+                label: '갤러리에서 선택',
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImageFromGallery();
+                },
+              ),
+              if (_selectedImage != null)
+                _buildImagePickerOption(
+                  icon: Icons.delete_outline_rounded,
+                  label: '사진 제거',
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() => _selectedImage = null);
+                  },
+                  isDestructive: true,
+                ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildImagePickerOption({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    bool isDestructive = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isDestructive ? AppColors.error : AppColors.primary,
+              size: 24,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              label,
+              style: AppTextStyle.bodyLarge.copyWith(
+                color: isDestructive ? AppColors.error : AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickImageFromCamera() async {
+    try {
+      final XFile? pickedFile = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80,
+      );
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('카메라 오류: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    try {
+      final XFile? pickedFile = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('갤러리 오류: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
@@ -239,144 +400,223 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
         ),
         child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 // Welcome Title
                 Text(
                   '환영합니다!',
-                  style: AppTextStyle.headlineMedium.copyWith(
+                  style: AppTextStyle.titleLarge.copyWith(
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Text(
                   '기본 정보만 입력하면 시작할 수 있어요',
-                  style: AppTextStyle.bodyLarge.copyWith(
+                  style: AppTextStyle.bodyMedium.copyWith(
                     color: AppColors.textSecondary,
                   ),
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 24),
 
-                // Nickname Section
-                _buildSectionHeader(
-                  icon: Icons.person_outline_rounded,
-                  title: '닉네임',
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.cardBackground,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: AppColors.textTertiary.withValues(alpha: 0.2),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.cardShadow,
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
+                // Profile Image Section
+                Center(
+                  child: Stack(
+                    children: [
+                      GestureDetector(
+                        onTap: _showImagePicker,
+                        child: Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.3),
+                              width: 3,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.cardShadow,
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ClipOval(
+                            child: _selectedImage != null
+                                ? Image.file(_selectedImage!, fit: BoxFit.cover)
+                                : Container(
+                                    decoration: BoxDecoration(
+                                      gradient: AppColors.cardGradient,
+                                    ),
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.photo_library_outlined,
+                                        size: 40,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.primary,
+                            border: Border.all(
+                              color: AppColors.background,
+                              width: 2,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.add_rounded,
+                            size: 18,
+                            color: AppColors.onPrimary,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  child: TextField(
-                    onChanged: authNotifier.updateRegisterNickname,
-                    style: AppTextStyle.bodyLarge.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: '나만의 특별한 닉네임을 입력해주세요',
-                      hintStyle: AppTextStyle.bodyLarge.copyWith(
-                        color: AppColors.textTertiary,
-                      ),
-                      prefixIcon: Icon(
-                        Icons.edit_outlined,
-                        color: AppColors.primary,
-                      ),
-                      filled: false,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 20,
-                      ),
-                    ),
-                  ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
 
-                // Location Section
-                _buildSectionHeader(
-                  icon: Icons.location_on_outlined,
-                  title: '거주지',
-                  subtitle: '리더보드 조회에 사용됩니다',
-                ),
-                const SizedBox(height: 12),
-                GestureDetector(
-                  onTap: _showLocationPicker,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.cardBackground,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: AppColors.textTertiary.withValues(alpha: 0.2),
-                        width: 1,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Nickname Section
+                      _buildSectionHeader(
+                        icon: Icons.person_outline_rounded,
+                        title: '닉네임',
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.cardShadow,
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBackground,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.textTertiary.withValues(
+                              alpha: 0.2,
+                            ),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.cardShadow,
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 20,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.location_city_outlined,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Text(
-                            _selectedLocation ?? '지역을 선택해주세요',
-                            style: AppTextStyle.bodyLarge.copyWith(
-                              color: _selectedLocation != null
-                                  ? AppColors.textPrimary
-                                  : AppColors.textTertiary,
+                        child: TextField(
+                          onChanged: authNotifier.updateRegisterNickname,
+                          style: AppTextStyle.bodyMedium.copyWith(
+                            color: AppColors.textPrimary,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: '닉네임을 입력해주세요',
+                            hintStyle: AppTextStyle.bodyMedium.copyWith(
+                              color: AppColors.textTertiary,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.edit_outlined,
+                              color: AppColors.primary,
+                              size: 20,
+                            ),
+                            filled: false,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
                             ),
                           ),
                         ),
-                        Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 16,
-                          color: AppColors.textSecondary,
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Location Section
+                      _buildSectionHeader(
+                        icon: Icons.location_on_outlined,
+                        title: '거주지',
+                        subtitle: '리더보드 조회에 사용됩니다',
+                      ),
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: _showLocationPicker,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.cardBackground,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.textTertiary.withValues(
+                                alpha: 0.2,
+                              ),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.cardShadow,
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.location_city_outlined,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  _selectedLocation ?? '지역을 선택해주세요',
+                                  style: AppTextStyle.bodyMedium.copyWith(
+                                    color: _selectedLocation != null
+                                        ? AppColors.textPrimary
+                                        : AppColors.textTertiary,
+                                  ),
+                                ),
+                              ),
+                              Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                size: 14,
+                                color: AppColors.textSecondary,
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-
-                const SizedBox(height: 60),
 
                 // Submit button
                 SizedBox(
                   width: double.infinity,
-                  height: 56,
+                  height: 50,
                   child: ElevatedButton(
                     onPressed:
                         authNotifier.isRegisterFormValid() &&
@@ -387,15 +627,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       backgroundColor: AppColors.primary,
                       disabledBackgroundColor: AppColors.textTertiary,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 4,
                       shadowColor: AppColors.primary.withValues(alpha: 0.3),
                     ),
                     child: authState.isLoading
                         ? SizedBox(
-                            height: 24,
-                            width: 24,
+                            height: 20,
+                            width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: const AlwaysStoppedAnimation<Color>(
@@ -408,7 +648,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             children: [
                               Text(
                                 '시작하기',
-                                style: AppTextStyle.titleMedium.copyWith(
+                                style: AppTextStyle.bodyLarge.copyWith(
                                   color: authNotifier.isRegisterFormValid()
                                       ? AppColors.onPrimary
                                       : AppColors.cardBackground,
@@ -419,6 +659,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 const SizedBox(width: 8),
                                 Icon(
                                   Icons.arrow_forward_rounded,
+                                  size: 18,
                                   color: AppColors.onPrimary,
                                 ),
                               ],
@@ -426,7 +667,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
               ],
             ),
           ),
@@ -446,17 +687,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, size: 20, color: AppColors.primary),
+              child: Icon(icon, size: 18, color: AppColors.primary),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Text(
               title,
-              style: AppTextStyle.titleMedium.copyWith(
+              style: AppTextStyle.bodyMedium.copyWith(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
@@ -466,11 +707,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         if (subtitle != null) ...[
           const SizedBox(height: 4),
           Padding(
-            padding: const EdgeInsets.only(left: 48),
+            padding: const EdgeInsets.only(left: 40),
             child: Text(
               subtitle,
               style: AppTextStyle.bodySmall.copyWith(
                 color: AppColors.textSecondary,
+                fontSize: 11,
               ),
             ),
           ),

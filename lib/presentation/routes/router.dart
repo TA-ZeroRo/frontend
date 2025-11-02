@@ -59,5 +59,5 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const CampaignRecruitingScreen(),
     ),
   ],
-  initialLocation: RoutePath.register,
+  initialLocation: RoutePath.splash,
 );
