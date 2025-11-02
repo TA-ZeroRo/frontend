@@ -12,8 +12,15 @@ import '../state/user_controller.dart';
 
 class WeeklyReportLibrarySection extends ConsumerStatefulWidget {
   final ScrollController? scrollController;
+  final VoidCallback? onToggleTap;
+  final bool isExpanded;
 
-  const WeeklyReportLibrarySection({super.key, this.scrollController});
+  const WeeklyReportLibrarySection({
+    super.key,
+    this.scrollController,
+    this.onToggleTap,
+    this.isExpanded = false,
+  });
 
   @override
   ConsumerState<WeeklyReportLibrarySection> createState() =>
@@ -300,28 +307,28 @@ class _WeeklyReportLibrarySectionState
     final reportsAsync = ref.watch(weeklyReportsProvider);
 
     return widget.scrollController != null
-        ? ListView(
-            controller: widget.scrollController,
-            physics: const ClampingScrollPhysics(),
+        ? Column(
             children: [
-              // Drag handle - ListView 첫 번째 아이템으로 포함
-              Container(
-                margin: const EdgeInsets.only(top: 8),
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                width: double.infinity,
-                alignment: Alignment.center,
+              // Toggle handle - 클릭 가능 (스크롤되지 않음)
+              GestureDetector(
+                onTap: widget.onToggleTap,
                 child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.textTertiary.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
+                  margin: const EdgeInsets.only(top: 2),
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  child: Icon(
+                    widget.isExpanded
+                        ? Icons.keyboard_arrow_down_rounded
+                        : Icons.keyboard_arrow_up_rounded,
+                    size: 32,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ),
-              // Header - ListView 두 번째 아이템으로 포함
+              // Header - 고정 (스크롤되지 않음)
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 4, 24, 8),
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
                 child: Row(
                   children: [
                     Icon(
@@ -340,119 +347,132 @@ class _WeeklyReportLibrarySectionState
                   ],
                 ),
               ),
-              // Reports list
-              reportsAsync.when(
-                data: (reports) {
-                  if (reports.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.assignment_outlined,
-                              size: 40,
-                              color: AppColors.textTertiary,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              '아직 월간보고서가 없어요',
-                              style: AppTextStyle.bodyLarge.copyWith(
-                                color: AppColors.textSecondary,
+              // Reports list - 스크롤 가능
+              Expanded(
+                child: reportsAsync.when(
+                  data: (reports) {
+                    if (reports.isEmpty) {
+                      return ListView(
+                        controller: widget.scrollController,
+                        physics: const ClampingScrollPhysics(),
+                        children: [
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.assignment_outlined,
+                                    size: 40,
+                                    color: AppColors.textTertiary,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    '아직 월간보고서가 없어요',
+                                    style: AppTextStyle.bodyLarge.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '매월 1일 자정에 월간보고서가 생성됩니다',
+                                    style: AppTextStyle.bodyMedium.copyWith(
+                                      color: AppColors.textTertiary,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 4),
+                          ),
+                        ],
+                      );
+                    }
+
+                    return ListView(
+                      controller: widget.scrollController,
+                      physics: const ClampingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 8,
+                      ),
+                      children: reports.map((report) {
+                        final isExpanded = _expandedReportId == report.id;
+
+                        // GlobalKey 생성 (없으면 생성)
+                        if (!_reportKeys.containsKey(report.id)) {
+                          _reportKeys[report.id] = GlobalKey();
+                        }
+
+                        return _WeeklyReportCard(
+                          key: _reportKeys[report.id],
+                          report: report,
+                          isExpanded: isExpanded,
+                          onTap: () {
+                            final wasExpanded = isExpanded;
+                            setState(() {
+                              _expandedReportId = isExpanded ? null : report.id;
+                            });
+                            // 모든 보고서에 대해 확장 시 중앙 정렬 스크롤 적용
+                            if (!wasExpanded) {
+                              // 모든 보고서(첫번째, 두번째, 세번째 등)에 동일하게 적용
+                              _scrollToReport(report.id);
+                            }
+                          },
+                        );
+                      }).toList(),
+                    );
+                  },
+                  loading: () => ListView(
+                    controller: widget.scrollController,
+                    physics: const ClampingScrollPhysics(),
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 40),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const CircularProgressIndicator(
+                              strokeWidth: 3.0,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
                             Text(
-                              '매월 1일 자정에 월간보고서가 생성됩니다',
+                              '보고서를 불러오는 중...',
                               style: AppTextStyle.bodyMedium.copyWith(
-                                color: AppColors.textTertiary,
+                                color: AppColors.textSecondary,
                               ),
                             ),
                           ],
                         ),
                       ),
-                    );
-                  }
-
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 8,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Column(
-                          children: reports.map((report) {
-                            final isExpanded = _expandedReportId == report.id;
-
-                            // GlobalKey 생성 (없으면 생성)
-                            if (!_reportKeys.containsKey(report.id)) {
-                              _reportKeys[report.id] = GlobalKey();
-                            }
-
-                            return _WeeklyReportCard(
-                              key: _reportKeys[report.id],
-                              report: report,
-                              isExpanded: isExpanded,
-                              onTap: () {
-                                final wasExpanded = isExpanded;
-                                setState(() {
-                                  _expandedReportId = isExpanded
-                                      ? null
-                                      : report.id;
-                                });
-                                // 모든 보고서에 대해 확장 시 중앙 정렬 스크롤 적용
-                                if (!wasExpanded) {
-                                  // 모든 보고서(첫번째, 두번째, 세번째 등)에 동일하게 적용
-                                  _scrollToReport(report.id);
-                                }
-                              },
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                loading: () => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 40),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const CircularProgressIndicator(
-                        strokeWidth: 3.0,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppColors.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        '보고서를 불러오는 중...',
-                        style: AppTextStyle.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
                     ],
                   ),
-                ),
-                error: (error, stack) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 40),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  error: (error, stack) => ListView(
+                    controller: widget.scrollController,
+                    physics: const ClampingScrollPhysics(),
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 48,
-                        color: AppColors.error,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        '보고서를 불러올 수 없어요',
-                        style: AppTextStyle.bodyLarge.copyWith(
-                          color: AppColors.error,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 40),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 48,
+                              color: AppColors.error,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              '보고서를 불러올 수 없어요',
+                              style: AppTextStyle.bodyLarge.copyWith(
+                                color: AppColors.error,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
