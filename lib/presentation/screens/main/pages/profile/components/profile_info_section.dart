@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
-import 'dart:math' as math;
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
 import '../../../../../../core/constants/regions.dart';
@@ -12,7 +10,6 @@ import '../../../../../../core/di/injection.dart';
 import '../../../../../../core/utils/toast_helper.dart';
 import '../../../../../../data/data_source/storage_service.dart';
 import '../state/user_controller.dart';
-import '../state/chart_controller.dart';
 
 class ProfileInfoSection extends ConsumerStatefulWidget {
   const ProfileInfoSection({super.key});
@@ -21,8 +18,7 @@ class ProfileInfoSection extends ConsumerStatefulWidget {
   ConsumerState<ProfileInfoSection> createState() => _ProfileInfoSectionState();
 }
 
-class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection>
-    with TickerProviderStateMixin {
+class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
   bool _isEditing = false;
   bool _isUploadingImage = false;
   late TextEditingController _usernameController;
@@ -31,13 +27,6 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection>
   final ImagePicker _imagePicker = ImagePicker();
   final StorageService _storageService = getIt<StorageService>();
 
-  // 차트 관련 변수
-  late ScrollController _chartScrollController;
-  late AnimationController _chartAnimationController;
-  double _currentMaxY = 100.0;
-  double _targetMaxY = 100.0;
-  bool suspendedAnimation = false;
-
   @override
   void initState() {
     super.initState();
@@ -45,85 +34,12 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection>
     _usernameController = TextEditingController(text: user?.username ?? '');
     _tempImageUrl = user?.userImg;
     _tempRegion = user?.region ?? '서울';
-
-    // 차트 초기화
-    _chartScrollController = ScrollController();
-    _chartAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-    _chartAnimationController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        setState(() {
-          _currentMaxY = _targetMaxY;
-          suspendedAnimation = false;
-        });
-        _chartAnimationController.reset();
-      }
-    });
-    // 초기 최대값 설정 (동적 계산)
-    _calculateDynamicScaling();
-
-    // 차트 초기화 시 가장 오른쪽(최신 데이터)으로 스크롤
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToLatest();
-    });
   }
 
   @override
   void dispose() {
     _usernameController.dispose();
-    _chartScrollController.dispose();
-    _chartAnimationController.dispose();
     super.dispose();
-  }
-
-  void _calculateDynamicScaling() {
-    final chartData = ref.read(chartProvider);
-    if (chartData.isEmpty) {
-      _currentMaxY = 100.0;
-      _targetMaxY = 100.0;
-      return;
-    }
-    _targetMaxY = ref
-        .read(chartProvider.notifier)
-        .calculateDynamicMaxY(chartData);
-    _currentMaxY = _targetMaxY;
-  }
-
-  void _scrollToLatest() {
-    const double pointWidth = 60.0; // 각 데이터 포인트의 너비
-
-    // 완전히 오른쪽 끝으로 스크롤하기 위해 최대 스크롤 위치 계산
-    final chartData = ref.read(chartProvider);
-    final double totalWidth = chartData.length * pointWidth;
-
-    // 스크롤 가능한 최대 위치는 (전체 너비 - 뷰포트 너비)
-    // 완전히 오른쪽 끝으로 가도록 약간의 여백을 더함
-    final double maxScroll = math.max(
-      0,
-      totalWidth, // 전체 너비로 스크롤해서 완전히 오른쪽 끝으로 이동
-    );
-
-    // 부드러운 애니메이션으로 스크롤
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_chartScrollController.hasClients) {
-        _chartScrollController.animateTo(
-          maxScroll,
-          duration: const Duration(milliseconds: 800),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-  }
-
-  double _getNiceInterval(double maxValue, int targetTickCount) {
-    if (maxValue <= 0) return 1;
-    final roughInterval = maxValue / targetTickCount;
-    final magnitude = math
-        .pow(10, roughInterval.toString().split('.')[0].length - 1)
-        .toDouble();
-    return (roughInterval / magnitude).ceil() * magnitude;
   }
 
   void _toggleEdit() {
@@ -530,6 +446,94 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header with title and action buttons
+              Row(
+                children: [
+                  Icon(
+                    Icons.person_rounded,
+                    color: AppColors.primary,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '프로필 정보',
+                    style: AppTextStyle.titleLarge.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  // 편집 모드에 따라 버튼 표시
+                  if (_isEditing) ...[
+                    // 취소 버튼
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.error.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: IconButton(
+                        onPressed: _cancelEdit,
+                        icon: Icon(
+                          Icons.close_rounded,
+                          color: AppColors.error,
+                          size: 20,
+                        ),
+                        tooltip: '취소',
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // 저장 버튼
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        onPressed: _toggleEdit,
+                        icon: const Icon(
+                          Icons.check_rounded,
+                          color: AppColors.onPrimary,
+                          size: 20,
+                        ),
+                        tooltip: '저장',
+                      ),
+                    ),
+                  ] else
+                    // 수정 버튼
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.background.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.textTertiary.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: IconButton(
+                        onPressed: _toggleEdit,
+                        icon: Icon(
+                          Icons.edit_rounded,
+                          color: AppColors.textPrimary,
+                          size: 20,
+                        ),
+                        tooltip: '편집',
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
               // Profile content
               Row(
                 children: [
@@ -539,8 +543,8 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection>
                     child: Stack(
                       children: [
                         Container(
-                          width: 72,
-                          height: 72,
+                          width: 100,
+                          height: 100,
                           decoration: BoxDecoration(
                             color: AppColors.primary,
                             shape: BoxShape.circle,
@@ -553,10 +557,10 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection>
                             ],
                           ),
                           child: CircleAvatar(
-                            radius: 34,
+                            radius: 48,
                             backgroundColor: AppColors.cardBackground,
                             child: CircleAvatar(
-                              radius: 32,
+                              radius: 45,
                               backgroundColor: AppColors.background,
                               backgroundImage:
                                   (displayImageUrl != null &&
@@ -568,7 +572,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection>
                                       displayImageUrl.isEmpty)
                                   ? Icon(
                                       Icons.person,
-                                      size: 36,
+                                      size: 50,
                                       color: AppColors.textSecondary,
                                     )
                                   : null,
@@ -599,14 +603,14 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection>
                             bottom: 0,
                             right: 0,
                             child: Container(
-                              width: 24,
-                              height: 24,
+                              width: 32,
+                              height: 32,
                               decoration: BoxDecoration(
                                 color: AppColors.primary,
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                   color: AppColors.cardBackground,
-                                  width: 2,
+                                  width: 3,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
@@ -619,18 +623,17 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection>
                               child: const Icon(
                                 Icons.camera_alt,
                                 color: AppColors.onPrimary,
-                                size: 12,
+                                size: 16,
                               ),
                             ),
                           ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 24),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         if (_isEditing)
                           TextField(
@@ -677,560 +680,231 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection>
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        const SizedBox(height: 8),
-                        // 지역 표시 (편집 모드가 아닐 때는 읽기 전용, 편집 모드일 때는 클릭 가능)
-                        GestureDetector(
-                          onTap: _isEditing ? _selectRegion : null,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.location_on_rounded,
-                                size: 14,
-                                color: _isEditing
-                                    ? AppColors.primary
-                                    : AppColors.textSecondary,
+                        const SizedBox(height: 12),
+
+                        // Stats cards
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildStatCard(
+                                '총 포인트',
+                                '${user.totalPoints}',
+                                Icons.stars_rounded,
+                                AppColors.primary,
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                _isEditing
-                                    ? (_tempRegion?.isNotEmpty == true
-                                          ? _tempRegion!
-                                          : '지역 선택')
-                                    : (user.region.isNotEmpty
-                                          ? user.region
-                                          : '미설정'),
-                                style: AppTextStyle.bodySmall.copyWith(
-                                  color: _isEditing
-                                      ? AppColors.primary
-                                      : AppColors.textSecondary,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildStatCard(
+                                '연속 일수',
+                                '${user.continuousDays}일',
+                                Icons.calendar_today_rounded,
+                                AppColors.primary,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
-                  // 편집 모드에 따라 버튼 표시 (이름과 지역 오른쪽에 배치)
-                  if (_isEditing) ...[
-                    const SizedBox(width: 8),
-                    // 취소 버튼
-                    Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.error.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: AppColors.error.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: IconButton(
-                        onPressed: _cancelEdit,
-                        icon: Icon(
-                          Icons.close_rounded,
-                          color: AppColors.error,
-                          size: 20,
-                        ),
-                        tooltip: '취소',
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // 저장 버튼
-                    Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: IconButton(
-                        onPressed: _toggleEdit,
-                        icon: const Icon(
-                          Icons.check_rounded,
-                          color: AppColors.onPrimary,
-                          size: 20,
-                        ),
-                        tooltip: '저장',
-                      ),
-                    ),
-                  ] else ...[
-                    const SizedBox(width: 8),
-                    // 수정 버튼
-                    Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.background.withValues(alpha: 0.8),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: AppColors.textTertiary.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: IconButton(
-                        onPressed: _toggleEdit,
-                        icon: Icon(
-                          Icons.edit_rounded,
-                          color: AppColors.textPrimary,
-                          size: 20,
-                        ),
-                        tooltip: '편집',
-                      ),
-                    ),
-                  ],
                 ],
               ),
-              // 차트 섹션 추가
-              const SizedBox(height: 24),
-              _buildChart(),
+
+              // 추가 정보 섹션 (펼쳐지는 애니메이션)
+              AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutCubic,
+                child: _isEditing
+                    ? Column(
+                        children: [
+                          const SizedBox(height: 24),
+                          // 지역 입력
+                          _buildExpandedInfoField(
+                            label: '지역',
+                            icon: Icons.location_on_rounded,
+                            onTap: _selectRegion,
+                            value: _tempRegion ?? '선택해주세요',
+                            hasValue: _tempRegion != null,
+                          ),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
+              ),
             ],
           ),
         );
       },
       loading: () => Container(
         padding: const EdgeInsets.all(24),
-        constraints: const BoxConstraints(
-          minHeight: 320, // 프로필 정보 + 차트 영역을 포함한 최소 높이
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header with title (동일한 구조, 공간만 차지)
+                SizedBox(
+                  height: 48, // IconButton 기본 크기와 동일
+                  child: Row(
+                    children: [
+                      SizedBox(width: 24), // 아이콘 공간
+                      const SizedBox(width: 8),
+                      SizedBox(width: 100), // 텍스트 공간
+                      const Spacer(),
+                      SizedBox(width: 48), // 편집 버튼 공간
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Profile content 영역 (동일한 구조와 크기 유지)
+                Row(
+                  children: [
+                    // 프로필 사진 영역 (공간만 차지, 동일한 크기)
+                    SizedBox(width: 100, height: 100),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 사용자명 영역 (동일한 높이 유지)
+                          SizedBox(height: 32),
+                          const SizedBox(height: 12),
+                          // Stats cards 영역 (동일한 구조와 크기)
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  constraints: const BoxConstraints(
+                                    minHeight: 60,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  constraints: const BoxConstraints(
+                                    minHeight: 60,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            // 로딩 인디케이터를 중앙에 오버레이로 표시
+            const Positioned.fill(
+              child: Center(child: CircularProgressIndicator(strokeWidth: 3)),
+            ),
+          ],
         ),
-        child: const Center(child: CircularProgressIndicator(strokeWidth: 3)),
       ),
       error: (error, stack) => Center(child: Text('오류가 발생했습니다: $error')),
     );
   }
 
-  // 차트 빌드 메서드
-  Widget _buildChart() {
-    final chartData = ref.watch(chartProvider);
-    final List<_ScoreData> scoreData = chartData
-        .map((data) => _ScoreData(data.date, data.score))
-        .toList();
-
-    if (scoreData.isEmpty) {
-      return Container(
+  Widget _buildExpandedInfoField({
+    required String label,
+    required IconData icon,
+    required VoidCallback onTap,
+    required String value,
+    required bool hasValue,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.background.withValues(alpha: 0.3),
+          color: AppColors.primary.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: AppColors.textTertiary.withValues(alpha: 0.3),
+            color: AppColors.textTertiary.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
-        height: 200,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.trending_up_outlined,
-                size: 40,
-                color: AppColors.textTertiary,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                '아직 성과 데이터가 없습니다',
-                style: AppTextStyle.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.background.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.textTertiary.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: AppColors.textTertiary.withValues(alpha: 0.4),
-            width: 1,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
+        child: Row(
           children: [
-            SizedBox(
-              height: 200,
-              child: Row(
+            Icon(icon, color: AppColors.primary, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 확장된 세로 레이블 영역 (전체 높이에 걸쳐)
-                  Container(
-                    width: 50,
-                    decoration: BoxDecoration(
-                      border: Border(
-                        right: BorderSide(
-                          color: AppColors.textTertiary.withValues(alpha: 0.4),
-                          width: 1,
-                        ),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        // 차트 영역 레이블 (150px) - 가로 격자선과 정확히 매칭
-                        Expanded(
-                          flex: 3, // 차트 영역 비율
-                          child: Stack(
-                            children: List.generate(6, (index) {
-                              final interval = _getNiceInterval(
-                                _currentMaxY,
-                                5,
-                              );
-                              final value = ((5 - index) * interval).toInt();
-                              final yRatio = value / _currentMaxY;
-                              // 가로 격자선과 동일한 공식으로 Y 위치 계산
-                              final chartHeight = 150.0;
-                              final yPosition =
-                                  chartHeight -
-                                  (yRatio * (chartHeight - 40)) -
-                                  20;
-
-                              return Positioned(
-                                left: 0,
-                                top: yPosition - 10, // 텍스트 중앙 정렬
-                                right: 0,
-                                child: Center(
-                                  child: Text(
-                                    value >= 1000
-                                        ? '${(value / 1000).toStringAsFixed(1)}K'
-                                        : value.toString(),
-                                    style: TextStyle(
-                                      color: AppColors.textPrimary,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }),
-                          ),
-                        ),
-                        // 날짜 레이블 영역 (50px) - 비우기, 차트와 일치하는 구분선
-                        Container(
-                          height: 50,
-                          decoration: BoxDecoration(
-                            border: Border(
-                              top: BorderSide(
-                                color: AppColors.textTertiary.withValues(
-                                  alpha: 0.4,
-                                ),
-                                width: 1,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                  Text(
+                    label,
+                    style: AppTextStyle.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
                     ),
                   ),
-                  Expanded(
-                    child: Scrollbar(
-                      controller: _chartScrollController,
-                      thumbVisibility: true,
-                      thickness: 4,
-                      radius: const Radius.circular(4),
-                      child: SingleChildScrollView(
-                        controller: _chartScrollController,
-                        scrollDirection: Axis.horizontal,
-                        child: Builder(
-                          builder: (context) {
-                            // 차트가 빌드된 후 최신 위치로 스크롤
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              if (mounted &&
-                                  _chartScrollController.hasClients) {
-                                _scrollToLatest();
-                              }
-                            });
-                            return SizedBox(
-                              width: scoreData.length * 60.0,
-                              child: Column(
-                                children: [
-                                  SizedBox(
-                                    height: 150,
-                                    child: Stack(
-                                      children: [
-                                        Positioned.fill(
-                                          child: CustomPaint(
-                                            painter: _CustomChartPainter(
-                                              data: scoreData,
-                                              interval: _getNiceInterval(
-                                                _currentMaxY,
-                                                5,
-                                              ),
-                                              maxY: _currentMaxY,
-                                              chartHeight: 150.0,
-                                            ),
-                                          ),
-                                        ),
-                                        Positioned.fill(
-                                          child: Stack(
-                                            children: scoreData.asMap().entries.map((
-                                              entry,
-                                            ) {
-                                              final index = entry.key;
-                                              final scoreDataItem = entry.value;
-                                              final x = (index * 60.0) + 30;
-                                              final maxY = suspendedAnimation
-                                                  ? _targetMaxY
-                                                  : _currentMaxY;
-                                              final yRatio =
-                                                  scoreDataItem.score / maxY;
-                                              final chartHeight = 150.0;
-                                              final yPosition =
-                                                  chartHeight -
-                                                  (yRatio *
-                                                      (chartHeight - 40)) -
-                                                  20;
-                                              return Positioned(
-                                                left: x - 15,
-                                                top: yPosition - 25,
-                                                child: Container(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 4,
-                                                        vertical: 2,
-                                                      ),
-                                                  child: Text(
-                                                    '${scoreDataItem.score}점',
-                                                    style: TextStyle(
-                                                      fontSize: 10,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color:
-                                                          AppColors.textPrimary,
-                                                    ),
-                                                  ),
-                                                ),
-                                              );
-                                            }).toList(),
-                                          ),
-                                        ),
-                                        Positioned.fill(
-                                          child: CustomPaint(
-                                            painter: _HorizontalGridPainter(
-                                              interval: _getNiceInterval(
-                                                _currentMaxY,
-                                                5,
-                                              ),
-                                              maxY: _currentMaxY,
-                                              chartHeight: 150.0,
-                                            ),
-                                          ),
-                                        ),
-                                        Positioned.fill(
-                                          child: CustomPaint(
-                                            painter: _VerticalGridPainter(
-                                              dataCount: scoreData.length,
-                                              pointWidth: 60.0,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                        top: BorderSide(
-                                          color: AppColors.textTertiary
-                                              .withValues(alpha: 0.4),
-                                          width: 1,
-                                        ),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: scoreData.map((data) {
-                                        return SizedBox(
-                                          width: 60.0,
-                                          child: Center(
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(
-                                                bottom: 16.0,
-                                              ),
-                                              child: Text(
-                                                DateFormat(
-                                                  'M/d',
-                                                ).format(data.date),
-                                                style: TextStyle(
-                                                  color: AppColors.textPrimary,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 10,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                  const SizedBox(height: 4),
+                  Text(
+                    value,
+                    style: AppTextStyle.bodyMedium.copyWith(
+                      color: hasValue
+                          ? AppColors.textPrimary
+                          : AppColors.textTertiary,
+                      fontWeight: hasValue
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                     ),
                   ),
                 ],
               ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: AppColors.textTertiary,
+              size: 16,
             ),
           ],
         ),
       ),
     );
   }
-}
 
-// 차트 데이터 클래스
-class _ScoreData {
-  final DateTime date;
-  final int score;
-  _ScoreData(this.date, this.score);
-}
-
-// 커스텀 차트 그래프 페인터
-class _CustomChartPainter extends CustomPainter {
-  final List<_ScoreData> data;
-  final double interval;
-  final double maxY;
-  final double chartHeight;
-
-  _CustomChartPainter({
-    required this.data,
-    required this.interval,
-    required this.maxY,
-    required this.chartHeight,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (data.isEmpty) return;
-
-    final paint = Paint()
-      ..color = AppColors.primary
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke;
-
-    final path = Path();
-
-    for (int i = 0; i < data.length; i++) {
-      final scoreData = data[i];
-      final x = (i * 60.0) + 30;
-      final yRatio = scoreData.score / maxY;
-      final y = chartHeight - (yRatio * (chartHeight - 40)) - 20;
-      final point = Offset(x, y);
-
-      if (i == 0) {
-        path.moveTo(point.dx, point.dy);
-      } else {
-        path.lineTo(point.dx, point.dy);
-      }
-
-      canvas.drawCircle(
-        point,
-        6,
-        Paint()
-          ..color = AppColors.primary
-          ..style = PaintingStyle.fill,
-      );
-      canvas.drawCircle(
-        point,
-        6,
-        Paint()
-          ..color = AppColors.cardBackground
-          ..strokeWidth = 2
-          ..style = PaintingStyle.stroke,
-      );
-    }
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(_CustomChartPainter oldDelegate) {
-    return data != oldDelegate.data ||
-        interval != oldDelegate.interval ||
-        maxY != oldDelegate.maxY ||
-        chartHeight != oldDelegate.chartHeight;
-  }
-}
-
-// 가로 격자선 페인터
-class _HorizontalGridPainter extends CustomPainter {
-  final double interval;
-  final double maxY;
-  final double chartHeight;
-
-  _HorizontalGridPainter({
-    required this.interval,
-    required this.maxY,
-    required this.chartHeight,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.textTertiary.withValues(alpha: 0.3)
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
-
-    for (int i = 0; i <= 5; i++) {
-      final value = i * interval;
-      final yRatio = value / maxY;
-      final y = chartHeight - (yRatio * (chartHeight - 40)) - 20;
-      if (y >= 20 && y <= chartHeight - 20) {
-        canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(_HorizontalGridPainter oldDelegate) {
-    return interval != oldDelegate.interval ||
-        maxY != oldDelegate.maxY ||
-        chartHeight != oldDelegate.chartHeight;
-  }
-}
-
-// 세로 격자선 페인터
-class _VerticalGridPainter extends CustomPainter {
-  final int dataCount;
-  final double pointWidth;
-
-  _VerticalGridPainter({required this.dataCount, required this.pointWidth});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.textTertiary.withValues(alpha: 0.3)
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
-
-    for (int i = 0; i < dataCount; i++) {
-      final x = i * pointWidth + (pointWidth / 2);
-      if (x < size.width) {
-        canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(_VerticalGridPainter oldDelegate) {
-    return dataCount != oldDelegate.dataCount ||
-        pointWidth != oldDelegate.pointWidth;
+  Widget _buildStatCard(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 16),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: AppTextStyle.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: AppTextStyle.titleMedium.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
