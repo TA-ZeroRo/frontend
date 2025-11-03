@@ -12,12 +12,12 @@
 {
   "leaderboard": [
     {
-      "id": "f8d96697-c125-4715-8be9-524231057496",
-      "username": "재우",
-      "user_img": null,
-      "total_points": 20,
-      "continuous_days": 2,
-      "rank": 1
+      "id": "f8d96697-c125-4715-8be9-524231057496" // Required(string),
+      "username": "재우", //Optional(string, null가능)
+      "user_img": null, //Optional(string, 기본값 : null)
+      "total_points": 20, // Required(int)
+      "continuous_days": 2, // Required(int)
+      "rank": 1 //  --> schemas에서 왜 Optional로 되있는거 모르겠음(질문)
     },
     {
       "id": "fa77a1bc-57da-457a-8130-b048918d03fe",
@@ -41,6 +41,67 @@
 
 - **Error Responses**
   - `500` : 리더보드 데이터를 가져올 수 없습니다
+
+---
+
+## **📚 Mission API 명세서**
+
+### **1. `유저 미션 조회`**
+
+- **URL**: /api/v1/mission/{user_id}
+- **Method**: GET
+- **Path Parameters**
+  - `user_id` (UUID, Required): 조회할 유저의 ID
+- missions_by_campaign(dict) : campaign_id를 키로 하는 딕셔너리
+- **Response (200 OK)**
+
+```bash
+{
+  "missions_by_campaign": {
+    "1": [
+      {
+        "id": 1 // Required(int) - 자동 증가,
+        "user_id": "123e4567-e89b-12d3-a456-426614174000", // Required(string)
+        "campaign_id": 1, // Required(Int)
+        "description": "플라스틱 재활용하기", // Optional (string, 기본값: null)
+        "status": "PROGRESS", // Required (string)
+        "started_at": "2024-01-01T10:00:00Z", //Required (datetime)
+        "completed_at": null // Optional (datetime, 기본값: null)
+      },
+      {
+        "id": 2,
+        "user_id": "123e4567-e89b-12d3-a456-426614174000",
+        "campaign_id": 1,
+        "description": "텀블러 사용하기",
+        "status": "COMPLETED",
+        "started_at": "2024-01-01T09:00:00Z",
+        "completed_at": "2024-01-01T18:00:00Z"
+      }
+    ],
+    "2": [
+      {
+        "id": 3,
+        "user_id": "123e4567-e89b-12d3-a456-426614174000",
+        "campaign_id": 2,
+        "description": "대중교통 이용하기",
+        "status": "VERIFICATION",
+        "started_at": "2024-01-02T08:00:00Z",
+        "completed_at": null
+      }
+    ]
+  }
+}
+
+```
+
+- status (string, Required): 미션 상태
+  - "PROGRESS" : 진행
+  - "VERIFICATION" : 검증 대기
+  - "COMPLETED" : 성공
+  - "FAILED" : 실패
+- 정렬 순서: started_at 기준 내림차순 (최신순)
+- Error Responses :
+  - `500` : 유저 생성 중 오류가 발생했습니다.
 
 ---
 
@@ -98,7 +159,7 @@
 
 ### **1. `유저 생성`**
 
-- **URL**: /users/
+- **URL**: /users
 - **Method**: POST
 - **Request Body**
 
@@ -242,8 +303,3 @@
   - `500 Internal Server Error`: 유저 삭제에 실패했습니다.
 
 ---
-
-### **⚠️ 참고사항**
-
-- 이상하면 수정하셈
-- 나한테 요청하지 마셈 . D지기 싫으면.

@@ -1,167 +1,90 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/domain/model/chat_message/chat_message.dart';
-import 'package:frontend/domain/model/conversation/conversation.dart';
-import 'package:frontend/domain/model/chat_summary/chat_summary.dart';
-import 'package:frontend/presentation/screens/main/pages/home/state/Mock/mock_chat_data.dart';
+import 'Mock/mock_chat_data.dart';
 
-// Chat view states
-enum ChatViewState {
-  characterVisible, // Default: Character only
-  chatActive, // Overlay shown, chat in focus
-  historyOpen, // Sidebar visible
+/// 간단한 메시지 모델 (Presentation 레이어 전용)
+class SimpleMessage {
+  final String text;
+  final bool isAI;
+  final DateTime timestamp;
+
+  SimpleMessage({
+    required this.text,
+    required this.isAI,
+    required this.timestamp,
+  });
 }
 
-// Chat view state notifier
-class ChatViewStateNotifier extends Notifier<ChatViewState> {
-  @override
-  ChatViewState build() {
-    return ChatViewState.characterVisible;
-  }
+/// 채팅 UI 상태
+class ChatState {
+  final SimpleMessage? latestAIMessage; // 최신 AI 메시지 1개만 유지
+  final bool isLoading; // 타이핑 인디케이터 표시 여부
+  final String inputText; // 입력 필드 텍스트
 
-  void setState(ChatViewState newState) {
-    state = newState;
-  }
-}
+  ChatState({
+    this.latestAIMessage,
+    this.isLoading = false,
+    this.inputText = '',
+  });
 
-// Chat view state provider
-final chatViewStateProvider = NotifierProvider<ChatViewStateNotifier, ChatViewState>(
-  ChatViewStateNotifier.new,
-);
-
-// Active conversation notifier
-class ConversationNotifier extends Notifier<Conversation?> {
-  @override
-  Conversation? build() {
-    return null; // Start with no active conversation
-  }
-
-  // Start a new conversation
-  void startNewConversation() {
-    final newConv = Conversation(
-      id: 'conv_${DateTime.now().millisecondsSinceEpoch}',
-      title: '새로운 대화',
-      messages: [
-        ChatMessage(
-          id: 'msg_welcome',
-          text: '안녕하세요! 저는 제로로예요 🌱\n환경에 대해 무엇이든 물어보세요!',
-          sender: 'ai',
-          timestamp: DateTime.now(),
-          isUser: false,
-        ),
-      ],
-      lastUpdated: DateTime.now(),
+  ChatState copyWith({
+    SimpleMessage? latestAIMessage,
+    bool? isLoading,
+    String? inputText,
+  }) {
+    return ChatState(
+      latestAIMessage: latestAIMessage ?? this.latestAIMessage,
+      isLoading: isLoading ?? this.isLoading,
+      inputText: inputText ?? this.inputText,
     );
-    state = newConv;
+  }
+}
+
+/// 채팅 컨트롤러
+class ChatNotifier extends Notifier<ChatState> {
+  @override
+  ChatState build() {
+    return ChatState();
   }
 
-  // Load existing conversation
-  void loadConversation(String conversationId) {
-    final conv = MockChatData.getConversationById(conversationId);
-    if (conv != null) {
-      state = conv;
-    }
+  /// 입력 텍스트 업데이트
+  void updateInputText(String text) {
+    state = state.copyWith(inputText: text);
   }
 
-  // Send a message
+  /// 메시지 전송
   Future<void> sendMessage(String text) async {
-    if (state == null || text.trim().isEmpty) return;
+    if (text.trim().isEmpty) return;
 
-    // Add user message
-    final userMessage = ChatMessage(
-      id: 'msg_${DateTime.now().millisecondsSinceEpoch}',
-      text: text.trim(),
-      sender: 'user',
+    // 입력 필드 초기화
+    state = state.copyWith(
+      inputText: '',
+      isLoading: true,
+    );
+
+    // Mock 응답 시뮬레이션 (1-2초 딜레이)
+    await Future.delayed(const Duration(milliseconds: 1500));
+
+    // Mock AI 응답 생성
+    final aiResponse = SimpleMessage(
+      text: MockChatData.getNextResponse(),
+      isAI: true,
       timestamp: DateTime.now(),
-      isUser: true,
     );
 
-    state = state!.copyWith(
-      messages: [...state!.messages, userMessage],
-      lastUpdated: DateTime.now(),
-    );
-
-    // Simulate AI typing delay
-    await Future.delayed(const Duration(milliseconds: 800));
-
-    // Add AI response
-    final aiMessage = ChatMessage(
-      id: 'msg_${DateTime.now().millisecondsSinceEpoch}',
-      text: MockChatData.getRandomResponse(),
-      sender: 'ai',
-      timestamp: DateTime.now(),
-      isUser: false,
-    );
-
-    state = state!.copyWith(
-      messages: [...state!.messages, aiMessage],
-      lastUpdated: DateTime.now(),
+    // 상태 업데이트
+    state = state.copyWith(
+      latestAIMessage: aiResponse,
+      isLoading: false,
     );
   }
 
-  // Clear conversation
-  void clearConversation() {
-    state = null;
+  /// 채팅 초기화
+  void resetChat() {
+    MockChatData.reset();
+    state = ChatState();
   }
 }
 
-// Active conversation provider
-final conversationProvider = NotifierProvider<ConversationNotifier, Conversation?>(
-  ConversationNotifier.new,
-);
-
-// Chat history notifier
-class ChatHistoryNotifier extends Notifier<List<ChatSummary>> {
-  @override
-  List<ChatSummary> build() {
-    return MockChatData.mockChatSummaries;
-  }
-
-  // Delete a chat from history
-  void deleteChat(String chatId) {
-    state = state.where((chat) => chat.id != chatId).toList();
-  }
-
-  // Add new chat to history (when user sends first message in new conv)
-  void addChatToHistory(Conversation conversation) {
-    final lastMessage = conversation.messages.isNotEmpty
-        ? conversation.messages.last.text
-        : '';
-
-    final newSummary = ChatSummary(
-      id: conversation.id,
-      title: conversation.title,
-      preview: lastMessage.length > 50
-          ? '${lastMessage.substring(0, 50)}...'
-          : lastMessage,
-      lastMessageTime: conversation.lastUpdated,
-    );
-
-    // Remove existing if present, then add to top
-    state = [
-      newSummary,
-      ...state.where((chat) => chat.id != conversation.id),
-    ];
-  }
-}
-
-// Chat history provider
-final chatHistoryProvider = NotifierProvider<ChatHistoryNotifier, List<ChatSummary>>(
-  ChatHistoryNotifier.new,
-);
-
-// Typing indicator notifier
-class AITypingNotifier extends Notifier<bool> {
-  @override
-  bool build() {
-    return false;
-  }
-
-  void setTyping(bool isTyping) {
-    state = isTyping;
-  }
-}
-
-// Typing indicator provider
-final isAITypingProvider = NotifierProvider<AITypingNotifier, bool>(
-  AITypingNotifier.new,
+final chatProvider = NotifierProvider<ChatNotifier, ChatState>(
+  ChatNotifier.new,
 );

@@ -17,7 +17,8 @@
       "Read(//c/Users/parks/Downloads/**)",
       "mcp__upstash-context-7-mcp__resolve-library-id",
       "mcp__upstash-context-7-mcp__get-library-docs",
-      "Bash(dir C:UsersparksProjectsZerorofrontendassetszeroro)"
+      "Bash(dir C:UsersparksProjectsZerorofrontendassetszeroro)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

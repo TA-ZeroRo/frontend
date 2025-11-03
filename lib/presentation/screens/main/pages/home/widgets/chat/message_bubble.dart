@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/theme/chat_colors.dart';
-import 'package:frontend/core/theme/chat_spacing.dart';
-import 'package:frontend/core/theme/app_text_style.dart';
-import 'package:frontend/domain/model/chat_message/chat_message.dart';
+import '../../../../../../../core/theme/app_color.dart';
+import '../../../../../../../core/theme/app_text_style.dart';
+import '../../state/chat_controller.dart';
 
+/// AI 메시지를 표시하는 말풍선 위젯
 class MessageBubble extends StatelessWidget {
-  final ChatMessage message;
+  final SimpleMessage message;
 
   const MessageBubble({
     super.key,
@@ -14,50 +14,29 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final maxWidth = screenWidth * 0.7;
-
     return Align(
-      alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: Alignment.centerLeft,
       child: Container(
-        constraints: BoxConstraints(maxWidth: maxWidth),
-        margin: EdgeInsets.only(
-          left: message.isUser ? ChatSpacing.xl : ChatSpacing.md,
-          right: message.isUser ? ChatSpacing.md : ChatSpacing.xl,
-          bottom: ChatSpacing.xs,
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: ChatSpacing.sm,
-            vertical: ChatSpacing.xs + 2,
-          ),
-          decoration: BoxDecoration(
-            color: message.isUser
-                ? ChatColors.userMessageBg
-                : ChatColors.aiMessageBg,
-            borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(20),
-              topRight: const Radius.circular(20),
-              bottomLeft: Radius.circular(message.isUser ? 20 : 4),
-              bottomRight: Radius.circular(message.isUser ? 4 : 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-            boxShadow: message.isUser
-                ? null
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-          ),
-          child: Text(
-            message.text,
-            style: AppTextStyle.bodyMedium.copyWith(
-              color: message.isUser
-                  ? ChatColors.userMessageText
-                  : ChatColors.aiMessageText,
-            ),
+          ],
+        ),
+        child: Text(
+          message.text,
+          style: AppTextStyle.bodyMedium.copyWith(
+            color: AppColors.textPrimary,
+            height: 1.5,
           ),
         ),
       ),

@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 import 'package:frontend/core/theme/app_color.dart';
-import 'package:frontend/presentation/screens/main/pages/home/state/chat_controller.dart';
-import 'package:frontend/presentation/screens/main/pages/home/widgets/chat/chat_overlay.dart';
-import 'package:frontend/presentation/screens/main/pages/home/widgets/chat/inline_chat_widget.dart';
 import 'package:logger/logger.dart';
+import 'widgets/chat/inline_chat_widget.dart';
+import 'widgets/chat/simple_chat_area.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -99,7 +98,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     const double logoHeight = 50;
-    final viewState = ref.watch(chatViewStateProvider);
 
     return Scaffold(
       body: Container(
@@ -108,136 +106,127 @@ class _HomePageState extends ConsumerState<HomePage> {
           fit: StackFit.expand,
           children: [
             // Character 3D model (dimmed when chat is active)
-            AnimatedOpacity(
-              duration: const Duration(milliseconds: 400),
-              opacity: viewState == ChatViewState.characterVisible ? 1.0 : 0.6,
-              child: Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30),
-                    child: Flutter3DViewer(
-                      progressBarColor: Colors.transparent,
-                      controller: _3DController,
-                      src: 'assets/zeroro/co2_zeroro_2.glb',
-                      enableTouch: false,
-                      onProgress: (double progress) {
-                        _logger.d('로딩 진행: $progress');
-                        if (mounted) {
-                          setState(() {
-                            _loadingProgress = progress;
-                          });
-                        }
-                      },
-                      onLoad: (String modelAddress) {
-                        _logger.d('모델 로드 완료: $modelAddress');
-                        if (mounted) {
-                          setState(() {
-                            _isLoading = false;
-                            _loadingProgress = 1.0;
-                          });
-                        }
-                      },
-                      onError: (String error) {
-                        _logger.e('오류: $error');
-                        if (mounted) {
-                          setState(() {
-                            _isLoading = false;
-                          });
-                        }
-                      },
-                    ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Flutter3DViewer(
+                progressBarColor: Colors.transparent,
+                controller: _3DController,
+                src: 'assets/zeroro/co2_zeroro_2.glb',
+                enableTouch: false,
+                onProgress: (double progress) {
+                  _logger.d('로딩 진행: $progress');
+                  if (mounted) {
+                    setState(() {
+                      _loadingProgress = progress;
+                    });
+                  }
+                },
+                onLoad: (String modelAddress) {
+                  _logger.d('모델 로드 완료: $modelAddress');
+                  if (mounted) {
+                    setState(() {
+                      _isLoading = false;
+                      _loadingProgress = 1.0;
+                    });
+                  }
+                },
+                onError: (String error) {
+                  _logger.e('오류: $error');
+                  if (mounted) {
+                    setState(() {
+                      _isLoading = false;
+                    });
+                  }
+                },
+              ),
+            ),
+            // 로딩 오버레이
+            if (_isLoading)
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(30),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        spreadRadius: 2,
+                      ),
+                    ],
                   ),
-                  // 로딩 오버레이
-                  if (_isLoading)
-                    Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(30),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 10,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 80,
+                        height: 80,
+                        child: Stack(
+                          alignment: Alignment.center,
                           children: [
                             SizedBox(
                               width: 80,
                               height: 80,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  SizedBox(
-                                    width: 80,
-                                    height: 80,
-                                    child: CircularProgressIndicator(
-                                      value: _loadingProgress,
-                                      strokeWidth: 6,
-                                      backgroundColor: Colors.grey[200],
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.green,
-                                      ),
-                                    ),
-                                  ),
-                                  Text(
-                                    '${(_loadingProgress * 100).toInt()}%',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ],
+                              child: CircularProgressIndicator(
+                                value: _loadingProgress,
+                                strokeWidth: 6,
+                                backgroundColor: Colors.grey[200],
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.green,
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 20),
-                            const Text(
-                              '제로로 캐릭터 로딩 중...',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
                             Text(
-                              '잠시만 기다려주세요',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
+                              '${(_loadingProgress * 100).toInt()}%',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                ],
-              ),
-            ),
-
-            // Logo at top (only visible when character is visible)
-            if (viewState == ChatViewState.characterVisible)
-              Positioned(
-                top: MediaQuery.of(context).padding.top + 8,
-                left: 16,
-                child: Image.asset(
-                  'assets/images/ZeroRo_logo.png',
-                  height: logoHeight,
-                  fit: BoxFit.contain,
+                      const SizedBox(height: 20),
+                      const Text(
+                        '제로로 캐릭터 로딩 중...',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '잠시만 기다려주세요',
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-
-            // // Chat overlay
-            // const ChatOverlay(),
-
-            // // Inline chat widget (only visible when character is visible)
-            // if (viewState == ChatViewState.characterVisible)
-            //   const InlineChatWidget(),
+            // Logo at top (only visible when character is visible)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 8,
+              left: 16,
+              child: Image.asset(
+                'assets/images/ZeroRo_logo.png',
+                height: logoHeight,
+                fit: BoxFit.contain,
+              ),
+            ),
+            // 채팅 영역 (SimpleChatArea + InlineChatWidget)
+            const Positioned(
+              bottom: 24,
+              left: 16,
+              right: 16,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [SimpleChatArea(), InlineChatWidget()],
+              ),
+            ),
           ],
         ),
       ),

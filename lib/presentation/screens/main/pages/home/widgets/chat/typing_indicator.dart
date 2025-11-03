@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/theme/chat_colors.dart';
 
+import '../../../../../../../core/theme/app_color.dart';
+
+/// AI 응답 생성 중 표시되는 타이핑 인디케이터
 class TypingIndicator extends StatefulWidget {
   const TypingIndicator({super.key});
 
@@ -16,8 +18,8 @@ class _TypingIndicatorState extends State<TypingIndicator>
   void initState() {
     super.initState();
     _controller = AnimationController(
+      duration: const Duration(milliseconds: 1400),
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
     )..repeat();
   }
 
@@ -30,21 +32,13 @@ class _TypingIndicatorState extends State<TypingIndicator>
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 20,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: ChatColors.aiMessageBg,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-          bottomLeft: Radius.circular(4),
-          bottomRight: Radius.circular(16),
-        ),
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -52,37 +46,38 @@ class _TypingIndicatorState extends State<TypingIndicator>
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildDot(0),
-          const SizedBox(width: 3),
-          _buildDot(1),
-          const SizedBox(width: 3),
-          _buildDot(2),
-        ],
-      ),
-    );
-  }
+        children: List.generate(
+          3,
+          (index) => AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              // 각 점이 순차적으로 애니메이션
+              final delay = index * 0.3;
+              final value = (_controller.value - delay) % 1.0;
+              final opacity = (value < 0.5)
+                  ? Curves.easeInOut.transform(value * 2)
+                  : Curves.easeInOut.transform(2 - value * 2);
 
-  Widget _buildDot(int index) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final delay = index * 0.2;
-        final value = (_controller.value - delay) % 1.0;
-        final opacity = (value < 0.5) ? value * 2 : (1 - value) * 2;
-
-        return Opacity(
-          opacity: opacity.clamp(0.3, 1.0),
-          child: Container(
-            width: 6,
-            height: 6,
-            decoration: const BoxDecoration(
-              color: ChatColors.typingIndicator,
-              shape: BoxShape.circle,
-            ),
+              return Container(
+                margin: EdgeInsets.only(
+                  left: index == 0 ? 0 : 6,
+                ),
+                child: Opacity(
+                  opacity: 0.3 + (opacity * 0.7), // 0.3 ~ 1.0
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

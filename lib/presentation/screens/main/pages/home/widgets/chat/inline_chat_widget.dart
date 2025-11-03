@@ -1,14 +1,12 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/core/theme/chat_colors.dart';
-import 'package:frontend/core/theme/chat_spacing.dart';
+import 'package:frontend/core/theme/app_color.dart';
 import 'package:frontend/core/theme/app_text_style.dart';
-import 'package:frontend/presentation/screens/main/pages/home/state/chat_controller.dart';
-import 'package:frontend/presentation/screens/main/pages/home/widgets/chat/message_bubble.dart';
-import 'package:frontend/presentation/screens/main/pages/home/widgets/chat/typing_indicator.dart';
+import '../../state/chat_controller.dart';
 
-/// Inline chat widget displayed at the bottom of the home page
-/// Shows up to 3 recent messages and provides input area with expand button
+/// 홈페이지 하단에 표시되는 인라인 채팅 입력 위젯
+/// 글래스모피즘 스타일의 타원형 디자인
 class InlineChatWidget extends ConsumerStatefulWidget {
   const InlineChatWidget({super.key});
 
@@ -18,306 +16,120 @@ class InlineChatWidget extends ConsumerStatefulWidget {
 
 class _InlineChatWidgetState extends ConsumerState<InlineChatWidget> {
   final TextEditingController _textController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-  bool _hasText = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _textController.addListener(() {
-      setState(() {
-        _hasText = _textController.text.trim().isNotEmpty;
-      });
-    });
-  }
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void dispose() {
     _textController.dispose();
-    _scrollController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
-  Future<void> _sendMessage() async {
+  void _handleSend() {
     final text = _textController.text.trim();
     if (text.isEmpty) return;
 
-    final conversation = ref.read(conversationProvider);
+    // 메시지 전송
+    ref.read(chatProvider.notifier).sendMessage(text);
 
-    // If no conversation, start a new one
-    if (conversation == null) {
-      ref.read(conversationProvider.notifier).startNewConversation();
-      await Future.delayed(const Duration(milliseconds: 100));
-    }
-
-    // Clear input immediately
-    _textController.clear();
-
-    // Show typing indicator
-    ref.read(isAITypingProvider.notifier).setTyping(true);
-
-    // Send message
-    await ref.read(conversationProvider.notifier).sendMessage(text);
-
-    // Hide typing indicator
-    ref.read(isAITypingProvider.notifier).setTyping(false);
-
-    // Scroll to bottom
-    _scrollToBottom();
-  }
-
-  void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-        }
-      });
-    }
-  }
-
-  void _expandChat() {
-    ref.read(chatViewStateProvider.notifier).setState(ChatViewState.chatActive);
-  }
-
-  void _closeMessages() {
-    // Clear the conversation and typing indicator
-    ref.read(conversationProvider.notifier).clearConversation();
-    ref.read(isAITypingProvider.notifier).setTyping(false);
-    // Clear text input
+    // 입력 필드 초기화 (포커스는 유지하여 연속 대화 가능)
     _textController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
-    final conversation = ref.watch(conversationProvider);
-    final isTyping = ref.watch(isAITypingProvider);
+    final chatState = ref.watch(chatProvider);
+    final canSend = _textController.text.trim().isNotEmpty && !chatState.isLoading;
 
-    // Get last 3 messages (excluding welcome message if it's the only one)
-    List<dynamic> displayItems = [];
-    if (conversation != null && conversation.messages.isNotEmpty) {
-      // Skip welcome message if it's the only message
-      final messages = conversation.messages.length == 1 &&
-              conversation.messages.first.id == 'msg_welcome'
-          ? <dynamic>[]
-          : conversation.messages.skip(
-              conversation.messages.length > 3
-                  ? conversation.messages.length - 3
-                  : 0,
-            ).toList();
-
-      displayItems = messages;
-      if (isTyping) {
-        displayItems = [...displayItems, 'typing'];
-      }
-    }
-
-    final hasMessages = displayItems.isNotEmpty;
-
-    return Positioned(
-      left: ChatSpacing.md,
-      right: ChatSpacing.md,
-      bottom: ChatSpacing.lg,
-      child: Container(
-        constraints: BoxConstraints(
-          minHeight: hasMessages ? 0 : 64,
-          maxHeight: hasMessages
-              ? MediaQuery.of(context).size.height * 0.5
-              : 64,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: hasMessages ? 0.75 : 0.95),
-          borderRadius: BorderRadius.circular(hasMessages ? 24 : 28),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: hasMessages ? const Offset(0, -5) : const Offset(0, 2),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(30),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          height: 56,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.8),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color: Colors.black,
+              width: 1,
             ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Messages area with blur gradient at top
-            if (hasMessages)
-              Flexible(
-                child: Stack(
-                  children: [
-                    // Messages list
-                    ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.only(
-                        top: ChatSpacing.lg,
-                        left: ChatSpacing.md,
-                        right: ChatSpacing.md,
-                        bottom: ChatSpacing.xs,
-                      ),
-                      shrinkWrap: true,
-                      itemCount: displayItems.length,
-                      itemBuilder: (context, index) {
-                        final item = displayItems[index];
+          ),
+          child: Row(
+            children: [
+              // 확장 버튼 (나중에 구현)
+              _buildExpandButton(),
 
-                        // Show typing indicator
-                        if (item == 'typing') {
-                          return Align(
-                            alignment: Alignment.centerLeft,
-                            child: Container(
-                              margin: const EdgeInsets.only(
-                                right: ChatSpacing.xl,
-                                bottom: ChatSpacing.xs,
-                              ),
-                              child: const TypingIndicator(),
-                            ),
-                          );
-                        }
-
-                        return MessageBubble(message: item);
-                      },
-                    ),
-
-                    // Top blur gradient
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        height: 40,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.white.withValues(alpha: 0.75),
-                              Colors.white.withValues(alpha: 0.0),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Close button
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: _closeMessages,
-                          borderRadius: BorderRadius.circular(20),
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.9),
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.close,
-                              size: 20,
-                              color: Colors.black54,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              // 입력 필드
+              Expanded(
+                child: _buildTextField(),
               ),
 
-            // Input area
-            Container(
-              padding: hasMessages
-                  ? const EdgeInsets.all(ChatSpacing.md)
-                  : const EdgeInsets.symmetric(
-                      horizontal: ChatSpacing.xs,
-                      vertical: ChatSpacing.xs,
-                    ),
-              child: SafeArea(
-                top: false,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Expand button (moved to left)
-                    IconButton(
-                      icon: const Icon(Icons.open_in_full),
-                      onPressed: _expandChat,
-                      color: Colors.black87,
-                      tooltip: '대화 확장',
-                      iconSize: 20,
-                    ),
-                    const SizedBox(width: ChatSpacing.xxs),
-
-                    // Text input field
-                    Expanded(
-                      child: Container(
-                        constraints: BoxConstraints(
-                          minHeight: 40,
-                          maxHeight: hasMessages ? 120 : 40,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: ChatColors.inputBorder,
-                            width: 1,
-                          ),
-                        ),
-                        child: TextField(
-                          controller: _textController,
-                          maxLines: hasMessages ? null : 1,
-                          textInputAction: TextInputAction.newline,
-                          style: AppTextStyle.bodyLarge,
-                          decoration: InputDecoration(
-                            hintText: '메시지를 입력하세요...',
-                            hintStyle: AppTextStyle.bodyMedium.copyWith(
-                              color: Colors.black45,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: ChatSpacing.md,
-                              vertical: ChatSpacing.xs + 2,
-                            ),
-                          ),
-                          onSubmitted: (_) => _sendMessage(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: ChatSpacing.xxs),
-
-                    // Send button
-                    AnimatedScale(
-                      duration: const Duration(milliseconds: 150),
-                      scale: _hasText ? 1.0 : 0.8,
-                      child: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 150),
-                        opacity: _hasText ? 1.0 : 0.5,
-                        child: IconButton(
-                          icon: const Icon(Icons.send),
-                          onPressed: _hasText ? _sendMessage : null,
-                          color: ChatColors.userMessageBg,
-                          disabledColor: ChatColors.disabledGray,
-                          tooltip: '전송',
-                          iconSize: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+              // 전송 버튼
+              _buildSendButton(canSend),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildExpandButton() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8),
+      child: IconButton(
+        onPressed: null, // 나중에 구현
+        icon: Icon(
+          Icons.expand_less,
+          color: AppColors.textSecondary.withValues(alpha: 0.5),
+          size: 24,
+        ),
+        tooltip: '확장 (준비 중)',
+      ),
+    );
+  }
+
+  Widget _buildTextField() {
+    return TextField(
+      controller: _textController,
+      focusNode: _focusNode,
+      style: AppTextStyle.bodyMedium.copyWith(
+        color: AppColors.textPrimary,
+      ),
+      decoration: InputDecoration(
+        hintText: '제로로에게 메시지 보내기...',
+        hintStyle: AppTextStyle.bodySmall.copyWith(
+          color: AppColors.textSecondary,
+        ),
+        border: InputBorder.none,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 8,
+          vertical: 16,
+        ),
+      ),
+      maxLines: 1,
+      textInputAction: TextInputAction.send,
+      onChanged: (_) {
+        // TextField 변경 시 UI 업데이트를 위한 setState
+        setState(() {});
+      },
+      onSubmitted: (_) => _handleSend(),
+    );
+  }
+
+  Widget _buildSendButton(bool canSend) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: IconButton(
+        onPressed: canSend ? _handleSend : null,
+        icon: Icon(
+          Icons.send,
+          color: canSend
+              ? AppColors.primary
+              : AppColors.textSecondary.withValues(alpha: 0.3),
+          size: 24,
+        ),
+        tooltip: '전송',
       ),
     );
   }
