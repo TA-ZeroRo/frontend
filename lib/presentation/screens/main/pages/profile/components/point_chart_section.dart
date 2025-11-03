@@ -36,13 +36,38 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
       activationMode: ActivationMode.singleTap,
       tooltipSettings: const InteractiveTooltip(
         enable: true,
+        // 날짜와 점수만 표시 (format만 사용)
         format: 'point.x : point.y점',
       ),
     );
-    // 툴팁 설정
+    // 툴팁 설정 - builder 사용으로 커스텀 툴팁 표시
     _tooltipBehavior = TooltipBehavior(
       enable: true,
-      format: 'point.x : point.y점',
+      // 커스텀 툴팁 빌더로 날짜와 점수만 표시 (series 정보 제거)
+      builder: (data, point, series, pointIndex, seriesIndex) {
+        // 날짜 포맷팅
+        final dateStr = DateFormat('M/d').format(point.x);
+        final score = (point.y ?? 0).toInt();
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          child: Text(
+            '$dateStr : ${score}점',
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -256,6 +281,8 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
                           // Y축 값 (점수)
                           yValueMapper: (ChartData data, _) =>
                               data.score.toDouble(),
+                          // 시리즈 이름 (툴팁에서 series 정보 표시 방지)
+                          name: '포인트',
                           // 선 스타일
                           color: AppColors.primary,
                           width: 3,
