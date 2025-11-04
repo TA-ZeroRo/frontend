@@ -10,8 +10,8 @@ class ToastHelper {
   /// 성공 메시지 표시
   static void showSuccess(String message) {
     toastification.show(
-      margin: const EdgeInsets.only(top: appBarHeight),
-      alignment: Alignment.topCenter,
+      margin: const EdgeInsets.only(bottom: 50),
+      alignment: Alignment.bottomCenter,
       style: ToastificationStyle.flatColored,
       title: Text(message),
       autoCloseDuration: const Duration(seconds: 2),
@@ -22,8 +22,8 @@ class ToastHelper {
   /// 에러 메시지 표시
   static void showError(String message) {
     toastification.show(
-      margin: const EdgeInsets.only(top: appBarHeight),
-      alignment: Alignment.topCenter,
+      margin: const EdgeInsets.only(bottom: 50),
+      alignment: Alignment.bottomCenter,
       style: ToastificationStyle.flatColored,
       title: Text(message),
       autoCloseDuration: const Duration(seconds: 2),
@@ -34,8 +34,8 @@ class ToastHelper {
   /// 경고 메시지 표시
   static void showWarning(String message) {
     toastification.show(
-      margin: const EdgeInsets.only(top: appBarHeight),
-      alignment: Alignment.topCenter,
+      margin: const EdgeInsets.only(bottom: 50),
+      alignment: Alignment.bottomCenter,
       style: ToastificationStyle.flatColored,
       title: Text(message),
       autoCloseDuration: const Duration(seconds: 2),
@@ -46,8 +46,8 @@ class ToastHelper {
   /// 정보 메시지 표시
   static void showInfo(String message) {
     toastification.show(
-      margin: const EdgeInsets.only(top: appBarHeight),
-      alignment: Alignment.topCenter,
+      margin: const EdgeInsets.only(bottom: 50),
+      alignment: Alignment.bottomCenter,
       style: ToastificationStyle.flatColored,
       title: Text(message),
       autoCloseDuration: const Duration(seconds: 2),

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'dart:math' as math;
+import 'package:syncfusion_flutter_charts/charts.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
+import '../../../../../../domain/model/chart_data/chart_data.dart';
 import '../state/chart_controller.dart';
 
 class PointChartSection extends ConsumerStatefulWidget {
@@ -13,132 +14,67 @@ class PointChartSection extends ConsumerStatefulWidget {
   ConsumerState<PointChartSection> createState() => _PointChartSectionState();
 }
 
-class _PointChartSectionState extends ConsumerState<PointChartSection>
-    with TickerProviderStateMixin {
-  late ScrollController _scrollController;
-
-  // 애니메이션 관련 변수들
-  late AnimationController _chartAnimationController;
-  late Animation<double> _chartScaleAnimation;
-
-  // 차트 확장 관련 변수들
-  double _currentMaxY = 100.0; // 현재 Y축 최대값
-  double _targetMaxY = 100.0; // 목표 Y축 최대값
-  bool suspendedAnimation = false;
+class _PointChartSectionState extends ConsumerState<PointChartSection> {
+  // Syncfusion 차트 컨트롤러 (팬/줌용)
+  late ZoomPanBehavior _zoomPanBehavior;
+  late TrackballBehavior _trackballBehavior;
+  late TooltipBehavior _tooltipBehavior;
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
-
-    // 애니메이션 컨트롤러 초기화
-    _chartAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
+    // 팬/줌 동작 설정
+    _zoomPanBehavior = ZoomPanBehavior(
+      enablePanning: true,
+      enablePinching: true,
+      enableDoubleTapZooming: true,
+      zoomMode: ZoomMode.xy,
     );
-
-    // 차트 확장 애니메이션 (0.9 ~ 1.0 배율)
-    _chartScaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _chartAnimationController,
-        curve: Curves.easeInOutCubic,
+    // 트랙볼 설정
+    _trackballBehavior = TrackballBehavior(
+      enable: true,
+      activationMode: ActivationMode.singleTap,
+      tooltipSettings: const InteractiveTooltip(
+        enable: true,
+        // 날짜와 점수만 표시 (format만 사용)
+        format: 'point.x : point.y점',
       ),
     );
-
-    // 애니메이션 완료 리스너
-    _chartAnimationController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        setState(() {
-          _currentMaxY = _targetMaxY;
-          suspendedAnimation = false;
-        });
-        _chartAnimationController.reset();
-      }
-    });
-
-    // 초기 최대값 설정 (동적 계산)
-    _calculateDynamicScaling();
-
-    // 차트 초기화 시 가장 오른쪽(최신 데이터)으로 스크롤
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToLatest();
-    });
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _chartAnimationController.dispose();
-    super.dispose();
-  }
-
-  // 동적 스케일링 계산 메서드
-  void _calculateDynamicScaling() {
-    final chartData = ref.read(chartProvider);
-    if (chartData.isEmpty) {
-      _currentMaxY = 100.0;
-      _targetMaxY = 100.0;
-      return;
-    }
-
-    // 차트 컨트롤러의 계산 메서드 사용
-    _targetMaxY = ref
-        .read(chartProvider.notifier)
-        .calculateDynamicMaxY(chartData);
-    _currentMaxY = _targetMaxY;
-  }
-
-  void _scrollToLatest() {
-    const double pointWidth = 60.0; // 각 데이터 포인트의 너비
-
-    // 완전히 오른쪽 끝으로 스크롤하기 위해 최대 스크롤 위치 계산
-    final chartData = ref.read(chartProvider);
-    final double totalWidth = chartData.length * pointWidth;
-
-    // 스크롤 가능한 최대 위치는 (전체 너비 - 뷰포트 너비)
-    // 완전히 오른쪽 끝으로 가도록 약간의 여백을 더함
-    final double maxScroll = math.max(
-      0,
-      totalWidth, // 전체 너비로 스크롤해서 완전히 오른쪽 끝으로 이동
-    );
-
-    // 부드러운 애니메이션으로 스크롤
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          maxScroll,
-          duration: const Duration(milliseconds: 800),
-          curve: Curves.easeOut,
+    // 툴팁 설정 - builder 사용으로 커스텀 툴팁 표시
+    _tooltipBehavior = TooltipBehavior(
+      enable: true,
+      // 커스텀 툴팁 빌더로 날짜와 점수만 표시 (series 정보 제거)
+      builder: (data, point, series, pointIndex, seriesIndex) {
+        // 날짜 포맷팅
+        final dateStr = DateFormat('M/d').format(point.x);
+        final score = (point.y ?? 0).toInt();
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          child: Text(
+            '$dateStr : ${score}점',
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
         );
-      }
-    });
-  }
-
-  // Y축 간격을 보기 좋게 계산하는 함수 - 제공받은 로직 적용
-  double _getNiceInterval(double maxValue, int targetTickCount) {
-    if (maxValue <= 0) return 1;
-
-    // 대략적인 간격 계산 (최대값을 목표 눈금 수로 나누기)
-    final roughInterval = maxValue / targetTickCount;
-
-    // 10의 거듭제곱으로 반올림할 기준값 계산
-    final magnitude = math
-        .pow(10, roughInterval.toString().split('.')[0].length - 1)
-        .toDouble();
-
-    // 반올림하여 보기 좋은 간격 반환
-    return (roughInterval / magnitude).ceil() * magnitude;
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     // Riverpod에서 차트 데이터 가져오기
     final chartData = ref.watch(chartProvider);
-
-    // ChartData를 ScoreData로 변환
-    final List<ScoreData> _scoreData = chartData
-        .map((data) => ScoreData(data.date, data.score))
-        .toList();
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -162,24 +98,53 @@ class _PointChartSectionState extends ConsumerState<PointChartSection>
                 ),
               ),
               const Spacer(),
-              // Chart info badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    width: 1,
+              // Chart info badges
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      '${chartData.length}일간',
+                      style: AppTextStyle.bodySmall.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
-                child: Text(
-                  '${_scoreData.length}일간',
-                  style: AppTextStyle.bodySmall.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      chartData.isNotEmpty ? '${chartData.last.score}점' : '0점',
+                      style: AppTextStyle.bodySmall.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),
@@ -196,530 +161,155 @@ class _PointChartSectionState extends ConsumerState<PointChartSection>
                 width: 1,
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 제목
-                Row(
-                  children: [
-                    Text(
-                      '내 성과 변화',
-                      style: AppTextStyle.titleMedium.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
+            child: chartData.isEmpty
+                ? SizedBox(
+                    height: 270,
+                    width: double.infinity,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.trending_up_outlined,
+                            size: 48,
+                            color: AppColors.textTertiary,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            '아직 성과 데이터가 없습니다',
+                            style: AppTextStyle.bodyLarge.copyWith(
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '활동을 시작하면 차트가 표시됩니다',
+                            style: AppTextStyle.bodySmall.copyWith(
+                              color: AppColors.textTertiary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    if (suspendedAnimation)
-                      AnimatedBuilder(
-                        animation: _chartAnimationController,
-                        builder: (context, child) {
-                          return Transform.rotate(
-                            angle: _chartScaleAnimation.value * 0.5,
-                            child: Icon(
-                              Icons.trending_up,
-                              color: AppColors.primary,
-                              size: 20 * _chartScaleAnimation.value,
-                            ),
-                          );
-                        },
+                  )
+                : SizedBox(
+                    height: 220,
+                    child: SfCartesianChart(
+                      // 차트 스타일 설정
+                      backgroundColor: Colors.transparent,
+                      plotAreaBackgroundColor: Colors.transparent,
+
+                      // 플롯 영역 패딩 설정 (데이터 라벨을 위한 공간 확보)
+                      plotAreaBorderWidth: 0,
+                      margin: const EdgeInsets.only(
+                        top: 30,
+                        bottom: 10,
+                        left: 10,
+                        right: 10,
                       ),
-                  ],
-                ),
-                const SizedBox(height: 16),
 
-                // 차트 또는 빈 상태 메시지
-                _scoreData.isEmpty
-                    ? Container(
-                        height: 270,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: AppColors.background.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppColors.textTertiary.withValues(
-                              alpha: 0.3,
-                            ),
-                            width: 1,
-                          ),
-                        ),
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.trending_up_outlined,
-                                size: 48,
-                                color: AppColors.textTertiary,
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                '아직 성과 데이터가 없습니다',
-                                style: AppTextStyle.bodyLarge.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '활동을 시작하면 차트가 표시됩니다',
-                                style: AppTextStyle.bodySmall.copyWith(
-                                  color: AppColors.textTertiary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    // 완전히 새로운 구조 - 차트 확장하고 외부 슬라이드바
-                    : Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: AppColors.textTertiary.withValues(
-                              alpha: 0.4,
-                            ),
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          children: [
-                            // 확장된 차트 영역 (세로 레이블이 전체 차트 높이와 날짜 레이블 포함)
-                            SizedBox(
-                              height: 220, // 차트 영역과 날짜 레이블을 포함한 전체 높이
-                              child: Row(
-                                children: [
-                                  // 확장된 세로 레이블 영역 (전체 높이에 걸쳐)
-                                  Container(
-                                    width: 50,
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                        right: BorderSide(
-                                          color: AppColors.textTertiary
-                                              .withValues(alpha: 0.4),
-                                          width: 1,
-                                        ),
-                                      ),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        // 차트 영역 레이블 (200px)
-                                        Expanded(
-                                          flex: 4, // 차트 영역 비율
-                                          child: Column(
-                                            children: List.generate(6, (index) {
-                                              final interval = _getNiceInterval(
-                                                _currentMaxY,
-                                                5,
-                                              );
-                                              final value =
-                                                  ((5 - index) * interval)
-                                                      .toInt();
+                      // 팬/줌 동작
+                      zoomPanBehavior: _zoomPanBehavior,
 
-                                              return Expanded(
-                                                child: Center(
-                                                  child: Text(
-                                                    value >= 1000
-                                                        ? '${(value / 1000).toStringAsFixed(1)}K'
-                                                        : value.toString(),
-                                                    style: TextStyle(
-                                                      color:
-                                                          AppColors.textPrimary,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 10,
-                                                    ),
-                                                  ),
-                                                ),
-                                              );
-                                            }),
-                                          ),
-                                        ),
-                                        // 날짜 레이블 영역 (50px) - 비우기, 차트와 일치하는 구분선
-                                        Container(
-                                          height: 50,
-                                          decoration: BoxDecoration(
-                                            border: Border(
-                                              top: BorderSide(
-                                                color: AppColors.textTertiary
-                                                    .withValues(alpha: 0.4),
-                                                width: 1,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  // 확장된 스크롤 연차트 영역 - Scrollbar로 감싸기
-                                  Expanded(
-                                    child: Scrollbar(
-                                      controller: _scrollController,
-                                      thumbVisibility: true,
-                                      trackVisibility: true,
-                                      thickness: 4,
-                                      radius: const Radius.circular(4),
-                                      child: SingleChildScrollView(
-                                        controller: _scrollController,
-                                        scrollDirection: Axis.horizontal,
-                                        child: SizedBox(
-                                          width: _scoreData.length * 60.0,
-                                          child: Column(
-                                            children: [
-                                              // 차트 영역 - Stack으로 수치 표시 포함
-                                              SizedBox(
-                                                height: 170, // 차트 높이 조정
-                                                child: Stack(
-                                                  children: [
-                                                    // 커스텀 차트 그래프 (격자선과 정확히 일치)
-                                                    Positioned.fill(
-                                                      child: CustomPaint(
-                                                        painter: CustomChartPainter(
-                                                          data: _scoreData,
-                                                          interval:
-                                                              _getNiceInterval(
-                                                                _currentMaxY,
-                                                                5,
-                                                              ),
-                                                          maxY: _currentMaxY,
-                                                          chartHeight: 170.0,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    // 차트 위에 수치 표시 오버레이
-                                                    Positioned.fill(
-                                                      child: Stack(
-                                                        children: _scoreData.asMap().entries.map((
-                                                          entry,
-                                                        ) {
-                                                          final index =
-                                                              entry.key;
-                                                          final scoreData =
-                                                              entry.value;
-                                                          // 각 데이터 포인트의 정확한 중앙 위치 (격자선과 일치)
-                                                          final x =
-                                                              (index * 60.0) +
-                                                              30;
+                      // 트랙볼
+                      trackballBehavior: _trackballBehavior,
 
-                                                          final maxY =
-                                                              suspendedAnimation
-                                                              ? _targetMaxY
-                                                              : _currentMaxY;
-                                                          // Y축 계산을 정확히 맞춤 - 실제 차트 영역(170px) 기준
-                                                          final yRatio =
-                                                              scoreData.score /
-                                                              maxY;
-                                                          // 커스텀 차트와 동일한 좌표 계산 사용
-                                                          final chartHeight =
-                                                              170.0;
-                                                          // 가로 격자선과 격자선과 동일한 계산식 사용
-                                                          final yPosition =
-                                                              chartHeight -
-                                                              (yRatio *
-                                                                  (chartHeight -
-                                                                      40)) -
-                                                              20;
+                      // 툴팁
+                      tooltipBehavior: _tooltipBehavior,
 
-                                                          return Positioned(
-                                                            left:
-                                                                x -
-                                                                15, // 박스 너비 절반으로 조정
-                                                            top:
-                                                                yPosition -
-                                                                25, // 차트 포인트 위에 정확히 위치
-                                                            child: Container(
-                                                              padding:
-                                                                  const EdgeInsets.symmetric(
-                                                                    horizontal:
-                                                                        4,
-                                                                    vertical: 2,
-                                                                  ),
-                                                              decoration: BoxDecoration(
-                                                                color: Colors
-                                                                    .transparent,
-                                                                borderRadius:
-                                                                    BorderRadius.circular(
-                                                                      4,
-                                                                    ),
-                                                                boxShadow: [
-                                                                  BoxShadow(
-                                                                    color: Colors
-                                                                        .grey
-                                                                        .withValues(
-                                                                          alpha:
-                                                                              0.2,
-                                                                        ),
-                                                                    blurRadius:
-                                                                        2,
-                                                                    offset:
-                                                                        const Offset(
-                                                                          1,
-                                                                          1,
-                                                                        ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                              child: Text(
-                                                                '${scoreData.score}점',
-                                                                style: TextStyle(
-                                                                  fontSize: 10,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  color: AppColors
-                                                                      .textPrimary,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          );
-                                                        }).toList(),
-                                                      ),
-                                                    ),
-                                                    // 가로 격자선 오버레이 (세로 레이블 기준)
-                                                    Positioned.fill(
-                                                      child: CustomPaint(
-                                                        painter:
-                                                            HorizontalGridPainter(
-                                                              interval:
-                                                                  _getNiceInterval(
-                                                                    _currentMaxY,
-                                                                    5,
-                                                                  ),
-                                                              maxY:
-                                                                  _currentMaxY,
-                                                              chartHeight:
-                                                                  170.0,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                    // 세로 격자선 오버레이
-                                                    Positioned.fill(
-                                                      child: CustomPaint(
-                                                        painter:
-                                                            VerticalGridPainter(
-                                                              dataCount:
-                                                                  _scoreData
-                                                                      .length,
-                                                              pointWidth: 60.0,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              // 하단 날짜 레이블 영역 (차트와 함께 스크롤됨) - 상단 구분선 추가
-                                              Container(
-                                                height: 50,
-                                                decoration: BoxDecoration(
-                                                  border: Border(
-                                                    top: BorderSide(
-                                                      color: AppColors
-                                                          .textTertiary
-                                                          .withValues(
-                                                            alpha: 0.4,
-                                                          ),
-                                                      width: 1,
-                                                    ),
-                                                  ),
-                                                ),
-                                                child: Row(
-                                                  children: _scoreData.map((
-                                                    data,
-                                                  ) {
-                                                    return SizedBox(
-                                                      width: 60.0,
-                                                      child: Center(
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets.only(
-                                                                bottom: 16.0,
-                                                              ),
-                                                          child: Text(
-                                                            DateFormat(
-                                                              'M/d',
-                                                            ).format(data.date),
-                                                            style: TextStyle(
-                                                              color: AppColors
-                                                                  .textPrimary,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontSize: 10,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }).toList(),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                      // X축 - 날짜 (DateTimeAxis)
+                      primaryXAxis: DateTimeAxis(
+                        // 날짜 포맷 설정
+                        dateFormat: DateFormat('M/d'),
+                        labelStyle: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
                         ),
+                        axisLine: AxisLine(
+                          color: AppColors.textTertiary.withValues(alpha: 0.4),
+                          width: 1,
+                        ),
+                        majorGridLines: MajorGridLines(
+                          color: AppColors.textTertiary.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                        minorGridLines: MinorGridLines(
+                          color: AppColors.textTertiary.withValues(alpha: 0.1),
+                        ),
+                        majorTickLines: const MajorTickLines(size: 0),
+                        minorTickLines: const MinorTickLines(size: 0),
+                        // 자동 스크롤 - 최신 데이터로 이동
+                        autoScrollingDelta: chartData.length > 7 ? 7 : null,
+                        autoScrollingDeltaType: DateTimeIntervalType.days,
+                        enableAutoIntervalOnZooming: true,
+                        edgeLabelPlacement: EdgeLabelPlacement.shift,
                       ),
-              ],
-            ),
+
+                      // Y축 - 점수 (NumericAxis) - Syncfusion 자동 계산 사용
+                      primaryYAxis: NumericAxis(
+                        // maximum과 interval을 지정하지 않으면
+                        // Syncfusion이 데이터 범위에 맞춰 자동으로 최대값과 간격을 계산합니다
+                        // 그래프 수치가 높아질수록 세로 레이블 숫자도 자동으로 커집니다
+                        // Y축 라벨 포맷 (1000 이상이면 K 표시)
+                        numberFormat: NumberFormat.compact(),
+                        labelStyle: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        axisLine: AxisLine(
+                          color: AppColors.textTertiary.withValues(alpha: 0.4),
+                          width: 1,
+                        ),
+                        majorGridLines: MajorGridLines(
+                          color: AppColors.textTertiary.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                        majorTickLines: const MajorTickLines(size: 0),
+                        minorTickLines: const MinorTickLines(size: 0),
+                      ),
+
+                      // 차트 시리즈
+                      series: <LineSeries<ChartData, DateTime>>[
+                        LineSeries<ChartData, DateTime>(
+                          // 데이터 소스
+                          dataSource: chartData,
+                          // X축 값 (날짜)
+                          xValueMapper: (ChartData data, _) => data.date,
+                          // Y축 값 (점수)
+                          yValueMapper: (ChartData data, _) =>
+                              data.score.toDouble(),
+                          // 시리즈 이름 (툴팁에서 series 정보 표시 방지)
+                          name: '포인트',
+                          // 선 스타일
+                          color: AppColors.primary,
+                          width: 3,
+                          // 데이터 포인트 마커
+                          markerSettings: MarkerSettings(
+                            isVisible: true,
+                            height: 12,
+                            width: 12,
+                            shape: DataMarkerType.circle,
+                            color: AppColors.primary,
+                            borderColor: AppColors.cardBackground,
+                            borderWidth: 2,
+                          ),
+                          // 데이터 라벨 숨김 (그래프에서 점수 제거)
+                          dataLabelSettings: const DataLabelSettings(
+                            isVisible: false,
+                          ),
+                          // 애니메이션
+                          animationDuration: 800,
+                          enableTooltip: true,
+                        ),
+                      ],
+                    ),
+                  ),
           ),
         ],
       ),
     );
   }
-}
-
-// 커스텀 차트 그래프 그리기 페인터
-class CustomChartPainter extends CustomPainter {
-  final List<ScoreData> data;
-  final double interval;
-  final double maxY;
-  final double chartHeight;
-
-  CustomChartPainter({
-    required this.data,
-    required this.interval,
-    required this.maxY,
-    required this.chartHeight,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (data.isEmpty) return;
-
-    final paint = Paint()
-      ..color = AppColors.primary
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke;
-
-    final path = Path();
-
-    for (int i = 0; i < data.length; i++) {
-      final scoreData = data[i];
-      final x = (i * 60.0) + 30; // 데이터 포인트 중앙
-
-      // Y 좌표를 가로 격자선과 동일한 방식으로 계산
-      final yRatio = scoreData.score / maxY;
-      final y = chartHeight - (yRatio * (chartHeight - 40)) - 20;
-
-      final point = Offset(x, y);
-
-      if (i == 0) {
-        path.moveTo(point.dx, point.dy);
-      } else {
-        path.lineTo(point.dx, point.dy);
-      }
-
-      // 데이터 포인트 그리기 (원 모양)
-      canvas.drawCircle(
-        point,
-        6,
-        Paint()
-          ..color = AppColors.primary
-          ..style = PaintingStyle.fill,
-      );
-      canvas.drawCircle(
-        point,
-        6,
-        Paint()
-          ..color = AppColors.cardBackground
-          ..strokeWidth = 2
-          ..style = PaintingStyle.stroke,
-      );
-    }
-
-    // 경로 그리기
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomChartPainter oldDelegate) {
-    return data != oldDelegate.data ||
-        interval != oldDelegate.interval ||
-        maxY != oldDelegate.maxY ||
-        chartHeight != oldDelegate.chartHeight;
-  }
-}
-
-// 가로 격자선을 그리는 커스텀 페인터 (세로 레이블 좌표 기준)
-class HorizontalGridPainter extends CustomPainter {
-  final double interval;
-  final double maxY;
-  final double chartHeight;
-
-  HorizontalGridPainter({
-    required this.interval,
-    required this.maxY,
-    required this.chartHeight,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.textTertiary.withValues(alpha: 0.3)
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
-
-    // 세로 레이블 값들에 해당하는 가로 격자선 그리기
-    for (int i = 0; i <= 5; i++) {
-      final value = i * interval.toDouble();
-      final yRatio = value / maxY;
-      final y = chartHeight - (yRatio * (chartHeight - 40)) - 20; // 패딩 고려
-
-      // 차트 영역 내에서만 선 그리기
-      if (y >= 20 && y <= chartHeight - 20) {
-        canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(HorizontalGridPainter oldDelegate) {
-    return interval != oldDelegate.interval ||
-        maxY != oldDelegate.maxY ||
-        chartHeight != oldDelegate.chartHeight;
-  }
-}
-
-// 세로 격자선을 그리는 커스텀 페인터
-class VerticalGridPainter extends CustomPainter {
-  final int dataCount;
-  final double pointWidth;
-
-  VerticalGridPainter({required this.dataCount, required this.pointWidth});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.textTertiary.withValues(alpha: 0.3)
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
-
-    // 세로 격자선 그리기 - 각 데이터 포인트 위치에 선 그리기
-    for (int i = 0; i < dataCount; i++) {
-      final x = i * pointWidth + (pointWidth / 2); // 데이터 포인트 중심에 선 그리기
-      if (x < size.width) {
-        canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(VerticalGridPainter oldDelegate) {
-    return dataCount != oldDelegate.dataCount ||
-        pointWidth != oldDelegate.pointWidth;
-  }
-}
-
-// 차트 데이터 클래스
-class ScoreData {
-  final DateTime date;
-  final int score;
-
-  ScoreData(this.date, this.score);
 }
