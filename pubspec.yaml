@@ -54,6 +54,7 @@ dependencies:
   google_sign_in: ^6.2.1
   logger: ^2.6.2
   flutter_3d_controller: ^2.3.0
+  google_fonts: ^6.3.2
 
 dev_dependencies:
   flutter_test:
