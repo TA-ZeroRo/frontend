@@ -219,7 +219,7 @@ class _EditPostScreenState extends ConsumerState<EditPostScreen> {
                           textAlign: TextAlign.center,
                           style: AppTextStyle.titleMedium.copyWith(
                             color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),

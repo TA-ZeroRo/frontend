@@ -89,7 +89,7 @@ class CollapsibleLeaderboardSection extends ConsumerWidget {
                 '리더보드',
                 style: TextStyle(
                   fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                   color: Colors.black87,
                 ),
               ),
@@ -190,7 +190,7 @@ class CollapsibleLeaderboardSection extends ConsumerWidget {
         dividerColor: Colors.transparent,
         labelColor: Colors.blue[700],
         unselectedLabelColor: Colors.black,
-        labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        labelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
         unselectedLabelStyle: const TextStyle(
           fontWeight: FontWeight.w500,
           fontSize: 16,
@@ -220,7 +220,7 @@ class CollapsibleLeaderboardSection extends ConsumerWidget {
                 '국외 랭킹 구현 예정',
                 style: TextStyle(
                   fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                   color: Colors.grey[600],
                 ),
               ),

@@ -59,7 +59,7 @@ class _CustomInfoDialogState extends State<CustomInfoDialog> {
               child: Text(
                 widget.title,
                 style: const TextStyle(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                   fontSize: 20,
                 ),
               ),

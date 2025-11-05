@@ -73,7 +73,7 @@ class _CommentDialogState extends ConsumerState<CommentDialog> {
               children: [
                 const Text(
                   '댓글',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),

@@ -170,7 +170,7 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w500,
                               color: Colors.black,
                             ),
                           ),
@@ -219,7 +219,7 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
                                 '카테고리 선택',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
@@ -255,7 +255,7 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
                                 '사진 첨부',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
@@ -493,7 +493,7 @@ class _VerifyImageScreenState extends ConsumerState<VerifyImageScreen> {
                       'AI가 분석 중입니다...',
                       style: TextStyle(
                         color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w500,
                         fontSize: 16,
                       ),
                       textAlign: TextAlign.center,

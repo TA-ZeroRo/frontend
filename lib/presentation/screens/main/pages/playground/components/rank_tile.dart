@@ -73,7 +73,7 @@ class MyRankTile extends StatelessWidget {
                     style: const TextStyle(
                       color: AppColors.white,
                       fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -87,7 +87,7 @@ class MyRankTile extends StatelessWidget {
                   style: const TextStyle(
                     color: AppColors.white,
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -96,7 +96,7 @@ class MyRankTile extends StatelessWidget {
                   style: TextStyle(
                     color: AppColors.white.withOpacity(0.9),
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -170,7 +170,7 @@ class RankTile extends StatelessWidget {
                 style: const TextStyle(
                   color: Colors.black87,
                   fontSize: 12,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
       ),
@@ -252,7 +252,7 @@ class RankTile extends StatelessWidget {
                     name,
                     style: const TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: Colors.black87,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -278,7 +278,7 @@ class RankTile extends StatelessWidget {
                   '$score점',
                   style: const TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                     color: AppColors.positive,
                   ),
                   overflow: TextOverflow.ellipsis,

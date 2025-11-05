@@ -65,7 +65,7 @@ class ActivityVerificationSection extends StatelessWidget {
               '활동 인증',
               style: TextStyle(
                 fontSize: 22,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: Colors.black87,
               ),
             ),
@@ -179,7 +179,7 @@ class _ActivityCardState extends State<_ActivityCard> {
                   widget.title,
                   style: const TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: Colors.black87,
                   ),
                 ),
@@ -208,7 +208,7 @@ class _ActivityCardState extends State<_ActivityCard> {
                     widget.points,
                     style: const TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w500,
                       color: Color(0xFF74CD7C),
                     ),
                   ),

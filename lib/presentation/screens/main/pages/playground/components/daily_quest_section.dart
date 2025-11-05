@@ -71,7 +71,7 @@ class DailyQuestSection extends ConsumerWidget {
             '일일 퀘스트',
             style: TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w500,
               color: Colors.black87,
             ),
           ),
@@ -120,7 +120,7 @@ class _AttendanceTracker extends StatelessWidget {
                 '${attendance.consecutiveDays}일 연속 출석',
                 style: const TextStyle(
                   fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                   color: Color(0xFF5D4037),
                 ),
               ),
@@ -207,7 +207,7 @@ class _AttendanceDayCircle extends StatelessWidget {
                     day.dayName,
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w500,
                       color: day.isToday
                           ? const Color(0xFF5D4037)
                           : const Color(0xFF999999),
@@ -238,7 +238,7 @@ class _QuestList extends ConsumerWidget {
               '오늘의 미션',
               style: TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
                 color: Colors.black87,
               ),
             ),
@@ -258,7 +258,7 @@ class _QuestList extends ConsumerWidget {
                     '$completedCount/${quests.length} 완료',
                     style: const TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w500,
                       color: Color(0xFF4A90E2),
                     ),
                   ),
@@ -373,7 +373,7 @@ class _QuestItemState extends ConsumerState<_QuestItem> {
                   '+${widget.quest.points}pt',
                   style: TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                     color: widget.quest.isCompleted
                         ? const Color(0xFF4CAF50)
                         : const Color(0xFF74CD7C),

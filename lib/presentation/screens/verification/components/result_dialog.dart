@@ -33,7 +33,7 @@ class VerificationResultDialog extends StatelessWidget {
             isValid ? '인증 성공!' : '인증 실패',
             style: TextStyle(
               color: isValid ? positiveColor : errorColor,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],

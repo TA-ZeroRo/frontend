@@ -16,7 +16,7 @@ class SettingsAppBar extends StatelessWidget {
             const Spacer(),
             const Text(
               '설정',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             ),
             const Spacer(),
             const SizedBox(width: 48),
@@ -61,7 +61,7 @@ class SettingsSection extends StatelessWidget {
                 title,
                 style: const TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
@@ -99,7 +99,7 @@ class SettingsToggleTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: ListTile(
         leading: Icon(icon, color: iconColor),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
         subtitle: subtitle != null ? Text(subtitle!) : null,
         trailing: Switch(value: value, onChanged: onChanged),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -130,7 +130,7 @@ class SettingsActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final bgColor = isDanger ? Colors.red.withOpacity(0.06) : Colors.grey[50];
     final titleStyle = TextStyle(
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w500,
       color: isDanger ? Colors.red : Colors.black,
     );
 

@@ -179,7 +179,7 @@ class _VerifyQuizScreenState extends ConsumerState<VerifyQuizScreen>
                 isCorrect ? '정답입니다!' : '오답입니다!',
                 style: TextStyle(
                   fontSize: 24,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                   color: isCorrect ? _positiveColor : _errorColor,
                 ),
               ),
@@ -197,7 +197,7 @@ class _VerifyQuizScreenState extends ConsumerState<VerifyQuizScreen>
                       '해설',
                       style: TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w500,
                         color: Colors.black87,
                       ),
                     ),
@@ -233,7 +233,7 @@ class _VerifyQuizScreenState extends ConsumerState<VerifyQuizScreen>
                     '다음 문제',
                     style: TextStyle(
                       fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w500,
                       color: Colors.white,
                     ),
                   ),
@@ -298,7 +298,7 @@ class _VerifyQuizScreenState extends ConsumerState<VerifyQuizScreen>
                 label,
                 style: const TextStyle(
                   fontSize: 36,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                   color: Colors.white,
                 ),
               ),
@@ -336,7 +336,7 @@ class _VerifyQuizScreenState extends ConsumerState<VerifyQuizScreen>
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w500,
                           color: Colors.black,
                         ),
                       ),
@@ -483,7 +483,7 @@ class _VerifyQuizScreenState extends ConsumerState<VerifyQuizScreen>
                                     textAlign: TextAlign.center,
                                     style: const TextStyle(
                                       fontSize: 22,
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.w500,
                                       height: 1.4,
                                       color: Colors.black87,
                                     ),
@@ -543,7 +543,7 @@ class _VerifyQuizScreenState extends ConsumerState<VerifyQuizScreen>
                   _resultColor?.withValues(alpha: 0.9) ?? Colors.black.withValues(alpha: 0.9),
               textStyle: const TextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
                 fontSize: 48,
               ),
               animation: _fadeAnimation,

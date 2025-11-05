@@ -233,7 +233,7 @@ class PlaygroundShimmer extends StatelessWidget {
                   '리더보드',
                   style: TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                     color: Colors.black87,
                   ),
                 ),

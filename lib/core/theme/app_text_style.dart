@@ -58,14 +58,14 @@ class AppTextStyle {
 
   static const TextStyle titleMedium = TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     height: 1.5,
     letterSpacing: 1.3,
   );
 
   static const TextStyle titleSmall = TextStyle(
     fontSize: 14,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     height: 1.43,
     letterSpacing: 1.2,
   );
@@ -95,21 +95,21 @@ class AppTextStyle {
   // Label
   static const TextStyle labelLarge = TextStyle(
     fontSize: 14,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     height: 1.43,
     letterSpacing: 1.2,
   );
 
   static const TextStyle labelMedium = TextStyle(
     fontSize: 12,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     height: 1.33,
     letterSpacing: 1.6,
   );
 
   static const TextStyle labelSmall = TextStyle(
     fontSize: 11,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     height: 1.45,
     letterSpacing: 1.6,
   );

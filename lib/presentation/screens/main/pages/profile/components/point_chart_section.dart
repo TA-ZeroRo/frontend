@@ -62,7 +62,7 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
             '$dateStr : ${score}점',
             style: const TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w500,
               color: AppColors.textPrimary,
             ),
           ),
@@ -94,7 +94,7 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
                 '포인트 추이',
                 style: AppTextStyle.titleLarge.copyWith(
                   color: AppColors.textPrimary,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Spacer(),
@@ -118,7 +118,7 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
                       '${chartData.length}일간',
                       style: AppTextStyle.bodySmall.copyWith(
                         color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
@@ -140,7 +140,7 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
                       chartData.isNotEmpty ? '${chartData.last.score}점' : '0점',
                       style: AppTextStyle.bodySmall.copyWith(
                         color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
@@ -225,7 +225,7 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
                         labelStyle: const TextStyle(
                           color: AppColors.textPrimary,
                           fontSize: 10,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w500,
                         ),
                         axisLine: AxisLine(
                           color: AppColors.textTertiary.withValues(alpha: 0.4),
@@ -257,7 +257,7 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
                         labelStyle: const TextStyle(
                           color: AppColors.textPrimary,
                           fontSize: 10,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w500,
                         ),
                         axisLine: AxisLine(
                           color: AppColors.textTertiary.withValues(alpha: 0.4),

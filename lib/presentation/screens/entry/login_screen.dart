@@ -127,7 +127,7 @@ class LoginScreen extends ConsumerWidget {
                             style: TextStyle(
                               color: AppColors.onPrimary,
                               fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
@@ -181,7 +181,7 @@ class LoginScreen extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 16,
                         color: AppColors.onPrimary,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
