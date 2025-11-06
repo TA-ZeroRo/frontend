@@ -25,7 +25,7 @@ class SettingsAppBar extends StatelessWidget {
             const Spacer(),
             Text(
               '설정',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             ),
             const Spacer(),
             const SizedBox(width: 48),
@@ -70,7 +70,7 @@ class SettingsSection extends StatelessWidget {
                 title,
                 style: const TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
@@ -108,7 +108,7 @@ class SettingsToggleTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: ListTile(
         leading: Icon(icon, color: iconColor),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
         subtitle: subtitle != null ? Text(subtitle!) : null,
         trailing: Switch(value: value, onChanged: onChanged),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -141,7 +141,7 @@ class SettingsActionTile extends StatelessWidget {
         ? AppColors.error.withOpacity(0.06)
         : AppColors.background;
     final titleStyle = TextStyle(
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w500,
       color: isDanger ? AppColors.error : AppColors.textPrimary,
     );
 
@@ -219,7 +219,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
           ),
           title: const Text(
             '로그아웃',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
           ),
           content: const Text(
             '정말로 로그아웃 하시겠습니까?',
@@ -290,7 +290,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
           title: const Text(
             '계정 삭제',
             style: TextStyle(
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w500,
               fontSize: 20,
               color: AppColors.error,
             ),
@@ -313,7 +313,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                 '이 작업은 되돌릴 수 없습니다.',
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   color: AppColors.error,
                 ),
               ),

@@ -94,7 +94,7 @@ class _CategorySelectorState extends State<CategorySelector>
                         .firstWhere((e) => e.id == _selectedSubCategoryId!)
                         .name
                   : '카테고리',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(fontWeight: FontWeight.w500),
             ),
             Icon(
               _isCategoryExpanded
@@ -129,7 +129,7 @@ class _CategorySelectorState extends State<CategorySelector>
             '카테고리 선택',
             style: TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w500,
               color: Colors.black87,
             ),
           ),
@@ -190,7 +190,7 @@ class _CategorySelectorState extends State<CategorySelector>
                 Text(
                   title,
                   style: TextStyle(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: isSuggestion
                         ? Colors.orange.shade700
                         : Colors.blue.shade700,
@@ -237,7 +237,7 @@ class _CategorySelectorState extends State<CategorySelector>
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: isSelected
-                            ? FontWeight.w600
+                            ? FontWeight.w500
                             : FontWeight.normal,
                         color: isSelected
                             ? Colors.green.shade700
@@ -277,7 +277,7 @@ class _CategorySelectorState extends State<CategorySelector>
                       '새로운 아이디어 제안하기',
                       style: TextStyle(
                         fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: Colors.orange.shade700,
                       ),
                     ),

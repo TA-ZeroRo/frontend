@@ -181,7 +181,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                               '${(_loadingProgress * 100).toInt()}%',
                               style: const TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w500,
                                 color: Colors.black87,
                               ),
                             ),

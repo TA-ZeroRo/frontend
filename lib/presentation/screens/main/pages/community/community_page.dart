@@ -57,7 +57,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                         'Community',
                         style: AppTextStyle.headlineSmall.copyWith(
                           color: AppColors.textPrimary,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       centerTitle: true,
@@ -124,7 +124,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                           'Community',
                           style: AppTextStyle.headlineSmall.copyWith(
                             color: AppColors.textPrimary,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         centerTitle: true,
@@ -177,7 +177,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
                         'Community',
                         style: AppTextStyle.headlineSmall.copyWith(
                           color: AppColors.textPrimary,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       centerTitle: true,

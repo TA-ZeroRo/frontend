@@ -284,7 +284,7 @@ class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
         'Playground',
         style: TextStyle(
           fontSize: 24,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w500,
           color: Colors.black,
         ),
       ),

@@ -194,7 +194,7 @@ class PostWidget extends ConsumerWidget {
                 Text(
                   post.title,
                   style: AppTextStyle.titleLarge.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                     color: AppColors.textPrimary,
                     height: 1.3,
                   ),

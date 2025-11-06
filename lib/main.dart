@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/config/env_var.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:toastification/toastification.dart';
 
@@ -31,7 +32,19 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ProviderScope(
       child: ToastificationWrapper(
-        child: MaterialApp.router(routerConfig: router),
+        child: MaterialApp.router(
+          routerConfig: router,
+          theme: ThemeData(
+            // 기본 텍스트 테마에 Jua 폰트 적용
+            textTheme: GoogleFonts.juaTextTheme(
+              ThemeData.light().textTheme,
+            ),
+            // 주요 텍스트 테마에도 Jua 폰트 적용
+            primaryTextTheme: GoogleFonts.juaTextTheme(
+              ThemeData.light().primaryTextTheme,
+            ),
+          ),
+        ),
       ),
     );
   }

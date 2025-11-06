@@ -90,7 +90,7 @@ class CommentCard extends StatelessWidget {
               children: [
                 Text(
                   userName,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
                 if (isMyComment)
                   PopupMenuButton<String>(

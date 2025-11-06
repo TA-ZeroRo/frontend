@@ -80,7 +80,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         '프로필',
         style: AppTextStyle.headlineSmall.copyWith(
           color: AppColors.textPrimary,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w500,
         ),
       ),
       centerTitle: true,

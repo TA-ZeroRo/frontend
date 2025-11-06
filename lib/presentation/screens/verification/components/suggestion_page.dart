@@ -97,7 +97,7 @@ class _SuggestionPageState extends State<SuggestionPage> {
       appBar: AppBar(
         title: const Text(
           '건의하기',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.w500),
         ),
         centerTitle: true,
         actions: [
@@ -139,7 +139,7 @@ class _SuggestionPageState extends State<SuggestionPage> {
                       '첨부된 이미지',
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 12),

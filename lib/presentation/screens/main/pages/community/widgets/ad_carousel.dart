@@ -118,7 +118,7 @@ class _AdCarouselState extends State<AdCarousel> {
               ad.title,
               style: AppTextStyle.titleLarge.copyWith(
                 color: AppColors.buttonTextColor,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 6),

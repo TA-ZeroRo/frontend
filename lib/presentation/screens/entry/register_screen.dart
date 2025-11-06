@@ -106,7 +106,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           '지역',
                           style: AppTextStyle.titleLarge.copyWith(
                             color: AppColors.onPrimary,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         IconButton(
@@ -243,7 +243,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       '프로필 사진 선택',
                       style: AppTextStyle.titleLarge.copyWith(
                         color: AppColors.onPrimary,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     IconButton(
@@ -310,7 +310,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               label,
               style: AppTextStyle.bodyLarge.copyWith(
                 color: isDestructive ? AppColors.error : AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -374,7 +374,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           '회원가입',
           style: AppTextStyle.headlineSmall.copyWith(
             color: AppColors.onPrimary,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w500,
           ),
         ),
         centerTitle: true,
@@ -394,7 +394,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   '환영합니다!',
                   style: AppTextStyle.titleLarge.copyWith(
                     color: AppColors.textPrimary,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -634,7 +634,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   color: authNotifier.isRegisterFormValid()
                                       ? AppColors.onPrimary
                                       : AppColors.cardBackground,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                               if (authNotifier.isRegisterFormValid()) ...[
@@ -681,7 +681,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               title,
               style: AppTextStyle.bodyMedium.copyWith(
                 color: AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],

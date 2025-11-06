@@ -305,7 +305,7 @@ class _WeeklyReportLibrarySectionState
                 '월간보고서',
                 style: AppTextStyle.titleLarge.copyWith(
                   color: AppColors.textPrimary,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
@@ -507,7 +507,7 @@ class _WeeklyReportCard extends StatelessWidget {
                             report.periodString,
                             style: AppTextStyle.bodySmall.copyWith(
                               color: AppColors.onPrimary,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
@@ -595,7 +595,7 @@ class _WeeklyReportContent extends StatelessWidget {
           '${report.username}의 월간 활동',
           style: AppTextStyle.headlineSmall.copyWith(
             color: AppColors.textPrimary,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 8),
@@ -759,7 +759,7 @@ class _WeeklyReportContent extends StatelessWidget {
                     '${points}+',
                     style: AppTextStyle.titleMedium.copyWith(
                       color: pointsColor,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   if (differenceText != null) ...[
@@ -831,7 +831,7 @@ class _WeeklyReportContent extends StatelessWidget {
         // 카테고리 텍스트 너비 계산
         final categoryTextStyle = AppTextStyle.bodySmall.copyWith(
           color: AppColors.primary,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w500,
         );
         final categoryTextPainter = TextPainter(
           text: TextSpan(text: categoryName, style: categoryTextStyle),
@@ -843,7 +843,7 @@ class _WeeklyReportContent extends StatelessWidget {
         // 숫자 텍스트 스타일 정의
         final countTextStyle = AppTextStyle.bodyMedium.copyWith(
           color: AppColors.textPrimary,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w500,
         );
 
         // • 너비 계산
@@ -899,7 +899,7 @@ class _WeeklyReportContent extends StatelessWidget {
                   '$categoryName',
                   style: AppTextStyle.bodySmall.copyWith(
                     color: AppColors.primary,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
@@ -921,7 +921,7 @@ class _WeeklyReportContent extends StatelessWidget {
                   '$count개',
                   style: AppTextStyle.bodyMedium.copyWith(
                     color: AppColors.textPrimary,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
             ],
@@ -982,7 +982,7 @@ class _WeeklyReportContent extends StatelessWidget {
                 _getCategoryDisplayName(category),
                 style: AppTextStyle.bodySmall.copyWith(
                   color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
@@ -994,7 +994,7 @@ class _WeeklyReportContent extends StatelessWidget {
                   '• $campaign',
                   style: AppTextStyle.titleMedium.copyWith(
                     color: AppColors.textPrimary,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),

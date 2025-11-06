@@ -84,7 +84,7 @@ class _LikeButtonState extends State<LikeButton> with SingleTickerProviderStateM
                   '$likeCount',
                   style: AppTextStyle.labelMedium.copyWith(
                     color: isLiked ? AppColors.likeActive : AppColors.textSecondary,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],

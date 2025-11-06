@@ -122,7 +122,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                       '프로필 사진 변경',
                       style: AppTextStyle.titleLarge.copyWith(
                         color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     IconButton(
@@ -190,7 +190,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
               label,
               style: AppTextStyle.bodyLarge.copyWith(
                 color: isDestructive ? AppColors.error : AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -270,7 +270,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
   /// Picker 아이템 텍스트 스타일 (일관성 유지)
   TextStyle get _pickerTextStyle => AppTextStyle.bodyLarge.copyWith(
     color: AppColors.textPrimary,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
   );
 
   Future<void> _selectRegion() async {
@@ -346,7 +346,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                           '지역',
                           style: AppTextStyle.titleLarge.copyWith(
                             color: AppColors.textPrimary,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         TextButton(
@@ -363,7 +363,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                             '완료',
                             style: AppTextStyle.bodyLarge.copyWith(
                               color: AppColors.primary,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
@@ -459,7 +459,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                     '프로필 정보',
                     style: AppTextStyle.titleLarge.copyWith(
                       color: AppColors.textPrimary,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const Spacer(),
@@ -640,7 +640,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                             controller: _usernameController,
                             style: AppTextStyle.headlineSmall.copyWith(
                               color: AppColors.textPrimary,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w500,
                             ),
                             decoration: InputDecoration(
                               hintText: '이름을 입력하세요',
@@ -677,7 +677,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
                             user.username,
                             style: AppTextStyle.headlineSmall.copyWith(
                               color: AppColors.textPrimary,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         const SizedBox(height: 8),
@@ -853,7 +853,7 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
             value,
             style: AppTextStyle.titleMedium.copyWith(
               color: AppColors.textPrimary,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
