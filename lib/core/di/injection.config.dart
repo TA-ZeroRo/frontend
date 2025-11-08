@@ -16,11 +16,7 @@ import 'package:frontend/data/data_source/user/user_remote_data_source.dart'
     as _i64;
 import 'package:frontend/data/repository_impl/user_repository_impl.dart'
     as _i609;
-import 'package:frontend/data/repository_impl/weekly_report_repository_impl.dart'
-    as _i196;
 import 'package:frontend/domain/repository/user_repository.dart' as _i653;
-import 'package:frontend/domain/repository/weekly_report_repository.dart'
-    as _i117;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
@@ -34,9 +30,6 @@ extension GetItInjectableX on _i174.GetIt {
     final dioModule = _$DioModule();
     gh.singleton<_i182.StorageService>(() => _i182.StorageService());
     gh.lazySingleton<_i361.Dio>(() => dioModule.dio);
-    gh.factory<_i117.WeeklyReportRepository>(
-      () => _i196.WeeklyReportRepositoryImpl(),
-    );
     gh.factory<_i64.UserRemoteDataSource>(
       () => _i64.UserRemoteDataSource(gh<_i361.Dio>()),
     );

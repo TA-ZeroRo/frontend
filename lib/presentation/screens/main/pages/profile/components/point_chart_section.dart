@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
-import '../../../../../../domain/model/chart_data/chart_data.dart';
+import '../state/mock/chart_mock_data.dart';
 import '../state/chart_controller.dart';
 
 class PointChartSection extends ConsumerStatefulWidget {
@@ -272,14 +272,14 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
                       ),
 
                       // 차트 시리즈
-                      series: <LineSeries<ChartData, DateTime>>[
-                        LineSeries<ChartData, DateTime>(
+                      series: <LineSeries<ProfileChartData, DateTime>>[
+                        LineSeries<ProfileChartData, DateTime>(
                           // 데이터 소스
                           dataSource: chartData,
                           // X축 값 (날짜)
-                          xValueMapper: (ChartData data, _) => data.date,
+                          xValueMapper: (ProfileChartData data, _) => data.date,
                           // Y축 값 (점수)
-                          yValueMapper: (ChartData data, _) =>
+                          yValueMapper: (ProfileChartData data, _) =>
                               data.score.toDouble(),
                           // 시리즈 이름 (툴팁에서 series 정보 표시 방지)
                           name: '포인트',

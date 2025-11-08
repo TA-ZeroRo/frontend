@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../../core/di/injection.dart';
-import '../../../../../../core/services/weekly_report_service.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
-import '../../../../../../domain/model/weekly_report/weekly_report.dart';
-import '../../../../../../domain/repository/weekly_report_repository.dart';
-import '../../activity/state/activity_state.dart';
 import '../state/weekly_report_controller.dart';
-import '../state/user_controller.dart';
+import '../state/mock/weekly_report_mock_data.dart';
 
 class WeeklyReportLibrarySection extends ConsumerStatefulWidget {
   const WeeklyReportLibrarySection({super.key});
@@ -26,23 +21,9 @@ class _WeeklyReportLibrarySectionState
   @override
   void initState() {
     super.initState();
-    // 월간보고서 자동 생성 체크 및 가장 최근 보고서 자동 펼침
+    // 가장 최근 보고서 자동 펼침
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeReports();
-    });
-  }
-
-  Future<void> _initializeReports() async {
-    // 과거 보고서를 먼저 생성하여 previousMonthPoints가 제대로 설정되도록 함
-    await _generatePastReports();
-    await _checkAndGenerateWeeklyReport();
-
-    // 모든 보고서의 previousMonthPoints를 최종적으로 업데이트
-    await _updateAllReportsPreviousMonthPoints();
-
-    // 첫 보고서를 자동으로 펼치기만 하고, 스크롤은 하지 않음 (창 변환 시 이동 방지)
-    final reportsAsync = ref.read(weeklyReportsProvider);
-    reportsAsync.whenData((reports) {
+      final reports = ref.read(weeklyReportsProvider);
       if (reports.isNotEmpty && _expandedReportId == null && mounted) {
         setState(() {
           _expandedReportId = reports.first.id;
@@ -51,216 +32,7 @@ class _WeeklyReportLibrarySectionState
     });
   }
 
-  Future<void> _checkAndGenerateWeeklyReport() async {
-    final user = ref.read(userProvider).value;
-    if (user == null) return;
-
-    final service = WeeklyReportService();
-    final missionState = ref.read(campaignMissionProvider);
-
-    // 캠페인 목록 추출
-    final campaignList = missionState.campaigns.map((c) => c.name).toList();
-
-    // 모든 미션을 flatten
-    final allMissions = missionState.campaigns
-        .expand((campaign) => campaign.missions)
-        .toList();
-
-    final completedMissionCount = allMissions
-        .where((mission) => mission.isCompleted)
-        .length;
-    final totalDailyMissions = allMissions.length;
-    final dailyMissionCompletedCount = completedMissionCount;
-
-    // 카테고리별 클리어한 미션 개수 계산
-    final missionCategoryCounts = <String, int>{};
-    for (final mission in allMissions.where((mission) => mission.isCompleted)) {
-      final backendCategory = _mapCategoryToBackend(mission.category);
-      missionCategoryCounts[backendCategory] =
-          (missionCategoryCounts[backendCategory] ?? 0) + 1;
-    }
-
-    // 월간 포인트 계산
-    final calculatedPoints = allMissions
-        .where((mission) => mission.isCompleted)
-        .fold(0, (sum, mission) => sum + mission.points);
-    // 실제 데이터가 0이거나 없으면 목데이터 사용 (350: 저번달 450보다 감소 → 파란색)
-    final monthlyPointsEarned = calculatedPoints > 0 ? calculatedPoints : 350;
-
-    await service.checkAndGenerateWeeklyReport(
-      userId: user.id,
-      username: user.username,
-      campaignList: campaignList,
-      dailyMissionCompletedCount: dailyMissionCompletedCount,
-      totalDailyMissions: totalDailyMissions,
-      monthlyPointsEarned: monthlyPointsEarned,
-      missionCategoryCounts: missionCategoryCounts,
-    );
-
-    // 보고서 생성/업데이트 후 목록 새로고침
-    await ref.read(weeklyReportsProvider.notifier).refresh();
-  }
-
-  /// 과거 월간보고서 생성 (초기 데이터용)
-  Future<void> _generatePastReports() async {
-    final user = ref.read(userProvider).value;
-    if (user == null) return;
-
-    final repository = getIt<WeeklyReportRepository>();
-
-    // 현재 보고서 목록 확인
-    final existingReports = await repository.getWeeklyReports(user.id);
-
-    // 최근 3개월 보고서가 필요한데 현재 보고서만 있으면 과거 2개 생성
-    if (existingReports.length < 3) {
-      final now = DateTime.now();
-
-      // 지난 2개월 보고서 생성 (각각 1개월, 2개월 전)
-      // 순서: 2개월 전 -> 1개월 전 -> 이번 달
-      // 역순으로 생성하여 이전 보고서가 이미 존재하도록 함
-      for (int i = 2; i >= 1; i--) {
-        final pastMonth = now.month - i;
-        final pastYear = now.year;
-        int adjustedMonth = pastMonth;
-        int adjustedYear = pastYear;
-
-        if (pastMonth <= 0) {
-          adjustedMonth = 12 + pastMonth;
-          adjustedYear = pastYear - 1;
-        }
-
-        // 과거 월의 시작일과 마지막 날
-        final monthRange = _getMonthRange(adjustedYear, adjustedMonth);
-        final pastMonthStart = monthRange.start;
-        final pastMonthEnd = monthRange.end;
-
-        // 이미 존재하는지 확인
-        final existing = await repository.getWeeklyReportByPeriod(
-          user.id,
-          pastMonthStart,
-          pastMonthEnd,
-        );
-
-        if (existing == null) {
-          // 저번 달 보고서 조회 (비교용)
-          final previousMonthRange = _getPreviousMonthRange(
-            adjustedYear,
-            adjustedMonth,
-          );
-          final previousReport = await repository.getWeeklyReportByPeriod(
-            user.id,
-            previousMonthRange.start,
-            previousMonthRange.end,
-          );
-
-          // 과거 데이터 (예시값)
-          // 포인트 값을 서로 다르게 설정하여 색상 변화 테스트
-          final reportId = 'monthly_${pastMonthStart.millisecondsSinceEpoch}';
-          // 1개월 전: 450 (저번달(2개월 전: 300)보다 증가), 2개월 전: 300
-          final monthlyPoints = i == 1 ? 450 : 300;
-          // 저번달 보고서 포인트 가져오기
-          // 가장 오래된 보고서(2개월 전)는 previousMonthPoints를 0으로 설정
-          final previousMonthPoints =
-              previousReport?.monthlyPointsEarned ??
-              (previousReport == null && i == 2 ? 0 : null);
-
-          // 목데이터: 캠페인 목록
-          final campaignList = i == 1
-              ? ['한강 플로깅 챌린지', '30일 제로웨이스트 챌린지']
-              : ['일주일 비건 챌린지'];
-
-          // 목데이터: 카테고리별 미션 개수
-          final missionCategoryCounts = i == 1
-              ? {'ZERO_WASTE': 5, 'TRANSPORTATION': 3, 'RECYCLING': 14}
-              : {'ZERO_WASTE': 3, 'TRANSPORTATION': 1, 'RECYCLING': 14};
-
-          final pastReport = WeeklyReport(
-            id: reportId,
-            userId: user.id,
-            username: user.username,
-            startDate: pastMonthStart,
-            endDate: pastMonthEnd,
-            campaignList: campaignList,
-            dailyMissionCompletedCount: i == 1 ? 22 : 18,
-            totalDailyMissions: 30,
-            monthlyPointsEarned: monthlyPoints,
-            previousMonthPoints: previousMonthPoints,
-            missionCategoryCounts: missionCategoryCounts,
-            createdAt: pastMonthStart.add(const Duration(hours: 1)),
-          );
-
-          await repository.saveWeeklyReport(pastReport);
-        }
-      }
-
-      // 과거 보고서 생성 후 목록 새로고침
-      await ref.read(weeklyReportsProvider.notifier).refresh();
-    }
-  }
-
-  /// 이전 달의 날짜 범위 계산
-  ({DateTime start, DateTime end}) _getPreviousMonthRange(int year, int month) {
-    final prevMonthStart = DateTime(year, month - 1, 1);
-    final prevMonthEnd = DateTime(year, month, 0, 23, 59, 59);
-    return (start: prevMonthStart, end: prevMonthEnd);
-  }
-
-  /// 특정 년/월의 날짜 범위 계산
-  ({DateTime start, DateTime end}) _getMonthRange(int year, int month) {
-    final monthStart = DateTime(year, month, 1);
-    final monthEnd = DateTime(year, month + 1, 0, 23, 59, 59);
-    return (start: monthStart, end: monthEnd);
-  }
-
-  /// 모든 보고서의 previousMonthPoints를 업데이트
-  Future<void> _updateAllReportsPreviousMonthPoints() async {
-    final user = ref.read(userProvider).value;
-    if (user == null) return;
-
-    final repository = getIt<WeeklyReportRepository>();
-    final allReports = await repository.getWeeklyReports(user.id);
-
-    // 날짜순 정렬 (오래된 순)
-    allReports.sort((a, b) => a.startDate.compareTo(b.startDate));
-
-    bool hasUpdates = false;
-
-    // 모든 보고서를 순회하며 previousMonthPoints 업데이트
-    for (int i = 0; i < allReports.length; i++) {
-      final report = allReports[i];
-      int? newPreviousMonthPoints;
-
-      if (i == 0) {
-        // 첫 번째(가장 오래된) 보고서는 0부터 시작
-        newPreviousMonthPoints = 0;
-      } else {
-        // 이전 보고서의 포인트를 가져옴
-        final previousReport = allReports[i - 1];
-        newPreviousMonthPoints = previousReport.monthlyPointsEarned;
-      }
-
-      // previousMonthPoints가 다르면 업데이트
-      if (report.previousMonthPoints != newPreviousMonthPoints) {
-        final updatedReport = report.copyWith(
-          previousMonthPoints: newPreviousMonthPoints,
-        );
-        await repository.saveWeeklyReport(updatedReport);
-        hasUpdates = true;
-      }
-    }
-
-    // 업데이트가 있었으면 목록 새로고침
-    if (hasUpdates) {
-      await ref.read(weeklyReportsProvider.notifier).refresh();
-    }
-  }
-
-  /// 보고서 확장 시 화면 중앙에 오도록 스크롤
-  /// 사용자가 직접 클릭해서 확장할 때만 적용
-  /// 확장 애니메이션(300ms)이 거의 완료된 후 스크롤하여 전체 보고서가 보이도록 함
   void _scrollToReport(String reportId) {
-    // 확장 애니메이션이 거의 완료된 후(250ms) 스크롤 시작
-    // 이렇게 하면 최종 크기가 거의 결정된 상태에서 정확한 위치로 스크롤 가능
     Future.delayed(const Duration(milliseconds: 250), () {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final key = _reportKeys[reportId];
@@ -270,7 +42,6 @@ class _WeeklyReportLibrarySectionState
         if (context == null) return;
 
         try {
-          // Scrollable.ensureVisible을 사용하여 전체 보고서가 화면에 보이도록 배치
           Scrollable.ensureVisible(
             context,
             duration: const Duration(milliseconds: 300), // 확장 애니메이션과 동일
@@ -286,7 +57,7 @@ class _WeeklyReportLibrarySectionState
 
   @override
   Widget build(BuildContext context) {
-    final reportsAsync = ref.watch(weeklyReportsProvider);
+    final reports = ref.watch(weeklyReportsProvider);
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -313,127 +84,73 @@ class _WeeklyReportLibrarySectionState
           ),
           const SizedBox(height: 20),
           // Reports list
-          reportsAsync.when(
-            data: (reports) {
-              if (reports.isEmpty) {
-                return SizedBox(
-                  height: 200,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.assignment_outlined,
-                          size: 48,
-                          color: AppColors.textTertiary,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          '아직 월간보고서가 없어요',
-                          style: AppTextStyle.bodyLarge.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '매월 1일 자정에 월간보고서가 생성됩니다',
-                          style: AppTextStyle.bodyMedium.copyWith(
-                            color: AppColors.textTertiary,
-                          ),
-                        ),
-                      ],
+          if (reports.isEmpty)
+            SizedBox(
+              height: 200,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.assignment_outlined,
+                      size: 48,
+                      color: AppColors.textTertiary,
                     ),
-                  ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '아직 월간보고서가 없어요',
+                      style: AppTextStyle.bodyLarge.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '매월 1일 자정에 월간보고서가 생성됩니다',
+                      style: AppTextStyle.bodyMedium.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            Column(
+              children: reports.map((report) {
+                final isExpanded = _expandedReportId == report.id;
+
+                // GlobalKey 생성 (없으면 생성)
+                if (!_reportKeys.containsKey(report.id)) {
+                  _reportKeys[report.id] = GlobalKey();
+                }
+
+                return _WeeklyReportCard(
+                  key: _reportKeys[report.id],
+                  report: report,
+                  isExpanded: isExpanded,
+                  onTap: () {
+                    final wasExpanded = isExpanded;
+                    setState(() {
+                      _expandedReportId = isExpanded ? null : report.id;
+                    });
+                    // 모든 보고서에 대해 확장 시 중앙 정렬 스크롤 적용
+                    if (!wasExpanded) {
+                      // 모든 보고서(첫번째, 두번째, 세번째 등)에 동일하게 적용
+                      _scrollToReport(report.id);
+                    }
+                  },
                 );
-              }
-
-              return Column(
-                children: reports.map((report) {
-                  final isExpanded = _expandedReportId == report.id;
-
-                  // GlobalKey 생성 (없으면 생성)
-                  if (!_reportKeys.containsKey(report.id)) {
-                    _reportKeys[report.id] = GlobalKey();
-                  }
-
-                  return _WeeklyReportCard(
-                    key: _reportKeys[report.id],
-                    report: report,
-                    isExpanded: isExpanded,
-                    onTap: () {
-                      final wasExpanded = isExpanded;
-                      setState(() {
-                        _expandedReportId = isExpanded ? null : report.id;
-                      });
-                      // 모든 보고서에 대해 확장 시 중앙 정렬 스크롤 적용
-                      if (!wasExpanded) {
-                        // 모든 보고서(첫번째, 두번째, 세번째 등)에 동일하게 적용
-                        _scrollToReport(report.id);
-                      }
-                    },
-                  );
-                }).toList(),
-              );
-            },
-            loading: () => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 40),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const CircularProgressIndicator(
-                    strokeWidth: 3.0,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '보고서를 불러오는 중...',
-                    style: AppTextStyle.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
+              }).toList(),
             ),
-            error: (error, stack) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 40),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 48, color: AppColors.error),
-                  const SizedBox(height: 16),
-                  Text(
-                    '보고서를 불러올 수 없어요',
-                    style: AppTextStyle.bodyLarge.copyWith(
-                      color: AppColors.error,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
     );
   }
 
-  /// 로컬 카테고리를 백엔드 카테고리로 매핑
-  String _mapCategoryToBackend(String localCategory) {
-    const categoryMap = {
-      'recycle': 'RECYCLING', // 재활용/분리수거
-      'transport': 'TRANSPORTATION', // 대중교통/자전거
-      'energy': 'ENERGY', // 에너지 절약
-      'reusable': 'ZERO_WASTE', // 제로웨이스트/다회용기
-      'plastic': 'ZERO_WASTE', // 제로웨이스트/다회용기
-      'food': 'CONSERVATION', // 자연보호/환경정화
-    };
-    return categoryMap[localCategory] ?? 'OTHER';
-  }
 }
 
 class _WeeklyReportCard extends StatelessWidget {
-  final WeeklyReport report;
+  final ProfileWeeklyReport report;
   final bool isExpanded;
   final VoidCallback onTap;
 
@@ -562,7 +279,7 @@ class _WeeklyReportCard extends StatelessWidget {
 }
 
 class _WeeklyReportContent extends StatelessWidget {
-  final WeeklyReport report;
+  final ProfileWeeklyReport report;
 
   const _WeeklyReportContent({required this.report});
 

@@ -1,80 +1,33 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../../core/di/injection.dart';
-import '../../../../../../core/logger/logger.dart';
-import '../../../../../../domain/model/weekly_report/weekly_report.dart';
-import '../../../../../../domain/repository/weekly_report_repository.dart';
+import 'mock/weekly_report_mock_data.dart';
 import 'user_controller.dart';
 
-/// 주간보고서 목록을 관리하는 AsyncNotifier
-class WeeklyReportsNotifier extends AsyncNotifier<List<WeeklyReport>> {
-  late final WeeklyReportRepository _repository;
-
+/// 주간보고서 목록을 관리하는 Notifier (Mock 데이터 사용)
+class WeeklyReportsNotifier extends Notifier<List<ProfileWeeklyReport>> {
   @override
-  Future<List<WeeklyReport>> build() async {
-    _repository = getIt<WeeklyReportRepository>();
+  List<ProfileWeeklyReport> build() {
+    final user = ref.read(userProvider);
 
-    final user = ref.read(userProvider).value;
-    if (user == null) {
-      return [];
-    }
-
-    try {
-      return await _repository.getWeeklyReports(user.id);
-    } catch (e) {
-      CustomLogger.logger.e('WeeklyReportsNotifier - 목록 조회 실패', error: e);
-      return [];
-    }
+    // Mock 데이터 반환
+    return ProfileWeeklyReport.getMockWeeklyReports(
+      userId: user.id,
+      username: user.username,
+    );
   }
 
   /// 주간보고서 새로고침
-  Future<void> refresh() async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final user = ref.read(userProvider).value;
-      if (user == null) {
-        return [];
-      }
-      return await _repository.getWeeklyReports(user.id);
-    });
-  }
+  void refresh() {
+    final user = ref.read(userProvider);
 
-  /// 월간보고서 생성
-  Future<WeeklyReport> generateWeeklyReport({
-    required String userId,
-    required String username,
-    required DateTime startDate,
-    required DateTime endDate,
-    List<String> campaignList = const [],
-    int dailyMissionCompletedCount = 0,
-    int totalDailyMissions = 30,
-    int monthlyPointsEarned = 0,
-    int? previousMonthPoints,
-  }) async {
-    final reportId = 'monthly_${startDate.millisecondsSinceEpoch}';
-
-    final report = WeeklyReport(
-      id: reportId,
-      userId: userId,
-      username: username,
-      startDate: startDate,
-      endDate: endDate,
-      campaignList: campaignList,
-      dailyMissionCompletedCount: dailyMissionCompletedCount,
-      totalDailyMissions: totalDailyMissions,
-      monthlyPointsEarned: monthlyPointsEarned,
-      previousMonthPoints: previousMonthPoints,
-      createdAt: DateTime.now(),
+    state = ProfileWeeklyReport.getMockWeeklyReports(
+      userId: user.id,
+      username: user.username,
     );
-
-    await _repository.saveWeeklyReport(report);
-    await refresh();
-
-    return report;
   }
 }
 
 /// 주간보고서 목록 Provider
 final weeklyReportsProvider =
-    AsyncNotifierProvider<WeeklyReportsNotifier, List<WeeklyReport>>(
+    NotifierProvider<WeeklyReportsNotifier, List<ProfileWeeklyReport>>(
       WeeklyReportsNotifier.new,
     );

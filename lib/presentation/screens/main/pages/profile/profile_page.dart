@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/theme/app_text_style.dart';
+import '../../../../routes/router_path.dart';
+import 'components/profile_card.dart';
 import 'components/profile_info_section.dart';
 import 'components/point_chart_section.dart';
 import 'components/weekly_report_library_section.dart';
-import 'settings_dialog.dart' show showSettingsDialog;
 import 'state/user_controller.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
@@ -17,7 +19,7 @@ class ProfilePage extends ConsumerStatefulWidget {
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   Future<void> _onRefresh() async {
-    await ref.read(userProvider.notifier).refresh();
+    ref.read(userProvider.notifier).refresh();
   }
 
   @override
@@ -41,7 +43,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     horizontal: 16,
                     vertical: 8,
                   ),
-                  child: _buildProfileInfoCard(),
+                  child: ProfileCard(child: const ProfileInfoSection()),
                 ),
               ),
               SliverToBoxAdapter(
@@ -50,7 +52,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     horizontal: 16,
                     vertical: 8,
                   ),
-                  child: _buildChartCard(),
+                  child: ProfileCard(child: const PointChartSection()),
                 ),
               ),
               SliverToBoxAdapter(
@@ -59,7 +61,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     horizontal: 16,
                     vertical: 8,
                   ),
-                  child: _buildWeeklyReportCard(),
+                  child: ProfileCard(child: const WeeklyReportLibrarySection()),
                 ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 24)),
@@ -90,73 +92,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             Icons.settings_rounded,
             color: AppColors.textPrimary,
           ),
-          onPressed: () => showSettingsDialog(context),
+          onPressed: () => context.push(RoutePath.settings),
           tooltip: '설정',
         ),
       ],
-    );
-  }
-
-  Widget _buildProfileInfoCard() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: AppColors.cardGradient,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.textTertiary.withValues(alpha: 0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.cardShadow,
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: const ProfileInfoSection(),
-    );
-  }
-
-  Widget _buildChartCard() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: AppColors.cardGradient,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.textTertiary.withValues(alpha: 0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.cardShadow,
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: const PointChartSection(),
-    );
-  }
-
-  Widget _buildWeeklyReportCard() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: AppColors.cardGradient,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.textTertiary.withValues(alpha: 0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.cardShadow,
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: const WeeklyReportLibrarySection(),
     );
   }
 }
