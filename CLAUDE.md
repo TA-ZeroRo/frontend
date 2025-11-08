@@ -1,28 +1,26 @@
 # CLAUDE.md
 
-This document serves as the entry point for guiding how to interact with this project.  
-Do not include full details here—only instructions on where to find them or which MCP to use based on the task context.
+이 문서는 이 프로젝트와 상호 작용하는 방법을 안내하는 진입점 역할을 합니다.
 
 ---
 
-## Read only the docs relevant to your current task
+## 반드시 지켜야 하는 내용
 
-- Architecture/Project setup: `frontend/docs/architecture.md`
-- State management (Riverpod): `frontend/docs/state_management.md`
-- UI design & styling: `frontend/docs/design_guide.md`
-
----
-
-## MCP Usage
-
-- For tasks involving the **remote database**: use the `supabase mcp`
-- For tasks related to **UI packages** (existing or new): use the `context-7 mcp`
+- 사용자가 요구한 스펙보다 훨씬 복잡한 설계를 하지마세요. 특히 당장 필요없는 기능에 대해 미리 구현하는 것을 피하세요. 이는 추후 필요에 따라 사용자가 결정할 내용입니다.
+- UI 구현 작업에서는 Domain 모델을 추가하지말고, Presentation Layer 내에서 Mock Data class 파일을 따로 생성하여 작업하세요.
+- UI를 구현할 때, 특히 위젯을 설계할 때 재사용성, 코드 가독성, 품질을 고려하여 생성하세요. Page/ Screen class의 build 함수 내에서는 전반적인 구성요소들의 배치를 확인할 수 있어야 합니다. (예를들어, 프로필 페이지에서는 사용자 정보 섹션, 사용자 포인트 차트 섹션 ,주간 보고서 섹션 이런식으로 어떤 구조로 이루어져있는지.)
+- 애니메이션 구현 작업에서 과도한 수식 사용을 자제하세요. 위젯의 위치를 수식 계산을 통해 하드코딩하기보단 레이아웃 요소를 적극 활용하여 코드 품질을 올리세요.
 
 ---
 
-## Notes
+## 참고
 
-- Don't use withOpacity() , instead use withValues(alpha: )
-- Don't use Navigator() , instead use go_router package
-- Keep this file lightweight; it is meant to route you to the right resources.
-- Update the references here whenever new documents or MCPs are introduced.
+- `withOpacity()`를 사용하지 말고, 대신 `withValues(alpha: )`를 사용하세요.
+- `Navigator()`를 사용하지 말고, 대신 `go_router` 패키지를 사용하세요.
+
+---
+
+## 현재 작업과 관련된 문서를 반드시 참조하고나서 작업을 진행하세요.
+
+- 아키텍처/프로젝트 설정: `frontend/docs/architecture.md` (특히 서버 API 연결할 때)
+- 디자인: `frontend/docs/design_guide.md`
