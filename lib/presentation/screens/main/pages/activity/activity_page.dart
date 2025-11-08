@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/theme/app_color.dart';
 import 'state/activity_state.dart';
-import 'components/collapsible_leaderboard_section.dart';
+import 'components/leaderboard_section.dart';
 import 'components/campaign_mission_section.dart';
 import 'components/shimmer_widgets.dart';
 
