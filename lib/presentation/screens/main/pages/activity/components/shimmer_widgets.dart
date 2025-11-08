@@ -34,13 +34,12 @@ class MyRankTileShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.grey[300],
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -140,7 +139,7 @@ class ActivityCardShimmer extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -192,7 +191,6 @@ class PlaygroundShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(top: 16.0, left: 16, right: 16, bottom: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
@@ -202,7 +200,7 @@ class PlaygroundShimmer extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -248,7 +246,273 @@ class PlaygroundShimmer extends StatelessWidget {
           ),
           const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
           // MyRankTile shimmer only
-          const MyRankTileShimmer(),
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: MyRankTileShimmer(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shimmer placeholder for attendance tracker
+class AttendanceTrackerShimmer extends StatelessWidget {
+  const AttendanceTrackerShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFFFFE5B4),
+      highlightColor: const Color(0xFFFFD89B),
+      period: const Duration(milliseconds: 1500),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          children: [
+            // Streak text
+            ShimmerBox(
+              width: 150,
+              height: 24,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            const SizedBox(height: 16),
+            // Week day circles
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(
+                7,
+                (index) => Container(
+                  width: 36,
+                  height: 36,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Info text
+            ShimmerBox(
+              width: 200,
+              height: 28,
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Shimmer placeholder for mission item
+class MissionItemShimmer extends StatelessWidget {
+  const MissionItemShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFFE0E0E0),
+      highlightColor: const Color(0xFFF5F5F5),
+      period: const Duration(milliseconds: 1500),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 24,
+              height: 24,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ShimmerBox(
+                width: double.infinity,
+                height: 16,
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+            const SizedBox(width: 12),
+            ShimmerBox(
+              width: 50,
+              height: 24,
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Complete campaign mission section shimmer
+class CampaignMissionSectionShimmer extends StatelessWidget {
+  const CampaignMissionSectionShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: const Color(0xFFE0E0E0),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header (static, no shimmer)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(18),
+                topRight: Radius.circular(18),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.assignment_turned_in_rounded,
+                  color: Color(0xFF4A90E2),
+                  size: 24,
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  '캠페인 미션',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+          // Campaign cards shimmer
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                _buildCampaignCardShimmer(),
+                const SizedBox(height: 20),
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: Colors.grey[200],
+                ),
+                const SizedBox(height: 20),
+                _buildCampaignCardShimmer(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCampaignCardShimmer() {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFFE0E0E0),
+      highlightColor: const Color(0xFFF5F5F5),
+      period: const Duration(milliseconds: 1500),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Campaign header shimmer
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+            child: Row(
+              children: [
+                ShimmerBox(
+                  width: 24,
+                  height: 24,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ShimmerBox(
+                    width: 120,
+                    height: 17,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                ShimmerBox(
+                  width: 60,
+                  height: 14,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ],
+            ),
+          ),
+          // Progress bar shimmer
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: ShimmerBox(
+              width: double.infinity,
+              height: 6,
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Mission tiles shimmer (3 items)
+          ...List.generate(
+            3,
+            (index) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  ShimmerBox(
+                    width: 24,
+                    height: 24,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ShimmerBox(
+                      width: double.infinity,
+                      height: 16,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  ShimmerBox(
+                    width: 50,
+                    height: 24,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

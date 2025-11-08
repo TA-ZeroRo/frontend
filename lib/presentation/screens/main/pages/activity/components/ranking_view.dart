@@ -68,11 +68,14 @@ class _RankingViewState extends ConsumerState<RankingView> {
           itemBuilder: (context, index) {
             final user = ranking[index];
             final rank = index + 1;
-            return RankTile(
-              rank: rank,
-              name: user.username,
-              score: user.totalPoints,
-              userImg: user.userImg,
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: RankTile(
+                rank: rank,
+                name: user.username,
+                score: user.totalPoints,
+                userImg: user.userImg,
+              ),
             );
           },
         ),
@@ -98,11 +101,14 @@ class _RankingViewState extends ConsumerState<RankingView> {
                   itemBuilder: (context, index) {
                     final user = rest[index];
                     final rank = index + 4;
-                    return RankTile(
-                      rank: rank,
-                      name: user.username,
-                      score: user.totalPoints,
-                      userImg: user.userImg,
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      child: RankTile(
+                        rank: rank,
+                        name: user.username,
+                        score: user.totalPoints,
+                        userImg: user.userImg,
+                      ),
                     );
                   },
                 ),

@@ -6,7 +6,7 @@ import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
 import '../../../../../../domain/model/weekly_report/weekly_report.dart';
 import '../../../../../../domain/repository/weekly_report_repository.dart';
-import '../../activity/state/daily_quest_controller.dart';
+import '../../activity/state/activity_state.dart';
 import '../state/weekly_report_controller.dart';
 import '../state/user_controller.dart';
 
@@ -56,33 +56,34 @@ class _WeeklyReportLibrarySectionState
     if (user == null) return;
 
     final service = WeeklyReportService();
-    final dailyQuestState = ref.read(dailyQuestProvider);
+    final missionState = ref.read(campaignMissionProvider);
 
-    // 이번 달 데이터 수집 (실제로는 API나 다른 데이터 소스에서 가져와야 함)
-    // 목데이터: 신청한 캠페인 목록
-    final campaignList = ['한강 플로깅 챌린지', '30일 제로웨이스트 챌린지', '일주일 비건 챌린지'];
+    // 캠페인 목록 추출
+    final campaignList = missionState.campaigns.map((c) => c.name).toList();
 
-    final completedQuestCount = dailyQuestState.quests
-        .where((quest) => quest.isCompleted)
+    // 모든 미션을 flatten
+    final allMissions = missionState.campaigns
+        .expand((campaign) => campaign.missions)
+        .toList();
+
+    final completedMissionCount = allMissions
+        .where((mission) => mission.isCompleted)
         .length;
-    final totalDailyMissions = dailyQuestState.quests.length;
-    final dailyMissionCompletedCount = completedQuestCount;
+    final totalDailyMissions = allMissions.length;
+    final dailyMissionCompletedCount = completedMissionCount;
 
     // 카테고리별 클리어한 미션 개수 계산
     final missionCategoryCounts = <String, int>{};
-    for (final quest in dailyQuestState.quests.where(
-      (quest) => quest.isCompleted,
-    )) {
-      final backendCategory = _mapCategoryToBackend(quest.category);
+    for (final mission in allMissions.where((mission) => mission.isCompleted)) {
+      final backendCategory = _mapCategoryToBackend(mission.category);
       missionCategoryCounts[backendCategory] =
           (missionCategoryCounts[backendCategory] ?? 0) + 1;
     }
 
-    // 목데이터: 월간 포인트 설정 (실제 데이터가 있으면 실제 데이터 사용)
-    // 저번달(1개월 전: 450)보다 적게 설정하여 색상 변화 확인 가능
-    final calculatedPoints = dailyQuestState.quests
-        .where((quest) => quest.isCompleted)
-        .fold(0, (sum, quest) => sum + quest.points);
+    // 월간 포인트 계산
+    final calculatedPoints = allMissions
+        .where((mission) => mission.isCompleted)
+        .fold(0, (sum, mission) => sum + mission.points);
     // 실제 데이터가 0이거나 없으면 목데이터 사용 (350: 저번달 450보다 감소 → 파란색)
     final monthlyPointsEarned = calculatedPoints > 0 ? calculatedPoints : 350;
 

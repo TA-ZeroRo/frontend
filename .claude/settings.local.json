@@ -20,7 +20,8 @@
       "Bash(dir C:UsersparksProjectsZerorofrontendassetszeroro)",
       "Bash(dir:*)",
       "Bash(move Mock temp_mock)",
-      "Bash(move temp_mock mock)"
+      "Bash(move temp_mock mock)",
+      "Bash(xargs ls:*)"
     ],
     "deny": [],
     "ask": []

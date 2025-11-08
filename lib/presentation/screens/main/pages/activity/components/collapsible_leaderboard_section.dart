@@ -1,37 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../state/activity_state.dart';
 import '../state/mock/mock_ranking_data.dart';
-import '../state/playground_providers.dart';
 import 'ranking_view.dart';
 import 'rank_tile.dart';
 
 /// Collapsible leaderboard section that shows MyRankTile by default
 /// and expands to show full leaderboard when tapped
-class CollapsibleLeaderboardSection extends ConsumerWidget {
+class LeaderboardSection extends ConsumerWidget {
   final List<RankingItem> rankings;
 
-  const CollapsibleLeaderboardSection({
-    super.key,
-    required this.rankings,
-  });
+  const LeaderboardSection({super.key, required this.rankings});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isExpanded = ref.watch(leaderboardExpandedProvider);
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: const Color(0xFFE0E0E0),
-          width: 1.2,
-        ),
+        border: Border.all(color: const Color(0xFFE0E0E0), width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -53,7 +46,10 @@ class CollapsibleLeaderboardSection extends ConsumerWidget {
   }
 
   Widget _buildSectionHeader(
-      BuildContext context, WidgetRef ref, bool isExpanded) {
+    BuildContext context,
+    WidgetRef ref,
+    bool isExpanded,
+  ) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -154,21 +150,14 @@ class CollapsibleLeaderboardSection extends ConsumerWidget {
       duration: const Duration(milliseconds: 400),
       curve: Curves.easeInOutCubic,
       child: Container(
-        constraints: const BoxConstraints(
-          minHeight: 350,
-          maxHeight: 500,
-        ),
+        constraints: const BoxConstraints(minHeight: 350, maxHeight: 500),
         child: DefaultTabController(
           length: 2,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildTabBar(),
-              const Divider(
-                height: 1,
-                thickness: 1,
-                color: Color(0xFFF0F0F0),
-              ),
+              const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
               Expanded(child: _buildTabBarView()),
             ],
           ),
@@ -179,13 +168,9 @@ class CollapsibleLeaderboardSection extends ConsumerWidget {
 
   Widget _buildTabBar() {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-      ),
+      decoration: BoxDecoration(color: Colors.grey[100]),
       child: TabBar(
-        indicator: BoxDecoration(
-          color: Colors.blue[50],
-        ),
+        indicator: BoxDecoration(color: Colors.blue[50]),
         indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: Colors.transparent,
         labelColor: Colors.blue[700],

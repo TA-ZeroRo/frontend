@@ -23,12 +23,11 @@ class MyRankTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.primary.withOpacity(0.8),
-            AppColors.primary.withOpacity(0.6),
+            AppColors.primary.withValues(alpha: 0.8),
+            AppColors.primary.withValues(alpha: 0.6),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -36,7 +35,7 @@ class MyRankTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
+            color: AppColors.primary.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -48,7 +47,7 @@ class MyRankTile extends StatelessWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: AppColors.white.withOpacity(0.2),
+                color: AppColors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.all(8),
@@ -62,7 +61,7 @@ class MyRankTile extends StatelessWidget {
                   Text(
                     '내 순위',
                     style: TextStyle(
-                      color: AppColors.white.withOpacity(0.9),
+                      color: AppColors.white.withValues(alpha: 0.9),
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
@@ -94,7 +93,7 @@ class MyRankTile extends StatelessWidget {
                 Text(
                   '$score점',
                   style: TextStyle(
-                    color: AppColors.white.withOpacity(0.9),
+                    color: AppColors.white.withValues(alpha: 0.9),
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -147,7 +146,7 @@ class RankTile extends StatelessWidget {
         boxShadow: isTopThree
             ? [
                 BoxShadow(
-                  color: _getRankColor(rank).withOpacity(0.3),
+                  color: _getRankColor(rank).withValues(alpha: 0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -180,21 +179,20 @@ class RankTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
         border: Border.all(
           color: rank <= 3
-              ? _getRankColor(rank).withOpacity(0.3)
-              : Colors.grey.withOpacity(0.1),
+              ? _getRankColor(rank).withValues(alpha: 0.3)
+              : Colors.grey.withValues(alpha: 0.1),
           width: rank <= 3 ? 1.5 : 1,
         ),
       ),
@@ -271,7 +269,7 @@ class RankTile extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: AppColors.positive.withOpacity(0.1),
+                  color: AppColors.positive.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
