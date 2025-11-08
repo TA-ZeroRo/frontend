@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'pages/community/community_page.dart';
+import '../../../core/theme/app_color.dart';
+import 'pages/campaign/campaign_page.dart';
 import 'pages/home/home_page.dart';
-import 'pages/playground/playground_page.dart';
+import 'pages/activity/activity_page.dart';
 import 'pages/profile/profile_page.dart';
 import 'state/bottom_nav_controller.dart';
 
@@ -16,9 +17,9 @@ class MainScreen extends ConsumerWidget {
 
     final Widget page = switch (nav) {
       BottomNav.home => const HomePage(),
+      BottomNav.activity => const ActivityPage(),
+      BottomNav.campaign => const CampaignPage(),
       BottomNav.profile => const ProfilePage(),
-      BottomNav.playground => const PlaygroundPage(),
-      BottomNav.community => const CommunityPage(),
     };
 
     return Scaffold(
@@ -50,6 +51,8 @@ class _BottomNavigationBar extends ConsumerWidget {
           onTap: (index) =>
               ref.read(bottomNavProvider.notifier).setIndex(index),
           showUnselectedLabels: false,
+          showSelectedLabels: false,
+          selectedItemColor: AppColors.primary,
           type: BottomNavigationBarType.fixed,
           items: List.generate(
             BottomNav.values.length,

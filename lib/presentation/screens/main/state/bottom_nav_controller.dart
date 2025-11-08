@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum BottomNav {
   home('홈', Icons.eco),
-  playground('놀이터', Icons.sports_esports),
-  community('커뮤니티', Icons.groups),
+  activity('활동', Icons.sports_esports),
+  campaign('캠페인', Icons.campaign),
   profile('프로필', Icons.person);
 
   final String title;

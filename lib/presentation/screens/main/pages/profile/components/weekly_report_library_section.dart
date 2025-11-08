@@ -6,7 +6,7 @@ import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
 import '../../../../../../domain/model/weekly_report/weekly_report.dart';
 import '../../../../../../domain/repository/weekly_report_repository.dart';
-import '../../../../../../presentation/screens/main/pages/playground/state/daily_quest_controller.dart';
+import '../../activity/state/daily_quest_controller.dart';
 import '../state/weekly_report_controller.dart';
 import '../state/user_controller.dart';
 

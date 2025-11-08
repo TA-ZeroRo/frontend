@@ -10,14 +10,14 @@ import 'widgets/expandable_fab.dart';
 import 'widgets/post_widget.dart';
 import 'widgets/ad_carousel.dart';
 
-class CommunityPage extends ConsumerStatefulWidget {
-  const CommunityPage({super.key});
+class CampaignPage extends ConsumerStatefulWidget {
+  const CampaignPage({super.key});
 
   @override
-  ConsumerState<CommunityPage> createState() => _CommunityPageState();
+  ConsumerState<CampaignPage> createState() => _CampaignPageState();
 }
 
-class _CommunityPageState extends ConsumerState<CommunityPage> {
+class _CampaignPageState extends ConsumerState<CampaignPage> {
   bool _isMenuExpanded = false;
   final GlobalKey<ExpandableFabState> _fabKey = GlobalKey<ExpandableFabState>();
 

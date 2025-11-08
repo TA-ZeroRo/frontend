@@ -6,7 +6,7 @@ import '../../../core/theme/app_color.dart';
 import '../../../core/theme/app_text_style.dart';
 import '../../../core/utils/toast_helper.dart';
 import '../../../domain/model/post/post.dart';
-import '../main/pages/community/state/community_controller.dart';
+import '../main/pages/campaign/state/community_controller.dart';
 
 // Form state model
 class PostFormState {

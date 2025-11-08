@@ -11,14 +11,14 @@ import 'components/daily_quest_section.dart';
 import 'components/activity_verification_fab.dart';
 import 'components/shimmer_widgets.dart';
 
-class PlaygroundPage extends ConsumerStatefulWidget {
-  const PlaygroundPage({super.key});
+class ActivityPage extends ConsumerStatefulWidget {
+  const ActivityPage({super.key});
 
   @override
-  ConsumerState<PlaygroundPage> createState() => _PlaygroundPageState();
+  ConsumerState<ActivityPage> createState() => _ActivityPageState();
 }
 
-class _PlaygroundPageState extends ConsumerState<PlaygroundPage> {
+class _ActivityPageState extends ConsumerState<ActivityPage> {
   bool _isMenuExpanded = false;
   final GlobalKey<ActivityVerificationFabState> _fabKey =
       GlobalKey<ActivityVerificationFabState>();
