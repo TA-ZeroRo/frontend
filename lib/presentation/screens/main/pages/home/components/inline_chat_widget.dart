@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_color.dart';
 import 'package:frontend/core/theme/app_text_style.dart';
-import '../../state/chat_controller.dart';
+import '../state/chat_controller.dart';
 
 /// 홈페이지 하단에 표시되는 인라인 채팅 입력 위젯
 /// 글래스모피즘 스타일의 타원형 디자인
@@ -39,7 +39,8 @@ class _InlineChatWidgetState extends ConsumerState<InlineChatWidget> {
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatProvider);
-    final canSend = _textController.text.trim().isNotEmpty && !chatState.isLoading;
+    final canSend =
+        _textController.text.trim().isNotEmpty && !chatState.isLoading;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(30),
@@ -50,20 +51,15 @@ class _InlineChatWidgetState extends ConsumerState<InlineChatWidget> {
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(30),
-            border: Border.all(
-              color: Colors.black,
-              width: 1,
-            ),
+            border: Border.all(color: Colors.black, width: 1),
           ),
           child: Row(
             children: [
-              // 확장 버튼 (나중에 구현)
+              // Full Chat Enable
               _buildExpandButton(),
 
               // 입력 필드
-              Expanded(
-                child: _buildTextField(),
-              ),
+              Expanded(child: _buildTextField()),
 
               // 전송 버튼
               _buildSendButton(canSend),
@@ -76,15 +72,13 @@ class _InlineChatWidgetState extends ConsumerState<InlineChatWidget> {
 
   Widget _buildExpandButton() {
     return Padding(
-      padding: const EdgeInsets.only(left: 8),
+      padding: const EdgeInsets.only(left: 15),
       child: IconButton(
-        onPressed: null, // 나중에 구현
-        icon: Icon(
-          Icons.expand_less,
-          color: AppColors.textSecondary.withValues(alpha: 0.5),
-          size: 24,
-        ),
-        tooltip: '확장 (준비 중)',
+        onPressed: () {
+          ref.read(chatProvider.notifier).toggleFullChat();
+        },
+        icon: Icon(Icons.expand_less, color: AppColors.primary, size: 24),
+        tooltip: '전체 화면으로 확장',
       ),
     );
   }
@@ -93,9 +87,7 @@ class _InlineChatWidgetState extends ConsumerState<InlineChatWidget> {
     return TextField(
       controller: _textController,
       focusNode: _focusNode,
-      style: AppTextStyle.bodyMedium.copyWith(
-        color: AppColors.textPrimary,
-      ),
+      style: AppTextStyle.bodyMedium.copyWith(color: AppColors.textPrimary),
       decoration: InputDecoration(
         hintText: '제로로에게 메시지 보내기...',
         hintStyle: AppTextStyle.bodySmall.copyWith(
@@ -103,8 +95,8 @@ class _InlineChatWidgetState extends ConsumerState<InlineChatWidget> {
         ),
         border: InputBorder.none,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 8,
-          vertical: 16,
+          horizontal: 15,
+          vertical: 17,
         ),
       ),
       maxLines: 1,
@@ -119,7 +111,7 @@ class _InlineChatWidgetState extends ConsumerState<InlineChatWidget> {
 
   Widget _buildSendButton(bool canSend) {
     return Padding(
-      padding: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.only(right: 15),
       child: IconButton(
         onPressed: canSend ? _handleSend : null,
         icon: Icon(

@@ -1,0 +1,132 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/theme/app_color.dart';
+import 'package:frontend/core/theme/app_text_style.dart';
+import '../state/chat_controller.dart';
+import 'ai_message_row.dart';
+import 'inline_chat_widget.dart';
+import 'typing_indicator.dart';
+
+/// 전체 화면 채팅 오버레이
+class FullChatOverlay extends ConsumerStatefulWidget {
+  const FullChatOverlay({super.key});
+
+  @override
+  ConsumerState<FullChatOverlay> createState() => _FullChatOverlayState();
+}
+
+class _FullChatOverlayState extends ConsumerState<FullChatOverlay> {
+  void _handleClose() {
+    ref.read(chatProvider.notifier).toggleFullChat();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final chatState = ref.watch(chatProvider);
+
+    return Material(
+      color: AppColors.background.withValues(alpha: 0.45),
+      child: SafeArea(
+        child: Column(
+          children: [
+            // 상단 헤더 (닫기 버튼)
+            _buildHeader(),
+
+            // 채팅 메시지 영역
+            Expanded(child: _buildChatArea(chatState)),
+
+            // 입력창 (좌우 17px 여백)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(17, 0, 17, 17),
+              child: InlineChatWidget(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 상단 헤더 (닫기 버튼)
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Text(
+            '제로로와 대화하기',
+            style: AppTextStyle.titleMedium.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const Spacer(),
+          IconButton(
+            onPressed: _handleClose,
+            icon: Icon(Icons.close, color: AppColors.textPrimary, size: 24),
+            tooltip: '닫기',
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 채팅 메시지 영역
+  Widget _buildChatArea(ChatState chatState) {
+    // 메시지가 없고 로딩 중도 아니면 빈 상태 표시
+    if (chatState.latestAIMessage == null && !chatState.isLoading) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.chat_bubble_outline, size: 64, color: Colors.black),
+            const SizedBox(height: 17),
+            Text(
+              '제로로에게 궁금한 것을 물어보세요!',
+              style: AppTextStyle.bodyMedium.copyWith(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 메시지 영역
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(17),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // 최신 AI 메시지 또는 타이핑 인디케이터
+          if (chatState.isLoading)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 제로로 아바타
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: AppColors.primary,
+                  child: Icon(Icons.eco, color: Colors.white, size: 20),
+                ),
+                const SizedBox(width: 10),
+                // 타이핑 인디케이터
+                const TypingIndicator(),
+              ],
+            )
+          else if (chatState.latestAIMessage != null)
+            AiMessageRow(message: chatState.latestAIMessage!),
+        ],
+      ),
+    );
+  }
+}

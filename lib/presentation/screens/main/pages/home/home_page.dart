@@ -4,8 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 import 'package:frontend/core/theme/app_color.dart';
 import 'package:logger/logger.dart';
-import 'widgets/chat/inline_chat_widget.dart';
-import 'widgets/chat/simple_chat_area.dart';
+import 'components/simple_chat_area.dart';
+import 'components/inline_chat_widget.dart';
+import 'state/chat_controller.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -97,7 +98,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    const double logoHeight = 50;
+    final chatState = ref.watch(chatProvider);
 
     return Scaffold(
       body: Container(
@@ -105,7 +106,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Character 3D model (dimmed when chat is active)
+            // 3D 캐릭터 (좌우 30px 여백)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Flutter3DViewer(
@@ -113,44 +114,23 @@ class _HomePageState extends ConsumerState<HomePage> {
                 controller: _3DController,
                 src: 'assets/zeroro/co2_zeroro_2.glb',
                 enableTouch: false,
-                onProgress: (double progress) {
-                  _logger.d('로딩 진행: $progress');
-                  if (mounted) {
-                    setState(() {
-                      _loadingProgress = progress;
-                    });
-                  }
-                },
-                onLoad: (String modelAddress) {
-                  _logger.d('모델 로드 완료: $modelAddress');
-                  if (mounted) {
-                    setState(() {
-                      _isLoading = false;
-                      _loadingProgress = 1.0;
-                    });
-                  }
-                },
-                onError: (String error) {
-                  _logger.e('오류: $error');
-                  if (mounted) {
-                    setState(() {
-                      _isLoading = false;
-                    });
-                  }
-                },
+                onProgress: _handleProgress,
+                onLoad: _handleLoad,
+                onError: _handleError,
               ),
             ),
-            // 로딩 오버레이
+
+            // 로딩 오버레이 (중앙)
             if (_isLoading)
               Center(
                 child: Container(
                   padding: const EdgeInsets.all(30),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.cardBackground,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 10,
                         spreadRadius: 2,
                       ),
@@ -159,77 +139,136 @@ class _HomePageState extends ConsumerState<HomePage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SizedBox(
-                        width: 80,
-                        height: 80,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            SizedBox(
-                              width: 80,
-                              height: 80,
-                              child: CircularProgressIndicator(
-                                value: _loadingProgress,
-                                strokeWidth: 6,
-                                backgroundColor: Colors.grey[200],
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.green,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              '${(_loadingProgress * 100).toInt()}%',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      _buildLoadingProgress(),
                       const SizedBox(height: 20),
-                      const Text(
-                        '제로로 캐릭터 로딩 중...',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '잠시만 기다려주세요',
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                      ),
+                      _buildLoadingMessage(),
                     ],
                   ),
                 ),
               ),
-            // Logo at top (only visible when character is visible)
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 8,
-              left: 16,
-              child: Image.asset(
-                'assets/images/ZeroRo_logo.png',
-                height: logoHeight,
-                fit: BoxFit.contain,
+
+            // 로고 (좌측 상단) - full chat이 아닐 때만 표시
+            if (!chatState.isFullChatOpen)
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 8,
+                left: 17,
+                child: Image.asset(
+                  'assets/images/ZeroRo_logo.png',
+                  height: 50,
+                  fit: BoxFit.contain,
+                ),
               ),
-            ),
-            // 채팅 영역 (SimpleChatArea + InlineChatWidget)
-            const Positioned(
-              bottom: 24,
-              left: 16,
-              right: 16,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [SimpleChatArea(), InlineChatWidget()],
+
+            // 채팅 영역 (하단) - 슬라이드 + 페이드 아웃 애니메이션
+            Positioned(
+              bottom: 17,
+              left: 17,
+              right: 17,
+              child: IgnorePointer(
+                ignoring: chatState.isFullChatOpen,
+                child: AnimatedSlide(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  offset: chatState.isFullChatOpen ? const Offset(0, 1.5) : Offset.zero,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    opacity: chatState.isFullChatOpen ? 0.0 : 1.0,
+                    child: const Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [SimpleChatArea(), InlineChatWidget()],
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  /// 3D 모델 로딩 진행률 처리
+  void _handleProgress(double progress) {
+    _logger.d('로딩 진행: $progress');
+    if (mounted) {
+      setState(() {
+        _loadingProgress = progress;
+      });
+    }
+  }
+
+  /// 3D 모델 로드 완료 처리
+  void _handleLoad(String modelAddress) {
+    _logger.d('모델 로드 완료: $modelAddress');
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+        _loadingProgress = 1.0;
+      });
+    }
+  }
+
+  /// 3D 모델 로드 오류 처리
+  void _handleError(String error) {
+    _logger.e('오류: $error');
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  /// 로딩 프로그레스 인디케이터
+  Widget _buildLoadingProgress() {
+    return SizedBox(
+      width: 80,
+      height: 80,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: 80,
+            height: 80,
+            child: CircularProgressIndicator(
+              value: _loadingProgress,
+              strokeWidth: 6,
+              backgroundColor: Colors.grey[200],
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+            ),
+          ),
+          Text(
+            '${(_loadingProgress * 100).toInt()}%',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 로딩 메시지
+  Widget _buildLoadingMessage() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '제로로 캐릭터 로딩 중...',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '잠시만 기다려주세요',
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+        ),
+      ],
     );
   }
 }

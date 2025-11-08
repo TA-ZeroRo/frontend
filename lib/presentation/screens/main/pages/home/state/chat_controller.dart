@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'Mock/mock_chat_data.dart';
+import 'mock/mock_chat_data.dart';
 
 /// 간단한 메시지 모델 (Presentation 레이어 전용)
 class SimpleMessage {
@@ -19,22 +19,26 @@ class ChatState {
   final SimpleMessage? latestAIMessage; // 최신 AI 메시지 1개만 유지
   final bool isLoading; // 타이핑 인디케이터 표시 여부
   final String inputText; // 입력 필드 텍스트
+  final bool isFullChatOpen; // 전체 화면 채팅 오버레이 표시 여부
 
   ChatState({
     this.latestAIMessage,
     this.isLoading = false,
     this.inputText = '',
+    this.isFullChatOpen = false,
   });
 
   ChatState copyWith({
     SimpleMessage? latestAIMessage,
     bool? isLoading,
     String? inputText,
+    bool? isFullChatOpen,
   }) {
     return ChatState(
       latestAIMessage: latestAIMessage ?? this.latestAIMessage,
       isLoading: isLoading ?? this.isLoading,
       inputText: inputText ?? this.inputText,
+      isFullChatOpen: isFullChatOpen ?? this.isFullChatOpen,
     );
   }
 }
@@ -82,6 +86,11 @@ class ChatNotifier extends Notifier<ChatState> {
   void resetChat() {
     MockChatData.reset();
     state = ChatState();
+  }
+
+  /// 전체 화면 채팅 토글
+  void toggleFullChat() {
+    state = state.copyWith(isFullChatOpen: !state.isFullChatOpen);
   }
 }
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../state/chat_controller.dart';
+import '../state/chat_controller.dart';
 import 'message_bubble.dart';
 import 'typing_indicator.dart';
 
@@ -27,11 +27,17 @@ class SimpleChatArea extends ConsumerWidget {
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 300),
         opacity: 1.0,
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: chatState.isLoading
-              ? const TypingIndicator()
-              : MessageBubble(message: chatState.latestAIMessage!),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // AI 메시지 또는 타이핑 인디케이터
+            chatState.isLoading
+                ? const TypingIndicator()
+                : MessageBubble(message: chatState.latestAIMessage!),
+            // InlineChatWidget과의 간격
+            const SizedBox(height: 17),
+          ],
         ),
       ),
     );

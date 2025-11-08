@@ -18,7 +18,9 @@
       "mcp__upstash-context-7-mcp__resolve-library-id",
       "mcp__upstash-context-7-mcp__get-library-docs",
       "Bash(dir C:UsersparksProjectsZerorofrontendassetszeroro)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(move Mock temp_mock)",
+      "Bash(move temp_mock mock)"
     ],
     "deny": [],
     "ask": []
