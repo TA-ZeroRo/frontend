@@ -76,11 +76,9 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
     // Riverpod에서 차트 데이터 가져오기
     final chartData = ref.watch(chartProvider);
 
-    return Container(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
           // Header with title and icon
           Row(
             children: [
@@ -176,7 +174,7 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            '아직 성과 데이터가 없습니다',
+                            '아직 성과 데이터가 없어요',
                             style: AppTextStyle.bodyLarge.copyWith(
                               color: AppColors.textSecondary,
                               fontWeight: FontWeight.w500,
@@ -184,7 +182,7 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '활동을 시작하면 차트가 표시됩니다',
+                            '활동을 시작하면 차트가 표시돼요',
                             style: AppTextStyle.bodySmall.copyWith(
                               color: AppColors.textTertiary,
                             ),
@@ -309,7 +307,6 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
                   ),
           ),
         ],
-      ),
     );
   }
 }

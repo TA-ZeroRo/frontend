@@ -1,160 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
-import '../state/weekly_report_controller.dart';
 import '../state/mock/weekly_report_mock_data.dart';
 
-class WeeklyReportLibrarySection extends ConsumerStatefulWidget {
-  const WeeklyReportLibrarySection({super.key});
-
-  @override
-  ConsumerState<WeeklyReportLibrarySection> createState() =>
-      _WeeklyReportLibrarySectionState();
-}
-
-class _WeeklyReportLibrarySectionState
-    extends ConsumerState<WeeklyReportLibrarySection> {
-  String? _expandedReportId;
-  final Map<String, GlobalKey> _reportKeys = {};
-
-  @override
-  void initState() {
-    super.initState();
-    // 가장 최근 보고서 자동 펼침
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final reports = ref.read(weeklyReportsProvider);
-      if (reports.isNotEmpty && _expandedReportId == null && mounted) {
-        setState(() {
-          _expandedReportId = reports.first.id;
-        });
-      }
-    });
-  }
-
-  void _scrollToReport(String reportId) {
-    Future.delayed(const Duration(milliseconds: 250), () {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final key = _reportKeys[reportId];
-        if (key == null) return;
-
-        final context = key.currentContext;
-        if (context == null) return;
-
-        try {
-          Scrollable.ensureVisible(
-            context,
-            duration: const Duration(milliseconds: 300), // 확장 애니메이션과 동일
-            curve: Curves.easeOutCubic, // 확장 애니메이션과 동일
-            alignment: 0.5, // 화면 중앙
-          );
-        } catch (e) {
-          // 스크롤 실패 시 무시
-        }
-      });
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final reports = ref.watch(weeklyReportsProvider);
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            children: [
-              Icon(
-                Icons.library_books_rounded,
-                color: AppColors.primary,
-                size: 24,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '월간보고서',
-                style: AppTextStyle.titleLarge.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          // Reports list
-          if (reports.isEmpty)
-            SizedBox(
-              height: 200,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.assignment_outlined,
-                      size: 48,
-                      color: AppColors.textTertiary,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      '아직 월간보고서가 없어요',
-                      style: AppTextStyle.bodyLarge.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '매월 1일 자정에 월간보고서가 생성됩니다',
-                      style: AppTextStyle.bodyMedium.copyWith(
-                        color: AppColors.textTertiary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else
-            Column(
-              children: reports.map((report) {
-                final isExpanded = _expandedReportId == report.id;
-
-                // GlobalKey 생성 (없으면 생성)
-                if (!_reportKeys.containsKey(report.id)) {
-                  _reportKeys[report.id] = GlobalKey();
-                }
-
-                return _WeeklyReportCard(
-                  key: _reportKeys[report.id],
-                  report: report,
-                  isExpanded: isExpanded,
-                  onTap: () {
-                    final wasExpanded = isExpanded;
-                    setState(() {
-                      _expandedReportId = isExpanded ? null : report.id;
-                    });
-                    // 모든 보고서에 대해 확장 시 중앙 정렬 스크롤 적용
-                    if (!wasExpanded) {
-                      // 모든 보고서(첫번째, 두번째, 세번째 등)에 동일하게 적용
-                      _scrollToReport(report.id);
-                    }
-                  },
-                );
-              }).toList(),
-            ),
-        ],
-      ),
-    );
-  }
-
-}
-
-class _WeeklyReportCard extends StatelessWidget {
+class WeeklyReportCard extends StatelessWidget {
   final ProfileWeeklyReport report;
   final bool isExpanded;
   final VoidCallback onTap;
 
-  const _WeeklyReportCard({
+  const WeeklyReportCard({
     super.key,
     required this.report,
     required this.isExpanded,
@@ -187,6 +41,13 @@ class _WeeklyReportCard extends StatelessWidget {
           // Header (항상 표시)
           Material(
             color: AppColors.cardBackground,
+            borderRadius: BorderRadius.only(
+              topLeft: const Radius.circular(16),
+              topRight: const Radius.circular(16),
+              bottomLeft: isExpanded ? Radius.zero : const Radius.circular(16),
+              bottomRight: isExpanded ? Radius.zero : const Radius.circular(16),
+            ),
+            clipBehavior: Clip.antiAlias,
             child: InkWell(
               onTap: onTap,
               borderRadius: BorderRadius.only(
@@ -258,9 +119,15 @@ class _WeeklyReportCard extends StatelessWidget {
                     thickness: 1,
                     color: AppColors.textTertiary.withValues(alpha: 0.1),
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    child: _WeeklyReportContent(report: report),
+                  ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(16),
+                      bottomRight: Radius.circular(16),
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      child: WeeklyReportContent(report: report),
+                    ),
                   ),
                 ],
               ),
@@ -278,10 +145,10 @@ class _WeeklyReportCard extends StatelessWidget {
   }
 }
 
-class _WeeklyReportContent extends StatelessWidget {
+class WeeklyReportContent extends StatelessWidget {
   final ProfileWeeklyReport report;
 
-  const _WeeklyReportContent({required this.report});
+  const WeeklyReportContent({super.key, required this.report});
 
   // 환경 관련 TMI 목록
   static const List<String> _environmentTmiList = [
@@ -355,7 +222,7 @@ class _WeeklyReportContent extends StatelessWidget {
                   const SizedBox(height: 4),
                   if (report.campaignList.isEmpty)
                     Text(
-                      '신청한 캠페인이 없습니다',
+                      '신청한 캠페인이 없어요',
                       style: AppTextStyle.bodyMedium.copyWith(
                         color: AppColors.textTertiary,
                       ),
@@ -474,7 +341,7 @@ class _WeeklyReportContent extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    '${points}+',
+                    '$points+',
                     style: AppTextStyle.titleMedium.copyWith(
                       color: pointsColor,
                       fontWeight: FontWeight.w500,
@@ -614,7 +481,7 @@ class _WeeklyReportContent extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '$categoryName',
+                  categoryName,
                   style: AppTextStyle.bodySmall.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w500,
