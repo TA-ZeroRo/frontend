@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 import 'package:frontend/core/theme/app_color.dart';
+import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
+import '../../../../../core/components/custom_app_bar.dart';
 import 'components/simple_chat_area.dart';
 import 'components/inline_chat_widget.dart';
 import 'state/chat_controller.dart';
@@ -101,6 +103,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final chatState = ref.watch(chatProvider);
 
     return Scaffold(
+      appBar: !chatState.isFullChatOpen ? CustomAppBar(title: 'ZeroRo') : null,
       body: Container(
         color: AppColors.background,
         child: Stack(
@@ -108,7 +111,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           children: [
             // 3D 캐릭터 (좌우 30px 여백)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
+              padding: const EdgeInsets.only(bottom: 80, left: 30, right: 30),
               child: Flutter3DViewer(
                 progressBarColor: Colors.transparent,
                 controller: _3DController,
@@ -147,18 +150,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
               ),
 
-            // 로고 (좌측 상단) - full chat이 아닐 때만 표시
-            if (!chatState.isFullChatOpen)
-              Positioned(
-                top: MediaQuery.of(context).padding.top + 8,
-                left: 17,
-                child: Image.asset(
-                  'assets/images/ZeroRo_logo.png',
-                  height: 50,
-                  fit: BoxFit.contain,
-                ),
-              ),
-
             // 채팅 영역 (하단) - 슬라이드 + 페이드 아웃 애니메이션
             Positioned(
               bottom: 17,
@@ -169,7 +160,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                 child: AnimatedSlide(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
-                  offset: chatState.isFullChatOpen ? const Offset(0, 1.5) : Offset.zero,
+                  offset: chatState.isFullChatOpen
+                      ? const Offset(0, 1.5)
+                      : Offset.zero,
                   child: AnimatedOpacity(
                     duration: const Duration(milliseconds: 300),
                     opacity: chatState.isFullChatOpen ? 0.0 : 1.0,

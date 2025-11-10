@@ -154,12 +154,11 @@ class SettingsScreen extends ConsumerWidget {
           ),
           title: Text(
             '로그아웃',
-            style: AppTextStyle.titleLarge.copyWith(fontWeight: FontWeight.w500),
+            style: AppTextStyle.titleLarge.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
           ),
-          content: Text(
-            '정말로 로그아웃 하시겠습니까?',
-            style: AppTextStyle.bodyLarge,
-          ),
+          content: Text('정말로 로그아웃 하시겠습니까?', style: AppTextStyle.bodyLarge),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
@@ -297,6 +296,10 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => context.pop(),
+          icon: Icon(Icons.arrow_back_rounded),
+        ),
         backgroundColor: AppColors.background,
         elevation: 0,
         centerTitle: true,

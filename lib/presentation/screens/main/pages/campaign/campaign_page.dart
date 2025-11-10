@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../core/components/custom_app_bar.dart';
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/theme/app_text_style.dart';
 import '../../../../../core/utils/toast_helper.dart';
@@ -36,20 +37,8 @@ class CampaignPage extends ConsumerWidget {
   }
 
   /// AppBar
-  Widget _buildAppBar() {
-    return SliverAppBar(
-      backgroundColor: AppColors.background,
-      surfaceTintColor: Colors.transparent,
-      scrolledUnderElevation: 0,
-      floating: true,
-      snap: true,
-      pinned: false,
-      title: Text(
-        '캠페인 둘러보기',
-        style: AppTextStyle.headlineSmall.copyWith(fontWeight: FontWeight.bold),
-      ),
-    );
-  }
+  Widget _buildAppBar() =>
+      SliverToBoxAdapter(child: const CustomAppBar(title: '캠페인 둘러보기'));
 
   /// 필터 섹션
   Widget _buildFilters(

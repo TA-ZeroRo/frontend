@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/components/custom_app_bar.dart';
 
 import '../../../../../core/theme/app_color.dart';
 import 'state/mock/mock_ranking_data.dart';
@@ -90,21 +91,7 @@ class _ActivityPageState extends State<ActivityPage> {
             controller: _scrollController,
             slivers: [
               // AppBar
-              const SliverAppBar(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                floating: true,
-                scrolledUnderElevation: 0,
-                snap: true,
-                title: Text(
-                  '활동하기',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
+              SliverToBoxAdapter(child: const CustomAppBar(title: '활동하기')),
 
               // 리더보드 섹션
               SliverToBoxAdapter(
@@ -260,16 +247,9 @@ class _NavIconButton extends StatelessWidget {
         child: Container(
           width: buttonSize,
           height: buttonSize,
-          decoration: BoxDecoration(
-            color: chipColor,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: chipColor, shape: BoxShape.circle),
           alignment: Alignment.center,
-          child: Icon(
-            icon,
-            size: iconSize,
-            color: baseIconColor,
-          ),
+          child: Icon(icon, size: iconSize, color: baseIconColor),
         ),
       ),
     );
