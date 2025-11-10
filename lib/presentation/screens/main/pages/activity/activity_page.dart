@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/core/components/custom_app_bar.dart';
 
@@ -19,6 +21,8 @@ class _ActivityPageState extends State<ActivityPage> {
   final GlobalKey _campaignKey = GlobalKey(debugLabel: 'campaign');
 
   int _currentIndex = 0; // 0: 리더보드, 1: 캠페인
+  bool _isSidebarVisible = false;
+  Timer? _sidebarHideTimer;
 
   @override
   void initState() {
@@ -29,12 +33,15 @@ class _ActivityPageState extends State<ActivityPage> {
 
   @override
   void dispose() {
+    _sidebarHideTimer?.cancel();
     _scrollController.removeListener(_updateActiveSection);
     _scrollController.dispose();
     super.dispose();
   }
 
   void _scrollTo(int index) {
+    _showSidebarTemporarily();
+
     final key = index == 0 ? _leaderboardKey : _campaignKey;
     final context = key.currentContext;
     if (context != null) {
@@ -48,6 +55,7 @@ class _ActivityPageState extends State<ActivityPage> {
   }
 
   void _updateActiveSection() {
+    _showSidebarTemporarily();
     // 화면 중앙에 가장 가까운 섹션을 활성으로 판단
     try {
       final size = MediaQuery.of(context).size;
@@ -76,9 +84,19 @@ class _ActivityPageState extends State<ActivityPage> {
     }
   }
 
+  void _showSidebarTemporarily() {
+    if (!_isSidebarVisible) {
+      setState(() => _isSidebarVisible = true);
+    }
+    _sidebarHideTimer?.cancel();
+    _sidebarHideTimer = Timer(const Duration(milliseconds: 2000), () {
+      if (!mounted) return;
+      setState(() => _isSidebarVisible = false);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final isNarrow = MediaQuery.of(context).size.width < 360;
     final iconSize = isNarrow ? 22.0 : 24.0;
     final buttonSize = isNarrow ? 44.0 : 48.0;
@@ -129,12 +147,26 @@ class _ActivityPageState extends State<ActivityPage> {
               alignment: Alignment.centerRight,
               child: Padding(
                 padding: const EdgeInsets.only(right: 8),
-                child: _NavPanel(
-                  currentIndex: _currentIndex,
-                  iconSize: iconSize,
-                  buttonSize: buttonSize,
-                  onTap: _scrollTo,
-                  theme: theme,
+                child: AnimatedSlide(
+                  duration: const Duration(milliseconds: 760),
+                  curve: Curves.easeInOut,
+                  offset: _isSidebarVisible
+                      ? Offset.zero
+                      : const Offset(1.1, 0),
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 560),
+                    curve: Curves.easeInOut,
+                    opacity: _isSidebarVisible ? 1 : 0,
+                    child: IgnorePointer(
+                      ignoring: !_isSidebarVisible,
+                      child: _NavPanel(
+                        currentIndex: _currentIndex,
+                        iconSize: iconSize,
+                        buttonSize: buttonSize,
+                        onTap: _scrollTo,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -150,14 +182,12 @@ class _NavPanel extends StatelessWidget {
   final double iconSize;
   final double buttonSize;
   final void Function(int) onTap;
-  final ThemeData theme;
 
   const _NavPanel({
     required this.currentIndex,
     required this.iconSize,
     required this.buttonSize,
     required this.onTap,
-    required this.theme,
   });
 
   @override
@@ -191,7 +221,6 @@ class _NavPanel extends StatelessWidget {
               buttonSize: buttonSize,
               onTap: () => onTap(0),
               selectedColor: const Color(0xFFFFD700),
-              theme: theme,
             ),
             const SizedBox(height: 4),
             _NavIconButton(
@@ -202,7 +231,6 @@ class _NavPanel extends StatelessWidget {
               buttonSize: buttonSize,
               onTap: () => onTap(1),
               selectedColor: const Color(0xFF4A90E2),
-              theme: theme,
             ),
           ],
         ),
@@ -219,7 +247,6 @@ class _NavIconButton extends StatelessWidget {
   final double buttonSize;
   final VoidCallback onTap;
   final Color selectedColor;
-  final ThemeData theme;
 
   const _NavIconButton({
     required this.tooltip,
@@ -229,7 +256,6 @@ class _NavIconButton extends StatelessWidget {
     required this.buttonSize,
     required this.onTap,
     required this.selectedColor,
-    required this.theme,
   });
 
   @override
