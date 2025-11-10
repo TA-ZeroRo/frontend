@@ -14,6 +14,7 @@ class CampaignFilters extends StatefulWidget {
   final ValueChanged<String> onCategoryChanged;
   final ValueChanged<DateTime?> onStartDateChanged;
   final ValueChanged<DateTime?> onEndDateChanged;
+  final VoidCallback onResetFilters;
 
   const CampaignFilters({
     super.key,
@@ -27,6 +28,7 @@ class CampaignFilters extends StatefulWidget {
     required this.onCategoryChanged,
     required this.onStartDateChanged,
     required this.onEndDateChanged,
+    required this.onResetFilters,
   });
 
   @override
@@ -67,6 +69,8 @@ class _CampaignFiltersState extends State<CampaignFilters> {
   bool get _isRegionActive => widget.selectedRegion != '전체';
   bool get _isCategoryActive => widget.selectedCategory != '전체';
   bool get _isDateActive => widget.startDate != null && widget.endDate != null;
+  bool get _isAnyFilterActive =>
+      _isRegionActive || _isCategoryActive || _isDateActive;
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +105,40 @@ class _CampaignFiltersState extends State<CampaignFilters> {
                 onTap: () => _toggleFilter('date'),
               ),
             ),
+            const SizedBox(width: 8),
+            // 필터 초기화 버튼
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: _isAnyFilterActive ? widget.onResetFilters : null,
+                borderRadius: BorderRadius.circular(12),
+                splashColor: AppColors.primary.withValues(alpha: 0.1),
+                highlightColor: AppColors.primary.withValues(alpha: 0.05),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _isAnyFilterActive
+                        ? AppColors.primary.withValues(alpha: 0.12)
+                        : Colors.white.withValues(alpha: 0.7),
+                    border: Border.all(
+                      color: _isAnyFilterActive
+                          ? AppColors.primary
+                          : AppColors.textTertiary.withValues(alpha: 0.25),
+                      width: _isAnyFilterActive ? 1.5 : 1,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.refresh,
+                    size: 20,
+                    color: _isAnyFilterActive
+                        ? AppColors.primary
+                        : AppColors.textTertiary,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
 
@@ -108,9 +146,11 @@ class _CampaignFiltersState extends State<CampaignFilters> {
         AnimatedSize(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
+          alignment: Alignment.topCenter,
           child: _expandedFilter == null
               ? const SizedBox.shrink()
               : Container(
+                  width: double.infinity,
                   margin: const EdgeInsets.only(top: 12),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -240,49 +280,6 @@ class _CampaignFiltersState extends State<CampaignFilters> {
           (date) => widget.onEndDateChanged(date),
         ),
         const SizedBox(height: 16),
-        // 버튼 Row
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            TextButton(
-              onPressed: () {
-                widget.onStartDateChanged(null);
-                widget.onEndDateChanged(null);
-              },
-              child: const Text(
-                '초기화',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _expandedFilter = null;
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text(
-                '적용',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
       ],
     );
   }

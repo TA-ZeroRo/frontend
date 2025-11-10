@@ -6,9 +6,9 @@ import '../../../../../core/theme/app_text_style.dart';
 import '../../../../../core/utils/toast_helper.dart';
 import 'campaign_webview_screen.dart';
 import 'state/campaign_state.dart';
-import 'widgets/campaign_card.dart';
-import 'widgets/campaign_card_shimmer.dart';
-import 'widgets/campaign_filters.dart';
+import 'components/campaign_card.dart';
+import 'components/campaign_card_shimmer.dart';
+import 'components/campaign_filters.dart';
 
 class CampaignPage extends ConsumerWidget {
   const CampaignPage({super.key});
@@ -91,6 +91,9 @@ class CampaignPage extends ConsumerWidget {
             } else {
               ref.read(campaignFilterProvider.notifier).clearDateRange();
             }
+          },
+          onResetFilters: () {
+            ref.read(campaignFilterProvider.notifier).reset();
           },
         ),
       ),
