@@ -81,7 +81,7 @@ class _ActivityPageState extends State<ActivityPage> {
     final theme = Theme.of(context);
     final isNarrow = MediaQuery.of(context).size.width < 360;
     final iconSize = isNarrow ? 22.0 : 24.0;
-    final buttonSize = isNarrow ? 42.0 : 48.0;
+    final buttonSize = isNarrow ? 44.0 : 48.0;
 
     return Stack(
       children: [
@@ -235,9 +235,6 @@ class _NavIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final baseIconColor = selected ? selectedColor : Colors.black54;
-    final chipColor = selected
-        ? selectedColor.withValues(alpha: 0.15)
-        : Colors.transparent;
 
     return Tooltip(
       message: tooltip,
@@ -247,7 +244,7 @@ class _NavIconButton extends StatelessWidget {
         child: Container(
           width: buttonSize,
           height: buttonSize,
-          decoration: BoxDecoration(color: chipColor, shape: BoxShape.circle),
+          decoration: const BoxDecoration(shape: BoxShape.circle),
           alignment: Alignment.center,
           child: Icon(icon, size: iconSize, color: baseIconColor),
         ),
