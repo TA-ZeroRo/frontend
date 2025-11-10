@@ -1,6 +1,5 @@
 import 'package:go_router/go_router.dart';
 
-import '../screens/campaign/campaign_recruiting_screen.dart';
 import '../screens/entry/login_screen.dart';
 import '../screens/entry/register_screen.dart';
 import '../screens/entry/splash_screen.dart';
@@ -29,11 +28,6 @@ final GoRouter router = GoRouter(
       path: RoutePath.main,
       name: 'main',
       builder: (context, state) => MainScreen(),
-    ),
-    GoRoute(
-      path: RoutePath.campaignRecruiting,
-      name: 'campaignRecruiting',
-      builder: (context, state) => const CampaignRecruitingScreen(),
     ),
     GoRoute(
       path: RoutePath.settings,

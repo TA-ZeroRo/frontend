@@ -89,20 +89,26 @@ class _RankingViewState extends ConsumerState<RankingView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        PodiumList(top3: podium, height: _podiumHeight, shouldAnimate: false),
+        SizedBox(
+          height: _podiumHeight,
+          child: PodiumList(top3: podium, height: _podiumHeight),
+        ),
         const SizedBox(height: 16),
         Expanded(
           child: rest.isEmpty
               ? const Center(child: Text('추가 순위 데이터가 없습니다.'))
               : ListView.builder(
-            padding: EdgeInsets.zero,
+                  padding: EdgeInsets.zero,
                   controller: _scrollController,
                   itemCount: rest.length,
                   itemBuilder: (context, index) {
                     final user = rest[index];
                     final rank = index + 4;
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
                       child: RankTile(
                         rank: rank,
                         name: user.username,

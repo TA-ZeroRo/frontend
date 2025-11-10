@@ -1,13 +1,5 @@
 import 'package:flutter/material.dart';
 
-// 임시 색상 정의
-class AppColors {
-  static const primary = Colors.blue;
-  static const white = Colors.white;
-  static const primaryContainer = Color(0xFFE3F2FD);
-  static const positive = Color(0xFF4CAF50);
-}
-
 class MyRankTile extends StatelessWidget {
   final int rank;
   final String name;
@@ -26,8 +18,8 @@ class MyRankTile extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.primary.withValues(alpha: 0.8),
-            AppColors.primary.withValues(alpha: 0.6),
+            Colors.blue.withValues(alpha: 0.8),
+            Colors.blue.withValues(alpha: 0.6),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -35,23 +27,23 @@ class MyRankTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
+            color: Colors.blue.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(17),
         child: Row(
           children: [
             Container(
               decoration: BoxDecoration(
-                color: AppColors.white.withValues(alpha: 0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.all(8),
-              child: Icon(Icons.emoji_events, color: AppColors.white, size: 24),
+              child: const Icon(Icons.emoji_events, color: Colors.white, size: 24),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -61,7 +53,7 @@ class MyRankTile extends StatelessWidget {
                   Text(
                     '내 순위',
                     style: TextStyle(
-                      color: AppColors.white.withValues(alpha: 0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
@@ -70,7 +62,7 @@ class MyRankTile extends StatelessWidget {
                   Text(
                     '$rank위',
                     style: const TextStyle(
-                      color: AppColors.white,
+                      color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.w500,
                     ),
@@ -84,7 +76,7 @@ class MyRankTile extends StatelessWidget {
                 Text(
                   name,
                   style: const TextStyle(
-                    color: AppColors.white,
+                    color: Colors.white,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -93,7 +85,7 @@ class MyRankTile extends StatelessWidget {
                 Text(
                   '$score점',
                   style: TextStyle(
-                    color: AppColors.white.withValues(alpha: 0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -130,7 +122,7 @@ class RankTile extends StatelessWidget {
       case 3:
         return const Color(0xFFCD7F32); // Bronze
       default:
-        return AppColors.primaryContainer;
+        return Colors.grey[300]!;
     }
   }
 
@@ -141,7 +133,7 @@ class RankTile extends StatelessWidget {
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: isTopThree ? _getRankColor(rank) : AppColors.primaryContainer,
+        color: isTopThree ? _getRankColor(rank) : Colors.grey[300],
         shape: BoxShape.circle,
         boxShadow: isTopThree
             ? [
@@ -161,7 +153,7 @@ class RankTile extends StatelessWidget {
                     : rank == 2
                     ? Icons.looks_two
                     : Icons.looks_3,
-                color: AppColors.white,
+                color: Colors.white,
                 size: 18,
               )
             : Text(
@@ -179,8 +171,9 @@ class RankTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      constraints: const BoxConstraints(minHeight: 48),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -197,8 +190,9 @@ class RankTile extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(15),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             _buildRankBadge(rank),
             const SizedBox(width: 8),
@@ -243,33 +237,26 @@ class RankTile extends StatelessWidget {
             const SizedBox(width: 8),
             // 사용자 정보
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '활동 점수',
-                    style: TextStyle(fontSize: 11, color: Colors.grey[600]),
-                  ),
-                ],
+              child: Text(
+                name,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 12),
             // 점수
             Flexible(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
-                  color: AppColors.positive.withValues(alpha: 0.1),
+                  color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
@@ -277,7 +264,7 @@ class RankTile extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.positive,
+                    color: Color(0xFF4CAF50),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),

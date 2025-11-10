@@ -15,7 +15,5 @@ class RoutePath {
 
   static const String verifyQuiz = '/verify-quiz';
 
-  static const String campaignRecruiting = '/campaign-recruiting';
-
   static const String settings = '/settings';
 }

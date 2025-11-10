@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../state/activity_state.dart';
 import '../state/mock/mock_ranking_data.dart';
 import 'ranking_view.dart';
 import 'rank_tile.dart';
 
-/// Collapsible leaderboard section that shows MyRankTile by default
-/// and expands to show full leaderboard when tapped
-class LeaderboardSection extends ConsumerWidget {
+class LeaderboardSection extends StatelessWidget {
   final List<RankingItem> rankings;
 
   const LeaderboardSection({super.key, required this.rankings});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isExpanded = ref.watch(leaderboardExpandedProvider);
-
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -33,76 +27,42 @@ class LeaderboardSection extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildSectionHeader(context, ref, isExpanded),
+          _buildSectionHeader(context),
           const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
           _buildMyRankSection(),
-          if (isExpanded) ...[
-            const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-            _buildExpandedContent(),
-          ],
+          const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+          _buildExpandedContent(),
         ],
       ),
     );
   }
 
-  Widget _buildSectionHeader(
-    BuildContext context,
-    WidgetRef ref,
-    bool isExpanded,
-  ) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          ref.read(leaderboardExpandedProvider.notifier).toggle();
-        },
-        borderRadius: BorderRadius.only(
-          topLeft: const Radius.circular(18),
-          topRight: const Radius.circular(18),
-          bottomLeft: isExpanded ? Radius.zero : const Radius.circular(18),
-          bottomRight: isExpanded ? Radius.zero : const Radius.circular(18),
+  Widget _buildSectionHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 17,
+        vertical: 12,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(18),
+          topRight: Radius.circular(18),
         ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(18),
-              topRight: const Radius.circular(18),
-              bottomLeft: isExpanded ? Radius.zero : const Radius.circular(18),
-              bottomRight: isExpanded ? Radius.zero : const Radius.circular(18),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.emoji_events, color: Color(0xFFFFD700), size: 24),
+          const SizedBox(width: 8),
+          const Text(
+            '리더보드',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
             ),
           ),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.emoji_events,
-                color: Color(0xFFFFD700),
-                size: 24,
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                '리더보드',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                ),
-              ),
-              const Spacer(),
-              AnimatedRotation(
-                turns: isExpanded ? 0.5 : 0.0,
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeInOutCubic,
-                child: Icon(
-                  Icons.expand_more_rounded,
-                  color: Colors.grey[700],
-                  size: 24,
-                ),
-              ),
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -136,7 +96,7 @@ class LeaderboardSection extends ConsumerWidget {
     final myUser = rankings[myRankIndex >= 0 ? myRankIndex : 0];
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(15),
       child: MyRankTile(
         rank: myRank,
         name: myUser.username,
@@ -146,21 +106,17 @@ class LeaderboardSection extends ConsumerWidget {
   }
 
   Widget _buildExpandedContent() {
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeInOutCubic,
-      child: Container(
-        constraints: const BoxConstraints(minHeight: 350, maxHeight: 500),
-        child: DefaultTabController(
-          length: 2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildTabBar(),
-              const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-              Expanded(child: _buildTabBarView()),
-            ],
-          ),
+    return Container(
+      constraints: const BoxConstraints(minHeight: 300, maxHeight: 500),
+      child: DefaultTabController(
+        length: 2,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildTabBar(),
+            const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+            Flexible(child: _buildTabBarView()),
+          ],
         ),
       ),
     );
@@ -192,7 +148,10 @@ class LeaderboardSection extends ConsumerWidget {
     return TabBarView(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(
+            vertical: 17,
+            horizontal: 8,
+          ),
           child: RankingView(rankings: rankings),
         ),
         Center(
