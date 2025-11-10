@@ -16,87 +16,110 @@ class ProfileInfoSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
     final numberFormat = NumberFormat('#,###');
+    final Color primaryColor = AppColors.primary;
+    final Color nameTextColor = AppColors.textPrimary;
+    final Color secondaryTextColor = AppColors.textSecondary;
+    const Color cardFillColor = Color(0xFFE3F5E5);
+    const Color avatarBackdrop = Color(0xFFD8DDD7);
+    const double avatarSize = 96;
 
     return Column(
       children: [
         // 상단: 좌측 정보 + 우측 프로필 이미지
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40),
-          child: Row(
-            children: [
-              // 좌측 정보 컬럼
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8),
-                    // 사용자 이름
-                    Text(
-                      user.username,
-                      style: AppTextStyle.headlineSmall.copyWith(
-                        color: AppColors.onPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    // 주소지
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          size: 16,
-                          color: AppColors.onPrimary.withValues(alpha: 0.7),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          user.region,
-                          style: AppTextStyle.bodyMedium.copyWith(
-                            color: AppColors.onPrimary.withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    // 총 포인트
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.onPrimary.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: AppColors.onPrimary.withValues(alpha: 0.3),
-                          width: 1,
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: cardFillColor,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.10),
+                blurRadius: 32,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // 좌측 정보 컬럼
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 사용자 이름
+                      Text(
+                        user.username,
+                        style: AppTextStyle.headlineSmall.copyWith(
+                          color: nameTextColor,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                      const SizedBox(height: 12),
+                      // 주소지
+                      Row(
                         children: [
                           Icon(
-                            Icons.stars_rounded,
-                            size: 20,
-                            color: AppColors.onPrimary,
+                            Icons.location_on_outlined,
+                            size: 16,
+                            color: primaryColor.withValues(alpha: 0.85),
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            '${numberFormat.format(user.totalPoints)} 포인트',
-                            style: AppTextStyle.titleMedium.copyWith(
-                              color: AppColors.onPrimary,
-                              fontWeight: FontWeight.w700,
+                            user.region,
+                            style: AppTextStyle.bodyMedium.copyWith(
+                              color: secondaryTextColor,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 18),
+                      // 총 포인트
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: primaryColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: primaryColor.withValues(alpha: 0.24),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.stars_rounded,
+                              size: 20,
+                              color: primaryColor,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '${numberFormat.format(user.totalPoints)} 포인트',
+                              style: AppTextStyle.titleMedium.copyWith(
+                                color: primaryColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              // 우측 프로필 이미지
-              ProfileAvatar(imageUrl: user.userImg, size: 80),
-            ],
+                const SizedBox(width: 28),
+                // 우측 프로필 이미지
+                ProfileAvatar(
+                  imageUrl: user.userImg,
+                  size: avatarSize,
+                  backgroundColor: avatarBackdrop,
+                ),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 40),
