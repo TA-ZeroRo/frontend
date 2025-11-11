@@ -13,8 +13,16 @@ class SimpleChatArea extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final chatState = ref.watch(chatProvider);
 
+    // 최신 AI 메시지 찾기
+    final latestAIMessage = chatState.messages.isEmpty
+        ? null
+        : chatState.messages.reversed.firstWhere(
+            (msg) => msg.isAI,
+            orElse: () => chatState.messages.last,
+          );
+
     // 메시지나 로딩 상태가 없으면 아무것도 표시하지 않음
-    final hasContent = chatState.latestAIMessage != null || chatState.isLoading;
+    final hasContent = latestAIMessage != null || chatState.isLoading;
 
     if (!hasContent) {
       return const SizedBox.shrink();
@@ -34,7 +42,7 @@ class SimpleChatArea extends ConsumerWidget {
             // AI 메시지 또는 타이핑 인디케이터
             chatState.isLoading
                 ? const TypingIndicator()
-                : MessageBubble(message: chatState.latestAIMessage!),
+                : MessageBubble(message: latestAIMessage!),
             // InlineChatWidget과의 간격
             const SizedBox(height: 17),
           ],

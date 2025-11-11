@@ -19,8 +19,8 @@
 
 #### 2. 데이터 레이어 (Data Layer)
 
-- **data_source**: 외부 API, 로컬 DB 등에 접근
-- **dto**: 네트워크/DB 응답을 위한 엔티티, 직렬화에 적합
+- **data_source**: 외부 API, 로컬 DB 등에 접근 *.api.dart
+- **dto**: 네트워크/DB 응답을 위한 엔티티, 직렬화에 적합 
 - **repository_impl**: 도메인 저장소 인터페이스 구현
 
 규칙:

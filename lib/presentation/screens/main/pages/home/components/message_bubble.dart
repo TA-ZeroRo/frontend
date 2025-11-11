@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/app_color.dart';
 import 'package:frontend/core/theme/app_text_style.dart';
 import '../state/chat_controller.dart';
+import '../state/chat_state.dart';
 
 /// AI 메시지를 표시하는 말풍선 위젯
 class MessageBubble extends StatelessWidget {

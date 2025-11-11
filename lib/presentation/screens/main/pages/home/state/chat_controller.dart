@@ -1,96 +1,81 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'mock/mock_chat_data.dart';
 
-/// 간단한 메시지 모델 (Presentation 레이어 전용)
-class SimpleMessage {
-  final String text;
-  final bool isAI;
-  final DateTime timestamp;
-
-  SimpleMessage({
-    required this.text,
-    required this.isAI,
-    required this.timestamp,
-  });
-}
-
-/// 채팅 UI 상태
-class ChatState {
-  final SimpleMessage? latestAIMessage; // 최신 AI 메시지 1개만 유지
-  final bool isLoading; // 타이핑 인디케이터 표시 여부
-  final String inputText; // 입력 필드 텍스트
-  final bool isFullChatOpen; // 전체 화면 채팅 오버레이 표시 여부
-
-  ChatState({
-    this.latestAIMessage,
-    this.isLoading = false,
-    this.inputText = '',
-    this.isFullChatOpen = false,
-  });
-
-  ChatState copyWith({
-    SimpleMessage? latestAIMessage,
-    bool? isLoading,
-    String? inputText,
-    bool? isFullChatOpen,
-  }) {
-    return ChatState(
-      latestAIMessage: latestAIMessage ?? this.latestAIMessage,
-      isLoading: isLoading ?? this.isLoading,
-      inputText: inputText ?? this.inputText,
-      isFullChatOpen: isFullChatOpen ?? this.isFullChatOpen,
-    );
-  }
-}
+import '../../../../../../core/di/injection.dart';
+import '../../../../../../domain/repository/agent_chat_repository.dart';
+import '../../../../entry/state/auth_controller.dart';
+import 'chat_state.dart';
 
 /// 채팅 컨트롤러
 class ChatNotifier extends Notifier<ChatState> {
+  final AgentChatRepository _agentChatRepository = getIt<AgentChatRepository>();
+
   @override
   ChatState build() {
     return ChatState();
-  }
-
-  /// 입력 텍스트 업데이트
-  void updateInputText(String text) {
-    state = state.copyWith(inputText: text);
   }
 
   /// 메시지 전송
   Future<void> sendMessage(String text) async {
     if (text.trim().isEmpty) return;
 
-    // 입력 필드 초기화
-    state = state.copyWith(
-      inputText: '',
-      isLoading: true,
-    );
+    // 현재 로그인한 사용자 ID 가져오기
+    final userId = ref.read(authProvider).currentUser?.id;
+    if (userId == null) {
+      state = state.copyWith(error: '로그인이 필요합니다', isLoading: false);
+      return;
+    }
 
-    // Mock 응답 시뮬레이션 (1-2초 딜레이)
-    await Future.delayed(const Duration(milliseconds: 1500));
-
-    // Mock AI 응답 생성
-    final aiResponse = SimpleMessage(
-      text: MockChatData.getNextResponse(),
-      isAI: true,
+    // 사용자 메시지 추가
+    final userMessage = SimpleMessage(
+      text: text,
+      isAI: false,
       timestamp: DateTime.now(),
     );
 
-    // 상태 업데이트
+    // 입력 필드 초기화, 사용자 메시지 추가, 로딩 시작
     state = state.copyWith(
-      latestAIMessage: aiResponse,
-      isLoading: false,
+      inputText: '',
+      messages: [...state.messages, userMessage],
+      isLoading: true,
+      error: null,
     );
-  }
 
-  /// 채팅 초기화
-  void resetChat() {
-    MockChatData.reset();
-    state = ChatState();
+    try {
+      // 실제 API 호출
+      final responseMessage = await _agentChatRepository.sendMessage(
+        userId: userId,
+        message: text,
+      );
+
+      // AI 응답 생성
+      final aiResponse = SimpleMessage(
+        text: responseMessage,
+        isAI: true,
+        timestamp: DateTime.now(),
+      );
+
+      // AI 메시지 추가 및 로딩 종료
+      state = state.copyWith(
+        messages: [...state.messages, aiResponse],
+        isLoading: false,
+      );
+    } catch (e) {
+      // 에러 처리
+      state = state.copyWith(
+        isLoading: false,
+        error: '메시지 전송에 실패했습니다: ${e.toString()}',
+      );
+    }
   }
 
   /// 전체 화면 채팅 토글
   void toggleFullChat() {
     state = state.copyWith(isFullChatOpen: !state.isFullChatOpen);
+  }
+
+  /// 에러 클리어
+  void clearError() {
+    state = state.copyWith(error: null);
   }
 }
 

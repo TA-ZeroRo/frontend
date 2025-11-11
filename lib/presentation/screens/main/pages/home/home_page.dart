@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 import 'package:frontend/core/theme/app_color.dart';
-import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 import '../../../../../core/components/custom_app_bar.dart';
+import '../../../../../core/utils/toast_helper.dart';
 import 'components/simple_chat_area.dart';
 import 'components/inline_chat_widget.dart';
 import 'state/chat_controller.dart';
+import 'state/chat_state.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -101,6 +102,15 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatProvider);
+
+    // 에러 메시지 표시
+    ref.listen<ChatState>(chatProvider, (previous, next) {
+      if (next.error != null) {
+        ToastHelper.showError(next.error!);
+        // 에러를 표시한 후 클리어
+        ref.read(chatProvider.notifier).clearError();
+      }
+    });
 
     return Scaffold(
       appBar: !chatState.isFullChatOpen ? CustomAppBar(title: 'ZeroRo') : null,

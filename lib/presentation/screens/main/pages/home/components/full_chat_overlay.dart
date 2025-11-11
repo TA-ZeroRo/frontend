@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_color.dart';
 import 'package:frontend/core/theme/app_text_style.dart';
 import '../state/chat_controller.dart';
+import '../state/chat_state.dart';
 import 'ai_message_row.dart';
+import 'user_message_row.dart';
 import 'inline_chat_widget.dart';
 import 'typing_indicator.dart';
 
@@ -16,13 +18,41 @@ class FullChatOverlay extends ConsumerStatefulWidget {
 }
 
 class _FullChatOverlayState extends ConsumerState<FullChatOverlay> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   void _handleClose() {
     ref.read(chatProvider.notifier).toggleFullChat();
+  }
+
+  // 새 메시지가 추가되면 스크롤을 최하단으로 이동
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatProvider);
+
+    // 메시지가 변경되면 스크롤
+    ref.listen(chatProvider, (previous, next) {
+      if (previous?.messages.length != next.messages.length) {
+        _scrollToBottom();
+      }
+    });
 
     return Material(
       color: AppColors.background.withValues(alpha: 0.45),
@@ -82,7 +112,7 @@ class _FullChatOverlayState extends ConsumerState<FullChatOverlay> {
   /// 채팅 메시지 영역
   Widget _buildChatArea(ChatState chatState) {
     // 메시지가 없고 로딩 중도 아니면 빈 상태 표시
-    if (chatState.latestAIMessage == null && !chatState.isLoading) {
+    if (chatState.messages.isEmpty && !chatState.isLoading) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -101,32 +131,38 @@ class _FullChatOverlayState extends ConsumerState<FullChatOverlay> {
       );
     }
 
-    // 메시지 영역
-    return SingleChildScrollView(
+    // 메시지 리스트
+    return ListView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.all(17),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // 최신 AI 메시지 또는 타이핑 인디케이터
-          if (chatState.isLoading)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 제로로 아바타
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: AppColors.primary,
-                  child: Icon(Icons.eco, color: Colors.white, size: 20),
-                ),
-                const SizedBox(width: 10),
-                // 타이핑 인디케이터
-                const TypingIndicator(),
-              ],
-            )
-          else if (chatState.latestAIMessage != null)
-            AiMessageRow(message: chatState.latestAIMessage!),
-        ],
-      ),
+      itemCount: chatState.messages.length + (chatState.isLoading ? 1 : 0),
+      itemBuilder: (context, index) {
+        // 로딩 인디케이터를 마지막에 표시
+        if (index == chatState.messages.length) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 제로로 아바타
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: AppColors.primary,
+                child: Icon(Icons.eco, color: Colors.white, size: 20),
+              ),
+              const SizedBox(width: 10),
+              // 타이핑 인디케이터
+              const TypingIndicator(),
+            ],
+          );
+        }
+
+        // 메시지 표시
+        final message = chatState.messages[index];
+        if (message.isAI) {
+          return AiMessageRow(message: message);
+        } else {
+          return UserMessageRow(message: message);
+        }
+      },
     );
   }
 }
