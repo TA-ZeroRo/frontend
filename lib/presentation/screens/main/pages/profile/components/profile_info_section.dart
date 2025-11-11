@@ -19,7 +19,7 @@ class ProfileInfoSection extends ConsumerWidget {
     final Color primaryColor = AppColors.primary;
     final Color nameTextColor = AppColors.textPrimary;
     final Color secondaryTextColor = AppColors.textSecondary;
-    const Color cardFillColor = Color(0xFFE3F5E5);
+    final Color cardFillColor = AppColors.background;
     const Color avatarBackdrop = Color(0xFFD8DDD7);
     const double avatarSize = 96;
 
