@@ -7,11 +7,13 @@ import '../../../../../../core/theme/app_color.dart';
 class ProfileAvatar extends StatelessWidget {
   final String? imageUrl;
   final double size;
+  final Color backgroundColor;
 
   const ProfileAvatar({
     super.key,
     this.imageUrl,
     this.size = 80,
+    this.backgroundColor = AppColors.cardBackground,
   });
 
   @override
@@ -21,7 +23,7 @@ class ProfileAvatar extends StatelessWidget {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: AppColors.cardBackground,
+          color: backgroundColor,
           border: Border.all(
             color: AppColors.onPrimary.withValues(alpha: 0.3),
             width: 2,
@@ -57,7 +59,7 @@ class ProfileAvatar extends StatelessWidget {
 
   Widget _buildPlaceholder() {
     return Container(
-      color: AppColors.cardBackground,
+      color: backgroundColor,
       child: Icon(
         Icons.person,
         size: size * 0.6,

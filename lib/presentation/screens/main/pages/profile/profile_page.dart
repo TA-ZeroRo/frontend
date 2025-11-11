@@ -108,7 +108,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                 duration: const Duration(milliseconds: 300),
                                 child: Container(
                                   color: AppColors.primary,
-                                  padding: const EdgeInsets.all(24),
+                                  padding: const EdgeInsets.only(
+                                    left: 22,
+                                    right: 22,
+                                    top: 10,
+                                    bottom: 20,
+                                  ),
                                   child: const PointChartSection(),
                                 ),
                               )
@@ -125,7 +130,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         child: Container(
                           width: double.infinity,
                           color: AppColors.background,
-                          padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+                          padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
                           child: Row(
                             children: [
                               Icon(
