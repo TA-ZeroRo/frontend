@@ -8,10 +8,7 @@ import '../state/profile_chart_state.dart';
 class ProfileActionButtons extends ConsumerWidget {
   final VoidCallback onEditProfile;
 
-  const ProfileActionButtons({
-    super.key,
-    required this.onEditProfile,
-  });
+  const ProfileActionButtons({super.key, required this.onEditProfile});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,11 +20,15 @@ class ProfileActionButtons extends ConsumerWidget {
           child: ElevatedButton(
             onPressed: onEditProfile,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.onPrimary,
-              foregroundColor: AppColors.primary,
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.onPrimary,
               minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
+              ),
+              side: BorderSide(
+                color: AppColors.onPrimary.withValues(alpha: 0.8),
+                width: 1.5,
               ),
               elevation: 0,
             ),
@@ -48,22 +49,20 @@ class ProfileActionButtons extends ConsumerWidget {
             icon: AnimatedRotation(
               turns: isChartExpanded ? 0.5 : 0,
               duration: const Duration(milliseconds: 300),
-              child: Icon(
-                Icons.keyboard_arrow_down,
-                color: AppColors.onPrimary,
-              ),
+              child: Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
             ),
             label: Text(
               '포인트 히스토리',
               style: AppTextStyle.bodyMedium.copyWith(
                 fontWeight: FontWeight.w600,
-                color: AppColors.onPrimary,
+                color: AppColors.primary,
               ),
             ),
             style: OutlinedButton.styleFrom(
+              backgroundColor: AppColors.onPrimary,
               side: BorderSide(
-                color: AppColors.onPrimary.withValues(alpha: 0.5),
-                width: 1.5,
+                color: AppColors.primary.withValues(alpha: 0.35),
+                width: 1.0,
               ),
               minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(
