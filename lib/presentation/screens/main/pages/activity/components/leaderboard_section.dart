@@ -39,10 +39,7 @@ class LeaderboardSection extends StatelessWidget {
 
   Widget _buildSectionHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 17,
-        vertical: 12,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.grey[100],
         borderRadius: const BorderRadius.only(
@@ -107,7 +104,7 @@ class LeaderboardSection extends StatelessWidget {
 
   Widget _buildExpandedContent() {
     return Container(
-      constraints: const BoxConstraints(minHeight: 300, maxHeight: 500),
+      constraints: const BoxConstraints(minHeight: 260, maxHeight: 440),
       child: DefaultTabController(
         length: 2,
         child: Column(
@@ -148,10 +145,7 @@ class LeaderboardSection extends StatelessWidget {
     return TabBarView(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 17,
-            horizontal: 8,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: RankingView(rankings: rankings),
         ),
         Center(

@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import '../state/mock/mock_ranking_data.dart';
 
+/// 애니메이션 설정 상수
+const _kSlideDuration = Duration(milliseconds: 900);
+const _kSlideCurve = Curves.easeOutCubic;
+// SlideTransition은 자식 높이에 대한 비율로 이동하므로, 0.25는 대략 자식 높이의 25% 아래에서 시작을 의미
+const double _kStartDy = 0.25;
+
 class PodiumList extends StatefulWidget {
   const PodiumList({super.key, required this.top3, this.height = 220.0});
   final List<RankingItem> top3;
@@ -12,44 +18,26 @@ class PodiumList extends StatefulWidget {
 
 class _PodiumListState extends State<PodiumList> with TickerProviderStateMixin {
   late AnimationController _animationController;
-
-  late Animation<double> _thirdPlaceAnimation;
-  late Animation<double> _secondPlaceAnimation;
-  late Animation<double> _firstPlaceAnimation;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    // 메인 애니메이션 컨트롤러 (전체 시퀀스용)
+    // 메인 애니메이션 컨트롤러 (동시 슬라이드)
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: _kSlideDuration,
       vsync: this,
     );
 
-    // 3등 애니메이션 (0.0 ~ 0.3초)
-    _thirdPlaceAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.1, 0.4, curve: Curves.elasticOut),
-      ),
-    );
-
-    // 2등 애니메이션 (0.3 ~ 0.6초)
-    _secondPlaceAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.4, 0.7, curve: Curves.elasticOut),
-      ),
-    );
-
-    // 1등 애니메이션 (0.6 ~ 1.0초)
-    _firstPlaceAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.7, 1.0, curve: Curves.elasticOut),
-      ),
-    );
+    // 아래에서 위로 동시에 슬라이드
+    _slideAnimation =
+        Tween<Offset>(
+          begin: const Offset(0, _kStartDy),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(parent: _animationController, curve: _kSlideCurve),
+        );
 
     // 애니메이션 시작 (다음 프레임에서)
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -87,14 +75,11 @@ class _PodiumListState extends State<PodiumList> with TickerProviderStateMixin {
       double topMargin = (idx == 0)
           ? 40 * heightRatio
           : (idx == 1 ? 50 * heightRatio : 60 * heightRatio);
-      Animation<double> animation = (idx == 0)
-          ? _firstPlaceAnimation
-          : (idx == 1 ? _secondPlaceAnimation : _thirdPlaceAnimation);
       podiumWidgets.add(
         _buildAnimatedPodiumItem(
           user: widget.top3[idx],
           topMargin: topMargin,
-          animation: animation,
+          slideAnimation: _slideAnimation,
           profileSize: profileSize,
           rank: idx + 1,
         ),
@@ -111,7 +96,7 @@ class _PodiumListState extends State<PodiumList> with TickerProviderStateMixin {
   Widget _buildAnimatedPodiumItem({
     required RankingItem user,
     required double topMargin,
-    required Animation<double> animation,
+    required Animation<Offset> slideAnimation,
     required double profileSize,
     required int rank,
   }) {
@@ -120,60 +105,57 @@ class _PodiumListState extends State<PodiumList> with TickerProviderStateMixin {
     final padding = (20 * heightRatio).clamp(8.0, 20.0);
 
     return Expanded(
-      child: ScaleTransition(
-        scale: animation,
-        child: FadeTransition(
-          opacity: animation,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: padding),
-                margin: EdgeInsets.only(top: topMargin, bottom: 0),
-                color: const Color.fromARGB(112, 127, 195, 251),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      user.username,
-                      style: TextStyle(fontSize: fontSize),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      user.totalPoints.toString(),
-                      style: TextStyle(fontSize: fontSize),
-                    ),
-                  ],
-                ),
-              ),
-              Positioned(
-                top: topMargin / 2,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: ClipOval(
-                    child: user.userImg != null && user.userImg!.isNotEmpty
-                        ? Image.network(
-                            user.userImg!,
-                            width: profileSize,
-                            height: profileSize,
-                            fit: BoxFit.cover,
-                          )
-                        : Container(
-                            width: profileSize,
-                            height: profileSize,
-                            color: Colors.grey[300],
-                            child: Icon(
-                              Icons.person,
-                              size: profileSize,
-                              color: Colors.white,
-                            ),
-                          ),
+      child: SlideTransition(
+        position: slideAnimation,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: padding),
+              margin: EdgeInsets.only(top: topMargin, bottom: 0),
+              color: const Color.fromARGB(112, 127, 195, 251),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    user.username,
+                    style: TextStyle(fontSize: fontSize),
+                    overflow: TextOverflow.ellipsis,
                   ),
+                  Text(
+                    user.totalPoints.toString(),
+                    style: TextStyle(fontSize: fontSize),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              top: topMargin / 2,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: ClipOval(
+                  child: user.userImg != null && user.userImg!.isNotEmpty
+                      ? Image.network(
+                          user.userImg!,
+                          width: profileSize,
+                          height: profileSize,
+                          fit: BoxFit.cover,
+                        )
+                      : Container(
+                          width: profileSize,
+                          height: profileSize,
+                          color: Colors.grey[300],
+                          child: Icon(
+                            Icons.person,
+                            size: profileSize,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
