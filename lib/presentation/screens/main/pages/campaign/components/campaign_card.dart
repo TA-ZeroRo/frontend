@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../state/mock/mock_campaign_data.dart';
+import 'participation_popup_menu.dart';
 
 class CampaignCard extends ConsumerWidget {
   final CampaignData campaign;
   final VoidCallback? onTap;
   final VoidCallback? onParticipate;
+  final VoidCallback? onCruiting;
   final VoidCallback? onShare;
 
   const CampaignCard({
@@ -14,6 +16,7 @@ class CampaignCard extends ConsumerWidget {
     required this.campaign,
     this.onTap,
     this.onParticipate,
+    this.onCruiting,
     this.onShare,
   });
 
@@ -208,11 +211,13 @@ class CampaignCard extends ConsumerWidget {
 
             const SizedBox(width: 8),
 
-            // 참가 버튼
-            _ParticipateButton(
-              isParticipating: campaign.isParticipating,
-              onPressed: onParticipate,
-            ),
+            // 참가 버튼 (팝업 메뉴)
+            if (onParticipate != null && onCruiting != null)
+              ParticipationPopupMenu(
+                isParticipating: campaign.isParticipating,
+                onParticipate: onParticipate!,
+                onCruiting: onCruiting!,
+              ),
           ],
         ),
       ),
@@ -240,39 +245,6 @@ class _ActionButton extends StatelessWidget {
           height: 40,
           alignment: Alignment.center,
           child: Icon(icon, color: Colors.white, size: 20),
-        ),
-      ),
-    );
-  }
-}
-
-/// 참가 버튼
-class _ParticipateButton extends StatelessWidget {
-  final bool isParticipating;
-  final VoidCallback? onPressed;
-
-  const _ParticipateButton({required this.isParticipating, this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: isParticipating
-          ? const Color(0xFF424242).withValues(alpha: 0.8)
-          : AppColors.primary,
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Text(
-            isParticipating ? '참가중' : '참가하기',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
         ),
       ),
     );

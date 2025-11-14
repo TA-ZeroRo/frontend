@@ -10,11 +10,40 @@ import 'components/campaign_card.dart';
 import 'components/campaign_card_shimmer.dart';
 import 'components/campaign_filters.dart';
 
-class CampaignPage extends ConsumerWidget {
+class CampaignPage extends ConsumerStatefulWidget {
   const CampaignPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CampaignPage> createState() => _CampaignPageState();
+}
+
+class _CampaignPageState extends ConsumerState<CampaignPage> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  /// 스크롤 이벤트 리스너
+  void _onScroll() {
+    // 스크롤이 끝에 가까워지면 다음 페이지 로드 (90% 지점)
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.9) {
+      ref.read(campaignListProvider.notifier).loadMore();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // 필터 상태 감지
     ref.listen(campaignFilterProvider, (previous, next) {
       // 필터가 변경되면 캠페인 목록 새로고침
@@ -27,10 +56,11 @@ class CampaignPage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           _buildAppBar(),
-          _buildFilters(context, ref, filter),
-          _buildCampaignList(context, ref, campaignListAsync),
+          _buildFilters(context, filter),
+          _buildCampaignList(context, campaignListAsync),
         ],
       ),
     );
@@ -43,7 +73,6 @@ class CampaignPage extends ConsumerWidget {
   /// 필터 섹션
   Widget _buildFilters(
     BuildContext context,
-    WidgetRef ref,
     CampaignFilter filter,
   ) {
     return SliverToBoxAdapter(
@@ -103,7 +132,6 @@ class CampaignPage extends ConsumerWidget {
   /// 캠페인 목록
   Widget _buildCampaignList(
     BuildContext context,
-    WidgetRef ref,
     AsyncValue campaignListAsync,
   ) {
     return campaignListAsync.when(
@@ -112,49 +140,71 @@ class CampaignPage extends ConsumerWidget {
           return _buildEmptyState();
         }
 
+        final hasMore = ref.read(campaignListProvider.notifier).hasMore;
+
         return SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              final campaign = campaigns[index];
-              return Padding(
-                padding: EdgeInsets.only(
-                  bottom: index == campaigns.length - 1 ? 16 : 12,
-                ),
-                child: CampaignCard(
-                  campaign: campaign,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CampaignWebViewScreen(
-                          url: campaign.url,
-                          title: campaign.title,
-                        ),
-                      ),
-                    );
-                  },
-                  onParticipate: () {
-                    ref
-                        .read(campaignListProvider.notifier)
-                        .toggleParticipation(campaign.id);
-                    ToastHelper.showSuccess(
-                      campaign.isParticipating
-                          ? '캠페인 참가가 취소되었어요'
-                          : '캠페인에 참가하셨어요!',
-                    );
-                  },
-                  onShare: () {
-                    ToastHelper.showInfo('공유 기능 준비중이에요');
-                  },
-                ),
-              );
-            }, childCount: campaigns.length),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                // 캠페인 카드
+                if (index < campaigns.length) {
+                  final campaign = campaigns[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: CampaignCard(
+                      campaign: campaign,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CampaignWebViewScreen(
+                              url: campaign.url,
+                              title: campaign.title,
+                            ),
+                          ),
+                        );
+                      },
+                      onParticipate: () {
+                        ref
+                            .read(campaignListProvider.notifier)
+                            .toggleParticipation(campaign.id);
+                        ToastHelper.showSuccess(
+                          campaign.isParticipating
+                              ? '캠페인 참가가 취소되었어요'
+                              : '캠페인에 참가하셨어요!',
+                        );
+                      },
+                      onCruiting: () {
+                        ToastHelper.showInfo('크루팅 기능 준비중이에요');
+                      },
+                      onShare: () {
+                        ToastHelper.showInfo('공유 기능 준비중이에요');
+                      },
+                    ),
+                  );
+                }
+                // 로딩 인디케이터 (더 로드할 데이터가 있을 때만)
+                else if (hasMore) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+                // 마지막 여백
+                else {
+                  return const SizedBox(height: 16);
+                }
+              },
+              childCount: campaigns.length + 1, // 캠페인 + 로딩/여백
+            ),
           ),
         );
       },
       loading: () => _buildLoadingState(),
-      error: (error, stack) => _buildErrorState(ref),
+      error: (error, stack) => _buildErrorState(),
     );
   }
 
@@ -200,7 +250,7 @@ class CampaignPage extends ConsumerWidget {
   }
 
   /// 에러 상태 UI
-  Widget _buildErrorState(WidgetRef ref) {
+  Widget _buildErrorState() {
     return SliverFillRemaining(
       hasScrollBody: false,
       child: Center(
