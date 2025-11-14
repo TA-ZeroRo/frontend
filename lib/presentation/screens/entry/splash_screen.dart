@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_color.dart';
-import '../../../core/utils/toast_helper.dart';
 import '../../routes/router_path.dart';
 import 'state/auth_controller.dart';
 
@@ -14,6 +13,8 @@ class SplashScreen extends ConsumerStatefulWidget {
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen> {
+  bool _showAutoLoginMessage = false;
+
   @override
   void initState() {
     super.initState();
@@ -35,10 +36,20 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
     // 세션 있고 유저 정보도 있으면 메인으로
     if (authState.currentUser != null) {
-      // 자동 로그인 성공 토스트
+      // 자동 로그인 성공 메시지 표시
       if (mounted) {
-        ToastHelper.showSuccess('자동 로그인 되었습니다');
+        setState(() {
+          _showAutoLoginMessage = true;
+        });
         await Future.delayed(const Duration(seconds: 2));
+      }
+
+      if (!mounted) return;
+
+      if (mounted) {
+        setState(() {
+          _showAutoLoginMessage = false;
+        });
       }
 
       if (!mounted) return;
@@ -83,6 +94,51 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 child: Image.asset('assets/images/ZeroRo_logo.png', width: 320),
               ),
             ),
+            // 자동 로그인 메시지
+            if (_showAutoLoginMessage)
+              Positioned(
+                bottom: 40,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.pointDecrease.withValues(alpha: 0.8),
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset(
+                          'assets/images/google.png',
+                          width: 20,
+                          height: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          '자동 로그인 되었습니다',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
