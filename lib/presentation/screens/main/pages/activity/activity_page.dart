@@ -21,7 +21,7 @@ class ActivityPage extends StatelessWidget {
           // 리더보드 섹션
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(17, 17, 17, 8),
+              padding: const EdgeInsets.only(left: 17, right: 17, top: 12),
               child: LeaderboardSection(rankings: mockRankings),
             ),
           ),

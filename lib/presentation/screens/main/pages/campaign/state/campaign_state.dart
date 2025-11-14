@@ -1,4 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../../core/di/injection.dart';
+import '../../../../../../domain/model/campaign/campaign.dart';
+import '../../../../../../domain/repository/campaign_repository.dart';
 import 'mock/mock_campaign_data.dart';
 
 /// 캠페인 필터 상태
@@ -81,62 +84,131 @@ final campaignFilterProvider =
 
 /// 캠페인 목록 Notifier
 class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
-  /// 내부 캠페인 데이터 (참가 상태 변경을 위해)
-  List<CampaignData> _campaigns = [];
+  late final CampaignRepository _repository;
+
+  /// 참여 중인 캠페인 ID 목록 (로컬 관리)
+  final Set<int> _participatingCampaignIds = {};
+
+  /// 현재 로드된 캠페인 목록
+  List<Campaign> _allCampaigns = [];
+
+  /// 페이지네이션 offset
+  int _offset = 0;
+
+  /// 더 로드할 데이터가 있는지 여부
+  bool _hasMore = true;
+
+  /// 무한 스크롤 중복 호출 방지 플래그
+  bool _isLoadingMore = false;
 
   @override
   Future<List<CampaignData>> build() async {
-    // Mock 데이터로 초기화
-    _campaigns = List.from(mockCampaigns);
-
-    // 필터 적용
-    return _applyFilters();
+    _repository = getIt<CampaignRepository>();
+    return _loadCampaigns(resetOffset: true);
   }
 
-  /// 필터 적용하여 캠페인 목록 반환
-  List<CampaignData> _applyFilters() {
+  /// 캠페인 목록 로드
+  Future<List<CampaignData>> _loadCampaigns({bool resetOffset = false}) async {
+    if (resetOffset) {
+      _offset = 0;
+      _allCampaigns = [];
+      _hasMore = true;
+    }
+
     final filter = ref.read(campaignFilterProvider);
 
-    return _campaigns.where((campaign) {
-      // 지역 필터
-      if (filter.region != '전체' && campaign.region != filter.region) {
-        return false;
-      }
+    final campaigns = await _repository.getCampaigns(
+      region: filter.region != '전체' ? filter.region : null,
+      category: filter.category != '전체' ? filter.category : null,
+      status: 'ACTIVE', // 진행 중인 캠페인만 조회
+      offset: _offset,
+    );
 
-      // 시 필터
-      if (filter.city != '전체' && campaign.city != filter.city) {
-        return false;
-      }
+    if (resetOffset) {
+      _allCampaigns = campaigns;
+    } else {
+      _allCampaigns.addAll(campaigns);
+    }
 
-      // 카테고리 필터
-      if (filter.category != '전체' && campaign.category != filter.category) {
-        return false;
-      }
+    // 20개 미만이면 더 이상 로드할 데이터가 없음
+    if (campaigns.length < 20) {
+      _hasMore = false;
+    }
 
-      // 기간 필터
+    return _applyLocalFilters();
+  }
+
+  /// 로컬 필터 적용 (city, startDate, endDate)
+  List<CampaignData> _applyLocalFilters() {
+    final filter = ref.read(campaignFilterProvider);
+
+    var filtered = _allCampaigns.where((campaign) {
+      // 기간 필터 (로컬)
       if (filter.startDate != null && filter.endDate != null) {
-        // 캠페인 기간과 검색 기간이 겹치는지 확인
-        // 캠페인 시작일이 검색 종료일 이전이고, 캠페인 종료일이 검색 시작일 이후면 겹침
-        final overlaps =
-            (campaign.startDate.isBefore(filter.endDate!) ||
-                campaign.startDate.isAtSameMomentAs(filter.endDate!)) &&
-            (campaign.endDate.isAfter(filter.startDate!) ||
-                campaign.endDate.isAtSameMomentAs(filter.startDate!));
+        final campaignStart =
+            DateTime.tryParse(campaign.startDate) ?? DateTime(1900, 1, 1);
+        final campaignEnd = (campaign.endDate != null
+                ? DateTime.tryParse(campaign.endDate!)
+                : null) ??
+            DateTime(9999, 12, 31);
+        final overlaps = (campaignStart.isBefore(filter.endDate!) ||
+                campaignStart.isAtSameMomentAs(filter.endDate!)) &&
+            (campaignEnd.isAfter(filter.startDate!) ||
+                campaignEnd.isAtSameMomentAs(filter.startDate!));
         if (!overlaps) return false;
       }
 
       return true;
     }).toList();
+
+    // Campaign을 CampaignData로 변환
+    return filtered
+        .map((campaign) => _campaignToCampaignData(campaign))
+        .toList();
+  }
+
+  /// Campaign을 CampaignData로 변환
+  CampaignData _campaignToCampaignData(Campaign campaign) {
+    return CampaignData(
+      id: campaign.id.toString(),
+      title: campaign.title,
+      imageUrl: campaign.imageUrl ?? '',
+      url: campaign.campaignUrl,
+      startDate: DateTime.tryParse(campaign.startDate) ?? DateTime.now(),
+      endDate: (campaign.endDate != null
+              ? DateTime.tryParse(campaign.endDate!)
+              : null) ??
+          (DateTime.tryParse(campaign.startDate) ?? DateTime.now()),
+      region: campaign.region,
+      city: '전체', // API에 city가 없으므로 기본값
+      category: campaign.category,
+      isParticipating: _participatingCampaignIds.contains(campaign.id),
+    );
   }
 
   /// 필터가 변경되었을 때 호출
   Future<void> refresh() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      // 짧은 딜레이로 로딩 효과 연출
-      await Future.delayed(const Duration(milliseconds: 300));
-      return _applyFilters();
+      return _loadCampaigns(resetOffset: true);
     });
+  }
+
+  /// 다음 페이지 로드 (무한 스크롤)
+  Future<void> loadMore() async {
+    // 이미 로딩 중이거나 더 이상 데이터가 없으면 무시
+    if (state.isLoading || !_hasMore || _isLoadingMore) return;
+
+    _isLoadingMore = true;
+    _offset += 20;
+
+    try {
+      state = await AsyncValue.guard(() async {
+        return _loadCampaigns(resetOffset: false);
+      });
+    } finally {
+      _isLoadingMore = false;
+    }
   }
 
   /// 캠페인 참가 토글
@@ -144,20 +216,20 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
     // 현재 상태가 로딩 중이면 무시
     if (state.isLoading) return;
 
-    // 낙관적 업데이트 (Optimistic Update)
     final currentData = state.value;
     if (currentData == null) return;
 
-    // 내부 데이터 업데이트
-    final index = _campaigns.indexWhere((c) => c.id == campaignId);
-    if (index != -1) {
-      _campaigns[index] = _campaigns[index].copyWith(
-        isParticipating: !_campaigns[index].isParticipating,
-      );
+    final id = int.parse(campaignId);
+
+    // 낙관적 업데이트
+    if (_participatingCampaignIds.contains(id)) {
+      _participatingCampaignIds.remove(id);
+    } else {
+      _participatingCampaignIds.add(id);
     }
 
     // UI 즉시 업데이트
-    state = AsyncValue.data(_applyFilters());
+    state = AsyncValue.data(_applyLocalFilters());
 
     // 실제 API 호출 시뮬레이션 (추후 실제 API로 대체)
     try {
@@ -165,14 +237,17 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
       // API 성공 시 상태 유지
     } catch (e) {
       // API 실패 시 롤백
-      if (index != -1) {
-        _campaigns[index] = _campaigns[index].copyWith(
-          isParticipating: !_campaigns[index].isParticipating,
-        );
-        state = AsyncValue.data(_applyFilters());
+      if (_participatingCampaignIds.contains(id)) {
+        _participatingCampaignIds.remove(id);
+      } else {
+        _participatingCampaignIds.add(id);
       }
+      state = AsyncValue.data(_applyLocalFilters());
     }
   }
+
+  /// 더 로드할 데이터가 있는지 여부
+  bool get hasMore => _hasMore;
 }
 
 /// 캠페인 목록 Provider

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:frontend/core/theme/app_color.dart';
 import 'package:frontend/core/theme/app_text_style.dart';
 import '../state/chat_state.dart';
@@ -16,17 +17,13 @@ class AiMessageRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 제로로 아바타 (임시)
           CircleAvatar(
             radius: 20,
-            backgroundColor: AppColors.primary,
-            child: Icon(
-              Icons.eco,
-              color: Colors.white,
-              size: 20,
-            ),
+            backgroundColor: Colors.white,
+            child: Image.asset('assets/images/smile_zeroro.png'),
           ),
           const SizedBox(width: 10),
+
           // 메시지 버블
           Flexible(
             child: Container(
@@ -45,13 +42,7 @@ class AiMessageRow extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Text(
-                message.text,
-                style: AppTextStyle.bodyMedium.copyWith(
-                  color: AppColors.textPrimary,
-                  height: 1.5,
-                ),
-              ),
+              child: MarkdownBody(data: message.text, selectable: true),
             ),
           ),
         ],

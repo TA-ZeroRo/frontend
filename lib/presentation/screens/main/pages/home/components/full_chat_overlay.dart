@@ -145,8 +145,8 @@ class _FullChatOverlayState extends ConsumerState<FullChatOverlay> {
               // 제로로 아바타
               CircleAvatar(
                 radius: 20,
-                backgroundColor: AppColors.primary,
-                child: Icon(Icons.eco, color: Colors.white, size: 20),
+                backgroundColor: Colors.white,
+                child: Image.asset('assets/images/smile_zeroro.png'),
               ),
               const SizedBox(width: 10),
               // 타이핑 인디케이터

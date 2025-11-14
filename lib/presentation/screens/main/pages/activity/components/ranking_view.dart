@@ -16,9 +16,9 @@ class RankingView extends ConsumerStatefulWidget {
 
 class _RankingViewState extends ConsumerState<RankingView> {
   late ScrollController _scrollController;
-  double _podiumHeight = 220.0;
-  final double _minPodiumHeight = 120.0;
-  final double _maxPodiumHeight = 220.0;
+  double _podiumHeight = 200.0;
+  final double _minPodiumHeight = 110.0;
+  final double _maxPodiumHeight = 200.0;
 
   @override
   void initState() {
@@ -93,7 +93,7 @@ class _RankingViewState extends ConsumerState<RankingView> {
           height: _podiumHeight,
           child: PodiumList(top3: podium, height: _podiumHeight),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Expanded(
           child: rest.isEmpty
               ? const Center(child: Text('추가 순위 데이터가 없습니다.'))

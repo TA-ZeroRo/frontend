@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:frontend/core/theme/app_color.dart';
 import 'package:frontend/core/theme/app_text_style.dart';
 import '../state/chat_controller.dart';
@@ -30,12 +31,9 @@ class MessageBubble extends StatelessWidget {
             ),
           ],
         ),
-        child: Text(
-          message.text,
-          style: AppTextStyle.bodyMedium.copyWith(
-            color: AppColors.textPrimary,
-            height: 1.5,
-          ),
+        child: MarkdownBody(
+          data: message.text,
+          selectable: true,
         ),
       ),
     );
