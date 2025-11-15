@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
-import '../state/user_controller.dart';
+import '../../../../entry/state/auth_controller.dart';
 import 'profile_avatar.dart';
 import 'profile_action_buttons.dart';
 
@@ -14,7 +14,15 @@ class ProfileInfoSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(userProvider);
+    final user = ref.watch(authProvider).currentUser;
+
+    // 사용자 정보가 없으면 로딩 표시
+    if (user == null) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
     final numberFormat = NumberFormat('#,###');
     final Color primaryColor = AppColors.primary;
     final Color nameTextColor = AppColors.textPrimary;
