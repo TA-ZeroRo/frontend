@@ -11,6 +11,7 @@ class CampaignData {
   final String city; // 시
   final String category; // 카테고리
   final bool isParticipating; // 참가 여부
+  final bool isAutoProcessable; // 자동 처리 가능 여부
 
   const CampaignData({
     required this.id,
@@ -23,6 +24,7 @@ class CampaignData {
     required this.city,
     required this.category,
     this.isParticipating = false,
+    this.isAutoProcessable = false,
   });
 
   /// 캠페인 기간 문자열 반환 (예: "2025.01.15 - 2025.02.15")
@@ -58,6 +60,7 @@ class CampaignData {
     String? city,
     String? category,
     bool? isParticipating,
+    bool? isAutoProcessable,
   }) {
     return CampaignData(
       id: id ?? this.id,
@@ -70,6 +73,7 @@ class CampaignData {
       city: city ?? this.city,
       category: category ?? this.category,
       isParticipating: isParticipating ?? this.isParticipating,
+      isAutoProcessable: isAutoProcessable ?? this.isAutoProcessable,
     );
   }
 }
