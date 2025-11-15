@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../../../core/theme/app_color.dart';
-import '../state/mock/mock_campaign_data.dart';
+import '../models/campaign_data.dart';
 
 class CampaignFilters extends StatefulWidget {
   final String selectedRegion;

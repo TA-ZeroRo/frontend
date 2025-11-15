@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/theme/app_color.dart';
-import '../state/mock/mock_campaign_data.dart';
+import '../models/campaign_data.dart';
 import 'participation_popup_menu.dart';
 
 class CampaignCard extends ConsumerWidget {
