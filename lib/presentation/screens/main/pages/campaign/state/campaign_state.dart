@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/di/injection.dart';
 import '../../../../../../domain/model/campaign/campaign.dart';
 import '../../../../../../domain/repository/campaign_repository.dart';
-import 'mock/mock_campaign_data.dart';
+import '../models/campaign_data.dart';
 
 /// 캠페인 필터 상태
 class CampaignFilter {
