@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../../core/utils/toast_helper.dart';
 import '../state/activity_state.dart';
 import '../state/mock/mock_campaign_mission_data.dart';
 import 'shimmer_widgets.dart';
@@ -175,14 +176,7 @@ class CampaignMissionSection extends ConsumerWidget {
                   ),
                 ),
               ),
-              Text(
-                '$completedCount/$totalCount 완료',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[700],
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
+              _buildCompleteButton(context, completedCount, totalCount),
             ],
           ),
         ),
@@ -312,5 +306,103 @@ class CampaignMissionSection extends ConsumerWidget {
       default:
         return const Color(0xFF9E9E9E).withValues(alpha: 0.06); // 연한 회색 (기본)
     }
+  }
+
+  /// 완료 버튼 위젯 생성
+  Widget _buildCompleteButton(
+    BuildContext context,
+    int completedCount,
+    int totalCount,
+  ) {
+    final isAllCompleted = completedCount == totalCount;
+
+    if (isAllCompleted) {
+      return _CompleteButton(
+        onPressed: () {
+          ToastHelper.showSuccess('캠페인 미션이 모두 완료되었습니다.');
+        },
+      );
+    } else {
+      return ElevatedButton(
+        onPressed: null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey[300],
+          disabledBackgroundColor: Colors.grey[300],
+          disabledForegroundColor: Colors.grey[600],
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          minimumSize: const Size(0, 36),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 0,
+        ),
+        child: Text(
+          '$completedCount/$totalCount 완료',
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+        ),
+      );
+    }
+  }
+}
+
+/// 깜빡이는 애니메이션이 적용된 완료 버튼
+class _CompleteButton extends StatefulWidget {
+  const _CompleteButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  State<_CompleteButton> createState() => _CompleteButtonState();
+}
+
+class _CompleteButtonState extends State<_CompleteButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    _animation = Tween<double>(
+      begin: 0.6,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _controller.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _animation,
+      child: ElevatedButton(
+        onPressed: widget.onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF4CAF50),
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          minimumSize: const Size(0, 36),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 0,
+        ),
+        child: const Text(
+          '완료',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
+      ),
+    );
   }
 }

@@ -79,8 +79,8 @@ class CampaignFilterNotifier extends Notifier<CampaignFilter> {
 /// 캠페인 필터 Provider
 final campaignFilterProvider =
     NotifierProvider<CampaignFilterNotifier, CampaignFilter>(
-  CampaignFilterNotifier.new,
-);
+      CampaignFilterNotifier.new,
+    );
 
 /// 캠페인 목록 Notifier
 class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
@@ -147,11 +147,13 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
       if (filter.startDate != null && filter.endDate != null) {
         final campaignStart =
             DateTime.tryParse(campaign.startDate) ?? DateTime(1900, 1, 1);
-        final campaignEnd = (campaign.endDate != null
+        final campaignEnd =
+            (campaign.endDate != null
                 ? DateTime.tryParse(campaign.endDate!)
                 : null) ??
             DateTime(9999, 12, 31);
-        final overlaps = (campaignStart.isBefore(filter.endDate!) ||
+        final overlaps =
+            (campaignStart.isBefore(filter.endDate!) ||
                 campaignStart.isAtSameMomentAs(filter.endDate!)) &&
             (campaignEnd.isAfter(filter.startDate!) ||
                 campaignEnd.isAtSameMomentAs(filter.startDate!));
@@ -169,13 +171,18 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
 
   /// Campaign을 CampaignData로 변환
   CampaignData _campaignToCampaignData(Campaign campaign) {
+    // 임의로 일부 캠페인에 자동 처리 가능 설정 (ID 기반)
+    final campaignId = campaign.id;
+    final isAutoProcessable = campaignId % 3 == 0; // ID가 3의 배수인 경우 자동 처리 가능
+
     return CampaignData(
       id: campaign.id.toString(),
       title: campaign.title,
       imageUrl: campaign.imageUrl ?? '',
       url: campaign.campaignUrl,
       startDate: DateTime.tryParse(campaign.startDate) ?? DateTime.now(),
-      endDate: (campaign.endDate != null
+      endDate:
+          (campaign.endDate != null
               ? DateTime.tryParse(campaign.endDate!)
               : null) ??
           (DateTime.tryParse(campaign.startDate) ?? DateTime.now()),
@@ -183,6 +190,7 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
       city: '전체', // API에 city가 없으므로 기본값
       category: campaign.category,
       isParticipating: _participatingCampaignIds.contains(campaign.id),
+      isAutoProcessable: isAutoProcessable,
     );
   }
 
@@ -253,5 +261,5 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
 /// 캠페인 목록 Provider
 final campaignListProvider =
     AsyncNotifierProvider<CampaignListNotifier, List<CampaignData>>(
-  CampaignListNotifier.new,
-);
+      CampaignListNotifier.new,
+    );

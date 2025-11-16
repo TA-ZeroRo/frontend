@@ -46,7 +46,7 @@ class CampaignCard extends ConsumerWidget {
     );
   }
 
-/// 배경 이미지
+  /// 배경 이미지
   Widget _buildBackgroundImage() {
     return Image.network(
       campaign.imageUrl,
@@ -79,7 +79,7 @@ class CampaignCard extends ConsumerWidget {
     );
   }
 
-  /// 상단 그라데이션 + 캠페인 제목
+  /// 상단 그라데이션 + 캠페인 제목 및 자동처리 텍스트
   Widget _buildTopGradient() {
     return Positioned(
       top: 0,
@@ -99,22 +99,48 @@ class CampaignCard extends ConsumerWidget {
             stops: const [0.0, 0.5, 1.0],
           ),
         ),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 캠페인 제목
-            Text(
-              campaign.title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                height: 1.3,
+            // 캠페인 제목 (남은 공간 차지)
+            Expanded(
+              child: Text(
+                campaign.title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  height: 1.3,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
+            // 자동처리 텍스트 (고정 크기)
+            if (campaign.isAutoProcessable) ...[
+              const SizedBox(width: 8),
+              _buildAutoProcessText(),
+            ],
           ],
+        ),
+      ),
+    );
+  }
+
+  /// 자동처리 텍스트
+  Widget _buildAutoProcessText() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        '자동처리',
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.9),
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
