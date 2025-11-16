@@ -329,8 +329,8 @@ class CampaignMissionSection extends ConsumerWidget {
           backgroundColor: Colors.grey[300],
           disabledBackgroundColor: Colors.grey[300],
           disabledForegroundColor: Colors.grey[600],
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          minimumSize: Size.zero,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          minimumSize: const Size(0, 36),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -339,7 +339,7 @@ class CampaignMissionSection extends ConsumerWidget {
         ),
         child: Text(
           '$completedCount/$totalCount 완료',
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         ),
       );
     }
@@ -391,7 +391,7 @@ class _CompleteButtonState extends State<_CompleteButton>
           backgroundColor: const Color(0xFF4CAF50),
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          minimumSize: Size.zero,
+          minimumSize: const Size(0, 36),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -400,7 +400,7 @@ class _CompleteButtonState extends State<_CompleteButton>
         ),
         child: const Text(
           '완료',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
       ),
     );
