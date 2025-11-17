@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/components/custom_app_bar.dart';
 
 import '../../../../../core/theme/app_color.dart';
-import 'state/mock/mock_ranking_data.dart';
 import 'components/leaderboard_section.dart';
 import 'components/campaign_mission_section.dart';
 
@@ -19,10 +18,10 @@ class ActivityPage extends StatelessWidget {
           SliverToBoxAdapter(child: const CustomAppBar(title: '활동하기')),
 
           // 리더보드 섹션
-          SliverToBoxAdapter(
+          const SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.only(left: 17, right: 17, top: 12),
-              child: LeaderboardSection(rankings: mockRankings),
+              padding: EdgeInsets.only(left: 17, right: 17, top: 12),
+              child: LeaderboardSection(),
             ),
           ),
 

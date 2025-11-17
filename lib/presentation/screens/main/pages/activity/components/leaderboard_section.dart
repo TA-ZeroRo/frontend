@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../state/mock/mock_ranking_data.dart';
+import '../../../../../../domain/model/leaderboard/leaderboard_entry.dart';
+import '../state/activity_state.dart';
 import 'ranking_view.dart';
-import 'rank_tile.dart';
+import 'shimmer_widgets.dart';
 
-class LeaderboardSection extends StatelessWidget {
-  final List<RankingItem> rankings;
-
-  const LeaderboardSection({super.key, required this.rankings});
+class LeaderboardSection extends ConsumerWidget {
+  const LeaderboardSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rankingAsync = ref.watch(rankingProvider);
+    final myRankingAsync = ref.watch(myRankingProvider);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -29,9 +32,9 @@ class LeaderboardSection extends StatelessWidget {
         children: [
           _buildSectionHeader(context),
           const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-          _buildMyRankSection(),
+          _buildMyRankSection(myRankingAsync),
           const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-          _buildExpandedContent(),
+          _buildExpandedContent(rankingAsync),
         ],
       ),
     );
@@ -64,45 +67,180 @@ class LeaderboardSection extends StatelessWidget {
     );
   }
 
-  Widget _buildMyRankSection() {
-    if (rankings.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.all(24),
-        child: Center(
-          child: Column(
+  Widget _buildMyRankSection(AsyncValue<LeaderboardEntry?> myRankingAsync) {
+    return Padding(
+      padding: const EdgeInsets.all(15),
+      child: myRankingAsync.when(
+        data: (myRanking) {
+          if (myRanking == null) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[300]!, width: 1),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, size: 20, color: Colors.grey[600]),
+                  const SizedBox(width: 8),
+                  Text(
+                    '로그인이 필요합니다',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[700],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blue[50]!, Colors.blue[100]!],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blue[200]!, width: 1.5),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: Colors.blue[700],
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${myRanking.rank}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        myRanking.username ?? '게스트',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '내 순위',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[700],
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.amber[400],
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.star, size: 16, color: Colors.white),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${myRanking.totalPoints}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+        loading: () => Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey[300]!, width: 1),
+          ),
+          child: Row(
             children: [
-              Icon(Icons.leaderboard, size: 48, color: Colors.grey[400]),
-              const SizedBox(height: 12),
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[700]!),
+                ),
+              ),
+              const SizedBox(width: 12),
               Text(
-                '아직 랭킹 데이터가 없어요',
+                '내 순위 불러오는 중...',
                 style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
+                  fontSize: 14,
+                  color: Colors.grey[700],
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           ),
         ),
-      );
-    }
-
-    // Find user's rank (임시로 'me' userId 사용)
-    final myRankIndex = rankings.indexWhere((r) => r.userId == 'me');
-    final myRank = myRankIndex >= 0 ? myRankIndex + 1 : 1;
-    final myUser = rankings[myRankIndex >= 0 ? myRankIndex : 0];
-
-    return Padding(
-      padding: const EdgeInsets.all(15),
-      child: MyRankTile(
-        rank: myRank,
-        name: myUser.username,
-        score: myUser.totalPoints,
+        error: (error, stack) => Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.red[50],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.red[200]!, width: 1),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.error_outline, size: 20, color: Colors.red[700]),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '순위를 불러올 수 없습니다',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.red[700],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildExpandedContent() {
+  Widget _buildExpandedContent(AsyncValue rankingAsync) {
     return Container(
       constraints: const BoxConstraints(minHeight: 260, maxHeight: 440),
       child: DefaultTabController(
@@ -112,7 +250,7 @@ class LeaderboardSection extends StatelessWidget {
           children: [
             _buildTabBar(),
             const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-            Flexible(child: _buildTabBarView()),
+            Flexible(child: _buildTabBarView(rankingAsync)),
           ],
         ),
       ),
@@ -141,13 +279,41 @@ class LeaderboardSection extends StatelessWidget {
     );
   }
 
-  Widget _buildTabBarView() {
+  Widget _buildTabBarView(AsyncValue rankingAsync) {
     return TabBarView(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: RankingView(rankings: rankings),
+        // 전체 랭킹 탭
+        rankingAsync.when(
+          data: (rankings) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: RankingView(rankings: rankings),
+          ),
+          loading: () => const PlaygroundShimmer(),
+          error: (error, stack) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                const SizedBox(height: 16),
+                Text(
+                  '랭킹을 불러올 수 없습니다',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  error.toString(),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
         ),
+        // 지역 랭킹 탭
         Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

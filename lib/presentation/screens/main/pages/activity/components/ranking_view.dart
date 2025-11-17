@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../state/mock/mock_ranking_data.dart';
 
+import '../../../../../../domain/model/leaderboard/leaderboard_entry.dart';
 import 'rank_tile.dart';
 import 'podium_list.dart';
 
 class RankingView extends ConsumerStatefulWidget {
-  final List<RankingItem> rankings;
+  final List<LeaderboardEntry> rankings;
 
   const RankingView({super.key, required this.rankings});
 
@@ -60,31 +60,28 @@ class _RankingViewState extends ConsumerState<RankingView> {
 
     // 3명 미만인 경우: ListView만 사용
     if (ranking.length < 3) {
-      return Expanded(
-        child: ListView.builder(
-          padding: EdgeInsets.zero,
-          controller: _scrollController,
-          itemCount: ranking.length,
-          itemBuilder: (context, index) {
-            final user = ranking[index];
-            final rank = index + 1;
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: RankTile(
-                rank: rank,
-                name: user.username,
-                score: user.totalPoints,
-                userImg: user.userImg,
-              ),
-            );
-          },
-        ),
+      return ListView.builder(
+        padding: EdgeInsets.zero,
+        controller: _scrollController,
+        itemCount: ranking.length,
+        itemBuilder: (context, index) {
+          final user = ranking[index];
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: RankTile(
+              rank: user.rank,
+              name: user.username ?? '알 수 없음',
+              score: user.totalPoints,
+              userImg: user.userImg,
+            ),
+          );
+        },
       );
     }
 
     // 3명 이상인 경우: PodiumList + ListView 사용
     final podium = ranking.take(3).toList();
-    final rest = ranking.length > 3 ? ranking.sublist(3) : <RankingItem>[];
+    final rest = ranking.length > 3 ? ranking.sublist(3) : <LeaderboardEntry>[];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,15 +100,14 @@ class _RankingViewState extends ConsumerState<RankingView> {
                   itemCount: rest.length,
                   itemBuilder: (context, index) {
                     final user = rest[index];
-                    final rank = index + 4;
                     return Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 4,
                       ),
                       child: RankTile(
-                        rank: rank,
-                        name: user.username,
+                        rank: user.rank,
+                        name: user.username ?? '알 수 없음',
                         score: user.totalPoints,
                         userImg: user.userImg,
                       ),

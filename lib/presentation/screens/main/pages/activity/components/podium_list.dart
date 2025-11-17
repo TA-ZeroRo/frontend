@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../state/mock/mock_ranking_data.dart';
+
+import '../../../../../../domain/model/leaderboard/leaderboard_entry.dart';
 
 /// 애니메이션 설정 상수
 const _kSlideDuration = Duration(milliseconds: 900);
@@ -9,7 +10,7 @@ const double _kStartDy = 0.25;
 
 class PodiumList extends StatefulWidget {
   const PodiumList({super.key, required this.top3, this.height = 220.0});
-  final List<RankingItem> top3;
+  final List<LeaderboardEntry> top3;
   final double height;
 
   @override
@@ -94,7 +95,7 @@ class _PodiumListState extends State<PodiumList> with TickerProviderStateMixin {
   }
 
   Widget _buildAnimatedPodiumItem({
-    required RankingItem user,
+    required LeaderboardEntry user,
     required double topMargin,
     required Animation<Offset> slideAnimation,
     required double profileSize,
@@ -118,7 +119,7 @@ class _PodiumListState extends State<PodiumList> with TickerProviderStateMixin {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    user.username,
+                    user.username ?? '알 수 없음',
                     style: TextStyle(fontSize: fontSize),
                     overflow: TextOverflow.ellipsis,
                   ),

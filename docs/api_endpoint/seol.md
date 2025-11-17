@@ -2,7 +2,7 @@
 
 ### **1. `리더보드 순위 조회`**
 
-- **URL**: /leaderBoard/ranking
+- **URL**: /leaderboard/ranking
 - **Method**: GET
 - 기본 limit 값(50)으로 상위 50명의 사용자를 조회
 - total_points가 동점일 시 continuous_days 순으로 rank 결정
@@ -40,46 +40,107 @@
 ```
 
 - **Error Responses**
-    - `500`  : 리더보드 데이터를 가져올 수 없습니다
+  - `500` : 리더보드 데이터를 가져올 수 없습니다
 
 ---
+## API 명세서: 사용자 리더보드 순위 조회
+
+- **URL**: `/api/v1/leaderboard/ranking/{user_id}`
+- **Method**: `GET`
+- **설명**: 특정 사용자의 리더보드 정보와 순위를 조회합니다.
+
+### Path Parameters
+
+| 파라미터 | 타입 | 필수 | 설명 |
+| --- | --- | --- | --- |
+| `user_id` | UUID | Yes | 조회할 사용자의 고유 식별자 |
+
+### Request Example
+
+```bash
+GET /api/v1/leaderboard/ranking/123e4567-e89b-12d3-a456-426614174000
+```
+
+### Response
+
+### 성공 응답 (200 OK)
+
+```json
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "username": "user123",
+  "user_img": "https://example.com/avatar.jpg",
+  "total_points": 1500,
+  "rank": 5
+}
+
+```
+
+**Response Fields**
+
+| 필드 | 타입 | Nullable | 설명 |
+| --- | --- | --- | --- |
+| `id` | UUID (string) | No | 사용자 고유 식별자 |
+| `username` | string | Yes | 사용자 이름 |
+| `user_img` | string | Yes | 사용자 프로필 이미지 URL |
+| `total_points` | integer | No | 사용자의 총 포인트 |
+| `rank` | integer | Yes | 리더보드 순위 (1위부터 시작) |
+
+### 에러 응답
+
+**404 Not Found** - 사용자를 찾을 수 없는 경우
+
+```json
+{
+  "detail": "User not found"
+}
+
+```
+
+**500 Internal Server Error** - 서버 오류 발생 시
+
+```json
+{
+  "detail": "Error message"
+}
+```
 
 ## **📚 Campaign API 명세서**
 
-### **1.  `캠페인 목록 조회`**
+### **1. `캠페인 목록 조회`**
 
 - **URL**: /campaign/campaign
 - **Method**: GET
 - **Query Parameters**
-    - `region` (string, Optional): 지역 필터 (예: "서울특별시", "경기도")
-    - `category` (CampaignCategory, Optional): 카테고리 필터
-        - `RECYCLING`: 재활용/분리수거
-        - `TRANSPORTATION`: 대중교통/자전거
-        - `ENERGY`: 에너지 절약
-        - `ZERO_WASTE`: 제로웨이스트/다회용기
-        - `CONSERVATION`: 자연보호/환경정화
-        - `EDUCATION`: 교육/세미나
-        - `OTHER`: 기타
-    - `status` (CampaignStatus, Optional, Default: `ACTIVE`) : 상태 필터
-        - `EXPECT`: 예정
-        - `ACTIVE`: 진행중
-        - `EXPIRED`: 종료
-    - `SubmissionType`
-        - `RPA_FORM_SUBMIT` : RPA 폼 자동 제출
-        - `DIRECT_API`  : 직접 API 연동
-        -  `MANUAL_GUIDE`  : 수동 안내 (기본값)
-    - RPA 관련 필드 설명
-        - `rpa_site_config_id` : RPA 사이트 설정 ID (로그인 설정 참조)
-        - `rpa_form_url` : RPA 폼 제출 페이지 URL
-        - `rpa_form_config`  : RPA 폼 셀렉터 설정 (JSON)
-        - `rpa_field_mapping` : submission_data 필드명 → 폼 셀렉터 매핑 (JSON)
-        - `rpa_form_selector_strategies` : Self-Healing용 폼 셀렉터 전략 (JSON)
-    - `offset` (int, Optional, Default: `0`): 페이지네이션 오프셋 (≥0)
+  - `region` (string, Optional): 지역 필터 (예: "서울특별시", "경기도")
+  - `category` (CampaignCategory, Optional): 카테고리 필터
+    - `RECYCLING`: 재활용/분리수거
+    - `TRANSPORTATION`: 대중교통/자전거
+    - `ENERGY`: 에너지 절약
+    - `ZERO_WASTE`: 제로웨이스트/다회용기
+    - `CONSERVATION`: 자연보호/환경정화
+    - `EDUCATION`: 교육/세미나
+    - `OTHER`: 기타
+  - `status` (CampaignStatus, Optional, Default: `ACTIVE`) : 상태 필터
+    - `EXPECT`: 예정
+    - `ACTIVE`: 진행중
+    - `EXPIRED`: 종료
+  - `SubmissionType`
+    - `RPA_FORM_SUBMIT` : RPA 폼 자동 제출
+    - `DIRECT_API` : 직접 API 연동
+    - `MANUAL_GUIDE` : 수동 안내 (기본값)
+  - RPA 관련 필드 설명
+    - `rpa_site_config_id` : RPA 사이트 설정 ID (로그인 설정 참조)
+    - `rpa_form_url` : RPA 폼 제출 페이지 URL
+    - `rpa_form_config` : RPA 폼 셀렉터 설정 (JSON)
+    - `rpa_field_mapping` : submission_data 필드명 → 폼 셀렉터 매핑 (JSON)
+    - `rpa_form_selector_strategies` : Self-Healing용 폼 셀렉터 전략 (JSON)
+  - `offset` (int, Optional, Default: `0`): 페이지네이션 오프셋 (≥0)
 - **응답 특징**
-    - 정렬: `updated_at` 기준 내림차순 (최신순)
-    - 페이지 크기: 20개/페이지 (고정)
-    - 기본 필터: `status=ACTIVE` (명시하지 않으면 진행중인 캠페인만 조회)
-    - RPA 관련 필드 :  `submission_type = RPA_FORM_SUBMIT` 인 경우에만 값이 있을 수 있음
+  - 정렬: `updated_at` 기준 내림차순 (최신순)
+  - 페이지 크기: 20개/페이지 (고정)
+  - 기본 필터: `status=ACTIVE` (명시하지 않으면 진행중인 캠페인만 조회)
+  - RPA 관련 필드 : `submission_type = RPA_FORM_SUBMIT` 인 경우에만 값이 있을 수 있음
 - **Response (200 OK)**
 
 ```bash
@@ -136,18 +197,18 @@
 ```
 
 - **Error Responses**
-    - `500 Internal Server Error`: 처리 중 오류 발생
+  - `500 Internal Server Error`: 처리 중 오류 발생
 
 ---
 
 ## **📚 Campaign_agent API 명세서**
 
-### **1.  `캠페인 시작`**
+### **1. `캠페인 시작`**
 
 - **URL**: /api/v1/campaign-agent/campaigns/{campaign_id}
 - **Method**: POST
 - **Path Parameters**
-    - `campaign_id` (int, Required): 시작할 캠페인의 ID
+  - `campaign_id` (int, Required): 시작할 캠페인의 ID
 - 최소 Request Body
 
 ```bash
@@ -187,22 +248,23 @@
 ```
 
 - 동작 설명
-    - 캠페인에 속한 모든 미션 템플릿에 대해 미션 로그를 생성합니다.
-    - 이미 존재하는 미션 로그가 있으면 새로 생성하지 않고 기존 로그를 반환합니다.
-    - 모든 미션 로그는 `IN_PROGRESS` 상태로 시작됩니다.
+
+  - 캠페인에 속한 모든 미션 템플릿에 대해 미션 로그를 생성합니다.
+  - 이미 존재하는 미션 로그가 있으면 새로 생성하지 않고 기존 로그를 반환합니다.
+  - 모든 미션 로그는 `IN_PROGRESS` 상태로 시작됩니다.
 
 - Error Responses
-    - `404 Not Found` : 캠페인을 찾을 수 없다 or 미션 템플릿이 없다.
-    - `500 Internal Server Error` : 캠페인 시작에 실패했습니다.
+  - `404 Not Found` : 캠페인을 찾을 수 없다 or 미션 템플릿이 없다.
+  - `500 Internal Server Error` : 캠페인 시작에 실패했습니다.
 
-### **2.  `캠페인 진행 상황 조회`**
+### **2. `캠페인 진행 상황 조회`**
 
 - **URL**: /api/v1/campaign-agent/campaigns/{campaign_id}
 - **Method**: GET
 - **Path Parameters**
-    - `campaign_id` (int, Required): 조회할 캠페인의 ID
+  - `campaign_id` (int, Required): 조회할 캠페인의 ID
 - Query Parameters
-    - `user_id` (UUID, Required): 사용자 ID
+  - `user_id` (UUID, Required): 사용자 ID
 - Response (200 OK)
 
 ```bash
@@ -286,15 +348,16 @@
 ```
 
 - Error Responses
-    - `404 Not Found` : 캠페인을 찾을 수 없습니다.
-    - `500 Internal Server Error` : 진행 상황 조회에 실패했습니다.
+  - `404 Not Found` : 캠페인을 찾을 수 없습니다.
+  - `500 Internal Server Error` : 진행 상황 조회에 실패했습니다.
 
 ### **3. `RPA를 통해 미션 제출`**
 
 - **URL**: /api/v1/campaign-agent/mission-logs/{mission_log_id}
 - **Method**: POST
 - **Path Parameters**
-    - `mission_log_id` (int, Required): 제출할 미션 로그의 ID
+
+  - `mission_log_id` (int, Required): 제출할 미션 로그의 ID
 
 - 최소 Request Body
 
@@ -384,27 +447,28 @@
 ```
 
 - 동작 설명
-    - RPA를 사용하여 자동으로 폼을 제출합니다.
-    - 제출 전에 미션 상태를 `PENDING_VERIFICATION`으로 변경합니다.
-    - RPA 실행 결과에 따라:
-        - 성공 시: 미션 상태를 `COMPLETED`로 변경하고 `proof_data`에 결과 저장
-        - 실패 시: 미션 상태를 `FAILED`로 변경하고 에러 정보 저장
-            - 하이브리드 RPA 구조를 지원합니다 (campaign의 `rpa_site_config_id`와 `rpa_form_config`가 있으면 사용).
+  - RPA를 사용하여 자동으로 폼을 제출합니다.
+  - 제출 전에 미션 상태를 `PENDING_VERIFICATION`으로 변경합니다.
+  - RPA 실행 결과에 따라:
+    - 성공 시: 미션 상태를 `COMPLETED`로 변경하고 `proof_data`에 결과 저장
+    - 실패 시: 미션 상태를 `FAILED`로 변경하고 에러 정보 저장
+      - 하이브리드 RPA 구조를 지원합니다 (campaign의 `rpa_site_config_id`와 `rpa_form_config`가 있으면 사용).
 - Error Responses
-    - `404 Not Found` : 미션 로그를 찾을 수 없습니다.
-    - `404 Not Found` : 이 미션이 본인 소유가 아닙니다.
-    - `404 Not Found` : 미션이 이미 완료되었습니다.
-    - `404 Not Found` : 미션 템플릿을 찾을 수 없습니다.
-    - `404 Not Found` : 캠페인을 찾을 수 없습니다.
-    - `404 Not Found` : RPA 사이트 설정을 찾을 수 없습니다.
-    - `500 Internal Server Error` : 미션 제출에 실패했습니다.
+  - `404 Not Found` : 미션 로그를 찾을 수 없습니다.
+  - `404 Not Found` : 이 미션이 본인 소유가 아닙니다.
+  - `404 Not Found` : 미션이 이미 완료되었습니다.
+  - `404 Not Found` : 미션 템플릿을 찾을 수 없습니다.
+  - `404 Not Found` : 캠페인을 찾을 수 없습니다.
+  - `404 Not Found` : RPA 사이트 설정을 찾을 수 없습니다.
+  - `500 Internal Server Error` : 미션 제출에 실패했습니다.
 
 ### 4. `실패한 미션 재시도`
 
 - **URL**: /api/v1/campaign-agent/mission-logs/{mission_log_id}
 - **Method**: PUT
 - **Path Parameters**
-    - `mission_log_id` (int, Required): 재시도할 미션 로그의 ID
+
+  - `mission_log_id` (int, Required): 재시도할 미션 로그의 ID
 
 - Request Body
 
@@ -456,15 +520,14 @@
 ```
 
 - 동작 설명
-    - 실패한 미션(`FAILED` 상태)을 재시도합니다.
-    - 실제로는 `submit_mission_with_rpa` 와 동일한 로직을 사용합니다.
-    - 미션 상태가 `FAILED` 가 아니면 재시도할 수 없습니다.
-    
+  - 실패한 미션(`FAILED` 상태)을 재시도합니다.
+  - 실제로는 `submit_mission_with_rpa` 와 동일한 로직을 사용합니다.
+  - 미션 상태가 `FAILED` 가 아니면 재시도할 수 없습니다.
 - Error Responses
-    - `404 Not Found` : 미션 로그를 찾을 수 없습니다.
-    - `404 Not Found` : 이 미션이 본인 소유가 아닙니다.
-    - `404 Not Found` : 실패한 미션만 재시도할 수 있습니다.
-    - `500 Internal Server Error` : 미션 재시도에 실패했습니다.
+  - `404 Not Found` : 미션 로그를 찾을 수 없습니다.
+  - `404 Not Found` : 이 미션이 본인 소유가 아닙니다.
+  - `404 Not Found` : 실패한 미션만 재시도할 수 있습니다.
+  - `500 Internal Server Error` : 미션 재시도에 실패했습니다.
 
 ```bash
 ## **📝 참고사항**
@@ -505,20 +568,20 @@ RPA 제출 시 필요한 필드 (캠페인별로 다를 수 있음):
 
 ---
 
-**⚠️ 참고**: 
+**⚠️ 참고**:
 - RPA 제출은 실제 웹사이트에 접속하여 폼을 제출하므로 시간이 걸릴 수 있습니다.
 - 실패한 미션은 재시도할 수 있지만, 이미 완료된 미션은 재제출할 수 없습니다.
 - 미션 로그는 사용자별로 관리되므로, 다른 사용자의 미션을 제출할 수 없습니다.
 ```
 
 - status (string, Required): 미션 상태
-    - "PROGRESS" : 진행
-    - "VERIFICATION" : 검증 대기
-    - "COMPLETED" : 성공
-    - "FAILED" : 실패
-- 정렬 순서:  started_at 기준 내림차순 (최신순)
+  - "PROGRESS" : 진행
+  - "VERIFICATION" : 검증 대기
+  - "COMPLETED" : 성공
+  - "FAILED" : 실패
+- 정렬 순서: started_at 기준 내림차순 (최신순)
 - Error Responses :
-    - `500`  : 미션 조회 중 오류
+  - `500` : 미션 조회 중 오류
 
 ---
 
@@ -531,8 +594,8 @@ RPA 제출 시 필요한 필드 (캠페인별로 다를 수 있음):
 - **URL:** /point/{user_id}
 - **Method**: POST
 - **Path Parameter**
-    - user_id (UUID)
-    - point (int)
+  - user_id (UUID)
+  - point (int)
 - **Response**
 
 ```bash
@@ -555,7 +618,7 @@ RPA 제출 시 필요한 필드 (캠페인별로 다를 수 있음):
 - **URL:** /point/{user_id}
 - **Method**: GET
 - **Path Parameter**
-    - user_id (UUID)
+  - user_id (UUID)
 - **Response**
 
 ```bash
@@ -628,7 +691,7 @@ RPA 제출 시 필요한 필드 (캠페인별로 다를 수 있음):
 - **URL**: /users/{user_id}
 - **Method**: GET
 - **Path Parameters**
-    - `user_id` (UUID, Required): 조회할 유저의 ID
+  - `user_id` (UUID, Required): 조회할 유저의 ID
 - **Response (200 OK)**
 
 ```bash
@@ -646,7 +709,7 @@ RPA 제출 시 필요한 필드 (캠페인별로 다를 수 있음):
 ```
 
 - **Error Responses**
-    - `404 Not Found`: 해당 user를 찾을 수 없습니다.
+  - `404 Not Found`: 해당 user를 찾을 수 없습니다.
 
 ---
 
@@ -655,7 +718,7 @@ RPA 제출 시 필요한 필드 (캠페인별로 다를 수 있음):
 - **URL**: /users/{user_id}
 - **Method**: PUT
 - **Path Parameters**
-    - `user_id` (UUID, Required): 수정할 유저의 ID
+  - `user_id` (UUID, Required): 수정할 유저의 ID
 - **Request Body** (모든 필드 Optional)
 
 ```bash
@@ -694,8 +757,8 @@ RPA 제출 시 필요한 필드 (캠페인별로 다를 수 있음):
 ```
 
 - **Error Responses**
-    - `400 Bad Request`: 업데이트할 데이터가 없습니다.
-    - `500 Internal Server Error`: 유저 수정에 실패했습니다.
+  - `400 Bad Request`: 업데이트할 데이터가 없습니다.
+  - `500 Internal Server Error`: 유저 수정에 실패했습니다.
 
 **⚠️ 제약사항:**
 
@@ -709,7 +772,7 @@ RPA 제출 시 필요한 필드 (캠페인별로 다를 수 있음):
 - **URL**: `/users/{user_id}`
 - **Method**: `DELETE`
 - **Path Parameters**
-    - `user_id` (UUID, Required): 삭제할 유저의 ID
+  - `user_id` (UUID, Required): 삭제할 유저의 ID
 - **Response (200 OK)**
 
 ```bash
@@ -719,6 +782,6 @@ RPA 제출 시 필요한 필드 (캠페인별로 다를 수 있음):
 ```
 
 - **Error Responses**
-    - `500 Internal Server Error`: 유저 삭제에 실패했습니다.
+  - `500 Internal Server Error`: 유저 삭제에 실패했습니다.
 
 ---

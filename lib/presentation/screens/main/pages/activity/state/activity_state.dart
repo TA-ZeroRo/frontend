@@ -1,37 +1,74 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../../../core/di/injection.dart';
+import '../../../../../../domain/model/leaderboard/leaderboard_entry.dart';
+import '../../../../../../domain/repository/leaderboard_repository.dart';
+import '../../../../entry/state/auth_controller.dart';
 import 'mock/mock_campaign_mission_data.dart';
-import 'mock/mock_ranking_data.dart';
 
-// ========================================
-// RANKING STATE
-// ========================================
+class RankingAsyncNotifier extends AsyncNotifier<List<LeaderboardEntry>> {
+  late final LeaderboardRepository _repository;
 
-/// Async notifier for ranking/leaderboard data
-class RankingAsyncNotifier extends AsyncNotifier<List<RankingItem>> {
   @override
-  Future<List<RankingItem>> build() async {
+  Future<List<LeaderboardEntry>> build() async {
+    _repository = getIt<LeaderboardRepository>();
     return await _fetchRankings();
   }
 
-  Future<List<RankingItem>> _fetchRankings() async {
-    // API call simulation
-    await Future.delayed(const Duration(seconds: 2));
-    return mockRankings;
+  Future<List<LeaderboardEntry>> _fetchRankings() async {
+    return await _repository.getRanking();
   }
 
   Future<void> refresh() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      await Future.delayed(const Duration(seconds: 1));
-      return mockRankings;
+      return await _repository.getRanking();
     });
   }
 }
 
 final rankingProvider =
-    AsyncNotifierProvider<RankingAsyncNotifier, List<RankingItem>>(
-  RankingAsyncNotifier.new,
-);
+    AsyncNotifierProvider<RankingAsyncNotifier, List<LeaderboardEntry>>(
+      RankingAsyncNotifier.new,
+    );
+
+// ========================================
+// MY RANKING STATE
+// ========================================
+
+class MyRankingAsyncNotifier extends AsyncNotifier<LeaderboardEntry?> {
+  late final LeaderboardRepository _repository;
+
+  @override
+  Future<LeaderboardEntry?> build() async {
+    _repository = getIt<LeaderboardRepository>();
+    return await _fetchMyRanking();
+  }
+
+  Future<LeaderboardEntry?> _fetchMyRanking() async {
+    final userId = ref.read(authProvider).currentUser?.id;
+    if (userId == null) {
+      return null;
+    }
+    return await _repository.getMyRanking(userId);
+  }
+
+  Future<void> refresh() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final userId = ref.read(authProvider).currentUser?.id;
+      if (userId == null) {
+        return null;
+      }
+      return await _repository.getMyRanking(userId);
+    });
+  }
+}
+
+final myRankingProvider =
+    AsyncNotifierProvider<MyRankingAsyncNotifier, LeaderboardEntry?>(
+      MyRankingAsyncNotifier.new,
+    );
 
 // ========================================
 // CAMPAIGN MISSION STATE
@@ -66,9 +103,7 @@ class CampaignMissionState {
 class CampaignMissionNotifier extends Notifier<CampaignMissionState> {
   @override
   CampaignMissionState build() {
-    return CampaignMissionState(
-      campaigns: mockCampaigns,
-    );
+    return CampaignMissionState(campaigns: mockCampaigns);
   }
 
   /// Toggle mission completion status
@@ -100,17 +135,14 @@ class CampaignMissionNotifier extends Notifier<CampaignMissionState> {
     await Future.delayed(const Duration(milliseconds: 800));
 
     // Reset to mock data
-    state = CampaignMissionState(
-      campaigns: mockCampaigns,
-      isLoading: false,
-    );
+    state = CampaignMissionState(campaigns: mockCampaigns, isLoading: false);
   }
 }
 
 final campaignMissionProvider =
     NotifierProvider<CampaignMissionNotifier, CampaignMissionState>(
-  CampaignMissionNotifier.new,
-);
+      CampaignMissionNotifier.new,
+    );
 
 /// Derived provider for completed mission count
 final completedMissionCountProvider = Provider<int>((ref) {
@@ -152,5 +184,5 @@ class LeaderboardExpandedNotifier extends Notifier<bool> {
 
 final leaderboardExpandedProvider =
     NotifierProvider<LeaderboardExpandedNotifier, bool>(
-  LeaderboardExpandedNotifier.new,
-);
+      LeaderboardExpandedNotifier.new,
+    );
