@@ -213,11 +213,13 @@ class CampaignMissionSection extends ConsumerWidget {
     if (missions.isEmpty) return const SizedBox.shrink();
 
     final campaign = missions.first.campaign;
-    final completedCount =
-        missions.where((m) => m.missionLog.status.value == 'COMPLETED').length;
+    final completedCount = missions
+        .where((m) => m.missionLog.status.value == 'COMPLETED')
+        .length;
     final totalCount = missions.length;
-    final progressPercentage =
-        totalCount > 0 ? completedCount / totalCount : 0.0;
+    final progressPercentage = totalCount > 0
+        ? completedCount / totalCount
+        : 0.0;
 
     // 카테고리별 이모지
     final iconEmoji = _getCategoryEmoji(campaign.category);
@@ -302,7 +304,6 @@ class CampaignMissionSection extends ConsumerWidget {
         return '🌿';
     }
   }
-
 
   Color _getProgressColor(double percentage) {
     if (percentage >= 0.67) {
@@ -451,8 +452,7 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
 
   @override
   Widget build(BuildContext context) {
-    final isCompleted =
-        widget.mission.missionLog.status.value == 'COMPLETED';
+    final isCompleted = widget.mission.missionLog.status.value == 'COMPLETED';
     final mission = widget.mission.missionTemplate;
 
     return Material(
@@ -493,8 +493,10 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
 
                   // 포인트 배지
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF4A90E2).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
@@ -559,7 +561,9 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
   }
 
   void _showVerificationBottomSheet(
-      BuildContext context, MissionWithTemplate mission) {
+    BuildContext context,
+    MissionWithTemplate mission,
+  ) {
     final verificationType = mission.missionTemplate.verificationType;
 
     switch (verificationType) {
