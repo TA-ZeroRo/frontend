@@ -2,29 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../core/utils/toast_helper.dart';
+import '../../../../../../domain/model/mission/mission_with_template.dart';
+import '../../../../../../domain/model/mission/verification_type.dart';
 import '../state/activity_state.dart';
-import '../state/mock/mock_campaign_mission_data.dart';
 import 'shimmer_widgets.dart';
+import 'verification_bottom_sheets/image_verification_bottom_sheet.dart';
+import 'verification_bottom_sheets/rpa_verification_bottom_sheet.dart';
+import 'verification_bottom_sheets/text_review_verification_bottom_sheet.dart';
 
 class CampaignMissionSection extends ConsumerWidget {
   const CampaignMissionSection({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final missionState = ref.watch(campaignMissionProvider);
+    final asyncCampaignMap = ref.watch(campaignMissionProvider);
 
-    // Show shimmer when loading
-    if (missionState.isLoading) {
-      return const CampaignMissionSectionShimmer();
-    }
+    return asyncCampaignMap.when(
+      data: (campaignMap) {
+        // Empty state
+        if (campaignMap.isEmpty) {
+          return _buildEmptyState();
+        }
 
-    final campaigns = missionState.campaigns;
+        return _buildContent(context, ref, campaignMap);
+      },
+      loading: () => const CampaignMissionSectionShimmer(),
+      error: (error, stack) => _buildErrorState(error),
+    );
+  }
 
-    // Empty state
-    if (campaigns.isEmpty) {
-      return _buildEmptyState();
-    }
-
+  Widget _buildContent(
+    BuildContext context,
+    WidgetRef ref,
+    Map<int, List<MissionWithTemplate>> campaignMap,
+  ) {
+    // Map을 List로 변환
+    final campaigns = campaignMap.entries.toList();
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -48,7 +61,11 @@ class CampaignMissionSection extends ConsumerWidget {
             child: Column(
               children: [
                 for (int i = 0; i < campaigns.length; i++) ...[
-                  _buildCampaignCard(context, ref, campaigns[i]),
+                  _buildCampaignCard(
+                    context,
+                    ref,
+                    campaigns[i].value, // List<MissionWithTemplate>
+                  ),
                   if (i < campaigns.length - 1) ...[
                     const SizedBox(height: 20),
                     Divider(
@@ -143,14 +160,67 @@ class CampaignMissionSection extends ConsumerWidget {
     );
   }
 
+  Widget _buildErrorState(Object error) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE0E0E0), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _buildSectionHeader(),
+          const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+          Padding(
+            padding: const EdgeInsets.all(48),
+            child: Column(
+              children: [
+                Icon(Icons.error_outline, size: 48, color: Colors.red[400]),
+                const SizedBox(height: 12),
+                Text(
+                  '데이터를 불러올 수 없습니다',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '나중에 다시 시도해주세요',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCampaignCard(
     BuildContext context,
     WidgetRef ref,
-    Campaign campaign,
+    List<MissionWithTemplate> missions,
   ) {
-    final completedCount = campaign.completedMissionsCount;
-    final totalCount = campaign.totalMissionsCount;
-    final progressPercentage = campaign.progressPercentage;
+    if (missions.isEmpty) return const SizedBox.shrink();
+
+    final campaign = missions.first.campaign;
+    final completedCount =
+        missions.where((m) => m.missionLog.status.value == 'COMPLETED').length;
+    final totalCount = missions.length;
+    final progressPercentage =
+        totalCount > 0 ? completedCount / totalCount : 0.0;
+
+    // 카테고리별 이모지
+    final iconEmoji = _getCategoryEmoji(campaign.category);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -158,17 +228,17 @@ class CampaignMissionSection extends ConsumerWidget {
         // Campaign header with highlight color
         Container(
           decoration: BoxDecoration(
-            color: _getCampaignHeaderColor(campaign.iconEmoji),
+            color: _getCampaignHeaderColor(iconEmoji),
             borderRadius: BorderRadius.circular(8),
           ),
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
           child: Row(
             children: [
-              Text(campaign.iconEmoji, style: const TextStyle(fontSize: 24)),
+              Text(iconEmoji, style: const TextStyle(fontSize: 24)),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  campaign.name,
+                  campaign.title,
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w500,
@@ -205,75 +275,34 @@ class CampaignMissionSection extends ConsumerWidget {
         const SizedBox(height: 8),
 
         // Mission list
-        ...campaign.missions.asMap().entries.map((entry) {
+        ...missions.asMap().entries.map((entry) {
           final mission = entry.value;
-          return _buildMissionTile(context, ref, mission);
+          return _MissionTileWithExpand(mission: mission);
         }),
       ],
     );
   }
 
-  Widget _buildMissionTile(
-    BuildContext context,
-    WidgetRef ref,
-    CampaignMissionItem mission,
-  ) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          ref
-              .read(campaignMissionProvider.notifier)
-              .toggleMissionCompletion(mission.id);
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              Icon(
-                mission.isCompleted
-                    ? Icons.check_circle
-                    : Icons.radio_button_unchecked,
-                size: 24,
-                color: mission.isCompleted
-                    ? const Color(0xFF4CAF50)
-                    : Colors.grey[400],
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  mission.title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: mission.isCompleted
-                        ? Colors.grey[600]
-                        : Colors.black87,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF4A90E2).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '${mission.points}pt',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF4A90E2),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  /// 카테고리별 이모지 반환
+  String _getCategoryEmoji(String category) {
+    switch (category) {
+      case 'RECYCLING':
+        return '♻️';
+      case 'TRANSPORTATION':
+        return '🚴';
+      case 'ENERGY':
+        return '💡';
+      case 'ZERO_WASTE':
+        return '🌱';
+      case 'CONSERVATION':
+        return '🌍';
+      case 'EDUCATION':
+        return '📚';
+      default:
+        return '🌿';
+    }
   }
+
 
   Color _getProgressColor(double percentage) {
     if (percentage >= 0.67) {
@@ -404,5 +433,161 @@ class _CompleteButtonState extends State<_CompleteButton>
         ),
       ),
     );
+  }
+}
+
+/// 접기/펼치기가 가능한 미션 타일
+class _MissionTileWithExpand extends StatefulWidget {
+  const _MissionTileWithExpand({required this.mission});
+
+  final MissionWithTemplate mission;
+
+  @override
+  State<_MissionTileWithExpand> createState() => _MissionTileWithExpandState();
+}
+
+class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isCompleted =
+        widget.mission.missionLog.status.value == 'COMPLETED';
+    final mission = widget.mission.missionTemplate;
+
+    return Material(
+      color: Colors.transparent,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          InkWell(
+            onTap: () => _showVerificationBottomSheet(context, widget.mission),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  // 완료 아이콘
+                  Icon(
+                    isCompleted
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked,
+                    size: 24,
+                    color: isCompleted
+                        ? const Color(0xFF4CAF50)
+                        : Colors.grey[400],
+                  ),
+                  const SizedBox(width: 12),
+
+                  // 미션 제목
+                  Expanded(
+                    child: Text(
+                      mission.title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: isCompleted ? Colors.grey[600] : Colors.black87,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+
+                  // 포인트 배지
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4A90E2).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${mission.rewardPoints}pt',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF4A90E2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+
+                  // 펼치기/접기 버튼
+                  IconButton(
+                    icon: Icon(
+                      _isExpanded ? Icons.expand_less : Icons.expand_more,
+                      color: Colors.grey[600],
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isExpanded = !_isExpanded;
+                      });
+                    },
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // 미션 설명 (접혔을 때 숨김)
+          AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            child: _isExpanded
+                ? Container(
+                    margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      mission.description,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                        height: 1.5,
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showVerificationBottomSheet(
+      BuildContext context, MissionWithTemplate mission) {
+    final verificationType = mission.missionTemplate.verificationType;
+
+    switch (verificationType) {
+      case VerificationType.image:
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          isScrollControlled: true,
+          builder: (context) => ImageVerificationBottomSheet(mission: mission),
+        );
+        break;
+      case VerificationType.textReview:
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          isScrollControlled: true,
+          builder: (context) =>
+              TextReviewVerificationBottomSheet(mission: mission),
+        );
+        break;
+      case VerificationType.rpaAction:
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          isScrollControlled: true,
+          builder: (context) => RpaVerificationBottomSheet(mission: mission),
+        );
+        break;
+    }
   }
 }

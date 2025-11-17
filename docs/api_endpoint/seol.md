@@ -1,5 +1,60 @@
 ## **📚 LeaderBoard API 명세서**
 
+## **📚 mission_log API 명세서**
+
+### **1. `사용자의 모든 미션 로그 조회`**
+
+- **URL**: /mission-logs/users/{user_id}
+- **Method**: GET
+- 특정 사용자의 모든 미션 로그를 조회(started_at DESC) 로 정렬
+- **Path Parameters**
+  - `user_id` (UUID, Required): 조회할 유저의 ID
+- Query Parameters
+  - `include_template` (boolean, Optional - 기본값 : True) : 미션 템플릿 정보 포함 여부
+  - `include_campaign` (boolean, Optional - 기본값 : True) : 캠페인 정보 포함 여부
+- **Response (200 OK) `inluce_template = True` , `include_campaign = True`**
+
+```bash
+[
+  {
+    "id": 19,
+    "user_id": "346b4ae4-ea3c-43c3-a9a8-5e5ccadd006f",
+    "mission_template_id": 4,
+    "status": "IN_PROGRESS",
+    "started_at": "2025-11-11T13:09:37.527361+00:00",
+    "completed_at": null,
+    "proof_data": null,
+    "created_at": "2025-11-11T13:09:37.562978+00:00",
+    "updated_at": "2025-11-11T13:09:37.562978+00:00",
+    "mission_templates": {
+      "id": 4,
+      "campaign_id": 3,
+      "title": "미세먼지 줄이기 실천",
+      "description": "실내외 환기, 공기정화 식물 관리, 친환경 이동수단(자전거, 대중교통) 이용 모습 인증사진 제출",
+      "verification_type": "IMAGE",
+      "reward_points": 100,
+      "order": 3,
+      "created_at": "2025-11-09T17:13:51.949843+00:00",
+      "updated_at": "2025-11-09T17:13:51.949843+00:00",
+      "campaigns": {
+        "id": 3,
+        "title": "탄탄대로 챌린지",
+        "description": "환경 보호 활동",
+        "host_organizer": "서울시",
+        "campaign_url": "https://example.com/campaign",
+        "image_url": "https://example.com/image.jpg",
+        "start_date": "2025-01-01",
+        "end_date": "2025-12-31",
+        "region": "서울특별시",
+        "category": "ZERO_WASTE",
+        "status": "ACTIVE",
+        "updated_at": "2025-11-09T17:13:51.949843+00:00"
+      }
+    }
+  }
+]
+```
+
 ### **1. `리더보드 순위 조회`**
 
 - **URL**: /leaderboard/ranking
@@ -43,6 +98,7 @@
   - `500` : 리더보드 데이터를 가져올 수 없습니다
 
 ---
+
 ## API 명세서: 사용자 리더보드 순위 조회
 
 - **URL**: `/api/v1/leaderboard/ranking/{user_id}`
@@ -51,9 +107,9 @@
 
 ### Path Parameters
 
-| 파라미터 | 타입 | 필수 | 설명 |
-| --- | --- | --- | --- |
-| `user_id` | UUID | Yes | 조회할 사용자의 고유 식별자 |
+| 파라미터  | 타입 | 필수 | 설명                        |
+| --------- | ---- | ---- | --------------------------- |
+| `user_id` | UUID | Yes  | 조회할 사용자의 고유 식별자 |
 
 ### Request Example
 
@@ -73,18 +129,17 @@ GET /api/v1/leaderboard/ranking/123e4567-e89b-12d3-a456-426614174000
   "total_points": 1500,
   "rank": 5
 }
-
 ```
 
 **Response Fields**
 
-| 필드 | 타입 | Nullable | 설명 |
-| --- | --- | --- | --- |
-| `id` | UUID (string) | No | 사용자 고유 식별자 |
-| `username` | string | Yes | 사용자 이름 |
-| `user_img` | string | Yes | 사용자 프로필 이미지 URL |
-| `total_points` | integer | No | 사용자의 총 포인트 |
-| `rank` | integer | Yes | 리더보드 순위 (1위부터 시작) |
+| 필드           | 타입          | Nullable | 설명                         |
+| -------------- | ------------- | -------- | ---------------------------- |
+| `id`           | UUID (string) | No       | 사용자 고유 식별자           |
+| `username`     | string        | Yes      | 사용자 이름                  |
+| `user_img`     | string        | Yes      | 사용자 프로필 이미지 URL     |
+| `total_points` | integer       | No       | 사용자의 총 포인트           |
+| `rank`         | integer       | Yes      | 리더보드 순위 (1위부터 시작) |
 
 ### 에러 응답
 
@@ -94,7 +149,6 @@ GET /api/v1/leaderboard/ranking/123e4567-e89b-12d3-a456-426614174000
 {
   "detail": "User not found"
 }
-
 ```
 
 **500 Internal Server Error** - 서버 오류 발생 시

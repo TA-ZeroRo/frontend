@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:frontend/core/theme/app_color.dart';
-import 'package:frontend/core/theme/app_text_style.dart';
 import '../state/chat_state.dart';
 
 /// 사용자 메시지를 오른쪽 정렬로 표시하는 행 위젯

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:frontend/core/theme/app_color.dart';
-import 'package:frontend/core/theme/app_text_style.dart';
 import '../state/chat_state.dart';
 
 /// AI 메시지를 아바타와 함께 표시하는 행 위젯

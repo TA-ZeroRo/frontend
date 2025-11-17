@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/di/injection.dart';
 import '../../../../../../domain/model/campaign/campaign.dart';
 import '../../../../../../domain/repository/campaign_repository.dart';
+import '../../../../../../domain/repository/mission_repository.dart';
+import '../../../../entry/state/auth_controller.dart';
 import '../models/campaign_data.dart';
 
 /// 캠페인 필터 상태
@@ -85,6 +87,7 @@ final campaignFilterProvider =
 /// 캠페인 목록 Notifier
 class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
   late final CampaignRepository _repository;
+  late final MissionRepository _missionRepository;
 
   /// 참여 중인 캠페인 ID 목록 (로컬 관리)
   final Set<int> _participatingCampaignIds = {};
@@ -104,6 +107,7 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
   @override
   Future<List<CampaignData>> build() async {
     _repository = getIt<CampaignRepository>();
+    _missionRepository = getIt<MissionRepository>();
     return _loadCampaigns(resetOffset: true);
   }
 
@@ -227,10 +231,17 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
     final currentData = state.value;
     if (currentData == null) return;
 
+    // 사용자 ID 가져오기
+    final userId = ref.read(authProvider).currentUser?.id;
+    if (userId == null) {
+      throw Exception('사용자 정보를 찾을 수 없습니다. 로그인이 필요합니다.');
+    }
+
     final id = int.parse(campaignId);
+    final wasParticipating = _participatingCampaignIds.contains(id);
 
     // 낙관적 업데이트
-    if (_participatingCampaignIds.contains(id)) {
+    if (wasParticipating) {
       _participatingCampaignIds.remove(id);
     } else {
       _participatingCampaignIds.add(id);
@@ -239,18 +250,29 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
     // UI 즉시 업데이트
     state = AsyncValue.data(_applyLocalFilters());
 
-    // 실제 API 호출 시뮬레이션 (추후 실제 API로 대체)
+    // 실제 API 호출
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
+      // 참가만 API 호출 (참가 취소는 추후 구현)
+      if (!wasParticipating) {
+        final success = await _missionRepository.participateInCampaign(
+          campaignId: id,
+          userId: userId,
+        );
+
+        if (!success) {
+          throw Exception('캠페인 참가에 실패했습니다.');
+        }
+      }
       // API 성공 시 상태 유지
     } catch (e) {
       // API 실패 시 롤백
-      if (_participatingCampaignIds.contains(id)) {
-        _participatingCampaignIds.remove(id);
-      } else {
+      if (wasParticipating) {
         _participatingCampaignIds.add(id);
+      } else {
+        _participatingCampaignIds.remove(id);
       }
       state = AsyncValue.data(_applyLocalFilters());
+      rethrow;
     }
   }
 

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../dto/campaign/campaign_dto.dart';
+import '../../dto/campaign/campaign_participation_response_dto.dart';
 
 @injectable
 class CampaignApi {
@@ -36,5 +37,19 @@ class CampaignApi {
 
     final List<dynamic> data = response.data;
     return data.map((json) => CampaignDto.fromJson(json)).toList();
+  }
+
+  /// Participate in campaign
+  /// POST /api/v1/campaign-agent/campaigns/{campaignId}
+  Future<CampaignParticipationResponseDto> participateInCampaign({
+    required int campaignId,
+    required String userId,
+  }) async {
+    final response = await _dio.post(
+      '/api/v1/campaign-agent/campaigns/$campaignId',
+      data: {'user_id': userId},
+    );
+
+    return CampaignParticipationResponseDto.fromJson(response.data);
   }
 }

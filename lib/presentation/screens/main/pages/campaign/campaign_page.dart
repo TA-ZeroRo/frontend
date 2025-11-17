@@ -55,13 +55,19 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          _buildAppBar(),
-          _buildFilters(context, filter),
-          _buildCampaignList(context, campaignListAsync),
-        ],
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await ref.read(campaignListProvider.notifier).refresh();
+        },
+        color: AppColors.primary,
+        child: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            _buildAppBar(),
+            _buildFilters(context, filter),
+            _buildCampaignList(context, campaignListAsync),
+          ],
+        ),
       ),
     );
   }
@@ -268,7 +274,7 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                ref.invalidate(campaignListProvider);
+                ref.read(campaignListProvider.notifier).refresh();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,

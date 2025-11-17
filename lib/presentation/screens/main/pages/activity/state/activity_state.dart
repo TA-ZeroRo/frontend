@@ -2,9 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../core/di/injection.dart';
 import '../../../../../../domain/model/leaderboard/leaderboard_entry.dart';
+import '../../../../../../domain/model/mission/mission_with_template.dart';
 import '../../../../../../domain/repository/leaderboard_repository.dart';
+import '../../../../../../domain/repository/mission_repository.dart';
 import '../../../../entry/state/auth_controller.dart';
-import 'mock/mock_campaign_mission_data.dart';
 
 class RankingAsyncNotifier extends AsyncNotifier<List<LeaderboardEntry>> {
   late final LeaderboardRepository _repository;
@@ -74,92 +75,78 @@ final myRankingProvider =
 // CAMPAIGN MISSION STATE
 // ========================================
 
-/// State class for campaign mission data
-class CampaignMissionState {
-  final List<Campaign> campaigns;
-  final bool isLoading;
-  final String? error;
+/// AsyncNotifier for managing campaign mission state with real server data
+/// 캠페인별로 그룹화된 미션 데이터를 Map으로 반환
+class CampaignMissionAsyncNotifier
+    extends AsyncNotifier<Map<int, List<MissionWithTemplate>>> {
+  late final MissionRepository _repository;
 
-  const CampaignMissionState({
-    required this.campaigns,
-    this.isLoading = false,
-    this.error,
-  });
-
-  CampaignMissionState copyWith({
-    List<Campaign>? campaigns,
-    bool? isLoading,
-    String? error,
-  }) {
-    return CampaignMissionState(
-      campaigns: campaigns ?? this.campaigns,
-      isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
-    );
-  }
-}
-
-/// Notifier for managing campaign mission state
-class CampaignMissionNotifier extends Notifier<CampaignMissionState> {
   @override
-  CampaignMissionState build() {
-    return CampaignMissionState(campaigns: mockCampaigns);
+  Future<Map<int, List<MissionWithTemplate>>> build() async {
+    _repository = getIt<MissionRepository>();
+    return await _fetchCampaignMissions();
   }
 
-  /// Toggle mission completion status
-  void toggleMissionCompletion(String missionId) {
-    final updatedCampaigns = state.campaigns.map((campaign) {
-      final updatedMissions = campaign.missions.map((mission) {
-        if (mission.id == missionId) {
-          return mission.copyWith(isCompleted: !mission.isCompleted);
-        }
-        return mission;
-      }).toList();
+  Future<Map<int, List<MissionWithTemplate>>> _fetchCampaignMissions() async {
+    final userId = ref.read(authProvider).currentUser?.id;
+    if (userId == null) {
+      return {};
+    }
 
-      return Campaign(
-        id: campaign.id,
-        name: campaign.name,
-        iconEmoji: campaign.iconEmoji,
-        missions: updatedMissions,
-      );
-    }).toList();
+    // 서버에서 사용자의 미션 로그 가져오기
+    final missionLogs = await _repository.getUserMissionLogs(userId);
 
-    state = state.copyWith(campaigns: updatedCampaigns);
+    // 캠페인별로 그룹화
+    final Map<int, List<MissionWithTemplate>> campaignMap = {};
+    for (final missionLog in missionLogs) {
+      final campaignId = missionLog.campaign.id;
+      if (!campaignMap.containsKey(campaignId)) {
+        campaignMap[campaignId] = [];
+      }
+      campaignMap[campaignId]!.add(missionLog);
+    }
+
+    return campaignMap;
   }
 
-  /// Refresh mission data (simulated)
+  /// 새로고침
   Future<void> refresh() async {
-    state = state.copyWith(isLoading: true);
-
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 800));
-
-    // Reset to mock data
-    state = CampaignMissionState(campaigns: mockCampaigns, isLoading: false);
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      return await _fetchCampaignMissions();
+    });
   }
 }
 
-final campaignMissionProvider =
-    NotifierProvider<CampaignMissionNotifier, CampaignMissionState>(
-      CampaignMissionNotifier.new,
-    );
+final campaignMissionProvider = AsyncNotifierProvider<
+    CampaignMissionAsyncNotifier, Map<int, List<MissionWithTemplate>>>(
+  CampaignMissionAsyncNotifier.new,
+);
 
 /// Derived provider for completed mission count
 final completedMissionCountProvider = Provider<int>((ref) {
-  final state = ref.watch(campaignMissionProvider);
-  return state.campaigns
-      .expand((campaign) => campaign.missions)
-      .where((mission) => mission.isCompleted)
-      .length;
+  final asyncState = ref.watch(campaignMissionProvider);
+  return asyncState.when(
+    data: (campaignMap) => campaignMap.values
+        .expand((missions) => missions)
+        .where((m) => m.missionLog.status.value == 'COMPLETED')
+        .length,
+    loading: () => 0,
+    error: (_, __) => 0,
+  );
 });
 
 /// Derived provider for total points earned
 final totalPointsEarnedProvider = Provider<int>((ref) {
-  final state = ref.watch(campaignMissionProvider);
-  return state.campaigns
-      .expand((campaign) => campaign.missions)
-      .where((mission) => mission.isCompleted)
-      .fold(0, (sum, mission) => sum + mission.points);
+  final asyncState = ref.watch(campaignMissionProvider);
+  return asyncState.when(
+    data: (campaignMap) => campaignMap.values
+        .expand((missions) => missions)
+        .where((m) => m.missionLog.status.value == 'COMPLETED')
+        .fold(0, (sum, m) => sum + m.missionTemplate.rewardPoints),
+    loading: () => 0,
+    error: (_, __) => 0,
+  );
 });
 
 // ========================================
