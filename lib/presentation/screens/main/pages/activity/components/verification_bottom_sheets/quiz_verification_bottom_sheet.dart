@@ -4,21 +4,21 @@ import 'package:frontend/domain/model/mission/mission_with_template.dart';
 
 import '../../../../../../../core/theme/app_color.dart';
 
-class RpaVerificationBottomSheet extends StatefulWidget {
+class QuizVerificationBottomSheet extends StatefulWidget {
   final MissionWithTemplate mission;
 
-  const RpaVerificationBottomSheet({
+  const QuizVerificationBottomSheet({
     super.key,
     required this.mission,
   });
 
   @override
-  State<RpaVerificationBottomSheet> createState() =>
-      _RpaVerificationBottomSheetState();
+  State<QuizVerificationBottomSheet> createState() =>
+      _QuizVerificationBottomSheetState();
 }
 
-class _RpaVerificationBottomSheetState
-    extends State<RpaVerificationBottomSheet> {
+class _QuizVerificationBottomSheetState
+    extends State<QuizVerificationBottomSheet> {
   bool _isSubmitting = false;
 
   @override
@@ -58,7 +58,7 @@ class _RpaVerificationBottomSheetState
         children: [
           const SizedBox(width: 40),
           const Text(
-            '자동 인증',
+            '퀴즈 인증',
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -131,7 +131,7 @@ class _RpaVerificationBottomSheetState
           ),
           const SizedBox(height: 16),
           const Text(
-            '이 미션은 자동으로 수행됩니다',
+            '이 미션은 퀴즈를 통해 수행됩니다',
             style: TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -141,7 +141,7 @@ class _RpaVerificationBottomSheetState
           ),
           const SizedBox(height: 8),
           Text(
-            '버튼을 누르면 자동으로\n미션이 완료됩니다',
+            '버튼을 누르면 퀴즈를 통해\n미션이 완료됩니다',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.7),
               fontSize: 14,

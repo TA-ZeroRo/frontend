@@ -7,7 +7,7 @@ enum VerificationType {
   textReview('TEXT_REVIEW'),
 
   /// RPA 자동 제출
-  rpaAction('RPA_ACTION');
+  quiz('QUIZ');
 
   const VerificationType(this.value);
 

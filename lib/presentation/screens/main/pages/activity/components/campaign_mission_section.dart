@@ -7,7 +7,7 @@ import '../../../../../../domain/model/mission/verification_type.dart';
 import '../state/activity_state.dart';
 import 'shimmer_widgets.dart';
 import 'verification_bottom_sheets/image_verification_bottom_sheet.dart';
-import 'verification_bottom_sheets/rpa_verification_bottom_sheet.dart';
+import 'verification_bottom_sheets/quiz_verification_bottom_sheet.dart';
 import 'verification_bottom_sheets/text_review_verification_bottom_sheet.dart';
 
 class CampaignMissionSection extends ConsumerWidget {
@@ -580,12 +580,12 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
               TextReviewVerificationBottomSheet(mission: mission),
         );
         break;
-      case VerificationType.rpaAction:
+      case VerificationType.quiz:
         showModalBottomSheet(
           context: context,
           backgroundColor: Colors.transparent,
           isScrollControlled: true,
-          builder: (context) => RpaVerificationBottomSheet(mission: mission),
+          builder: (context) => QuizVerificationBottomSheet(mission: mission),
         );
         break;
     }
