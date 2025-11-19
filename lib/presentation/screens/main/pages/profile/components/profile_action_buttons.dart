@@ -85,22 +85,10 @@ class ProfileActionButtons extends ConsumerWidget {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: OutlinedButton.icon(
+          child: OutlinedButton(
             onPressed: () {
               ref.read(isChartExpandedProvider.notifier).toggle();
             },
-            icon: AnimatedRotation(
-              turns: isChartExpanded ? 0.5 : 0,
-              duration: const Duration(milliseconds: 300),
-              child: Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
-            ),
-            label: Text(
-              '포인트 히스토리',
-              style: AppTextStyle.bodyMedium.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.primary,
-              ),
-            ),
             style: OutlinedButton.styleFrom(
               backgroundColor: AppColors.onPrimary,
               side: BorderSide(
@@ -111,6 +99,24 @@ class ProfileActionButtons extends ConsumerWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '포인트 히스토리',
+                  style: AppTextStyle.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                AnimatedRotation(
+                  turns: isChartExpanded ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
+                ),
+              ],
             ),
           ),
         ),
