@@ -194,10 +194,7 @@ class PlaygroundShimmer extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: const Color(0xFFE0E0E0),
-          width: 1.2,
-        ),
+        border: Border.all(color: const Color(0xFFE0E0E0), width: 1.2),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -221,10 +218,11 @@ class PlaygroundShimmer extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(
-                  Icons.emoji_events,
-                  color: Color(0xFFFFD700),
-                  size: 24,
+                Image.asset(
+                  'assets/images/trophy_icon.png',
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.contain,
                 ),
                 const SizedBox(width: 8),
                 const Text(
@@ -368,10 +366,7 @@ class CampaignMissionSectionShimmer extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: const Color(0xFFE0E0E0),
-          width: 1.2,
-        ),
+        border: Border.all(color: const Color(0xFFE0E0E0), width: 1.2),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -395,10 +390,11 @@ class CampaignMissionSectionShimmer extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(
-                  Icons.assignment_turned_in_rounded,
-                  color: Color(0xFF4A90E2),
-                  size: 24,
+                Image.asset(
+                  'assets/images/file_icon.png',
+                  width: 36,
+                  height: 36,
+                  fit: BoxFit.contain,
                 ),
                 const SizedBox(width: 8),
                 const Text(
@@ -420,11 +416,7 @@ class CampaignMissionSectionShimmer extends StatelessWidget {
               children: [
                 _buildCampaignCardShimmer(),
                 const SizedBox(height: 20),
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: Colors.grey[200],
-                ),
+                Divider(height: 1, thickness: 1, color: Colors.grey[200]),
                 const SizedBox(height: 20),
                 _buildCampaignCardShimmer(),
               ],

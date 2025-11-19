@@ -52,7 +52,12 @@ class LeaderboardSection extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.emoji_events, color: Color(0xFFFFD700), size: 24),
+          Image.asset(
+            'assets/images/trophy_icon.png',
+            width: 40,
+            height: 40,
+            fit: BoxFit.contain,
+          ),
           const SizedBox(width: 8),
           const Text(
             '리더보드',
