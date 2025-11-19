@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../../core/components/custom_app_bar.dart';
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/theme/app_text_style.dart';
-import '../../../../routes/router_path.dart';
 import 'components/profile_info_section.dart';
 import 'components/point_chart_section.dart';
 import 'components/weekly_report_card.dart';
@@ -92,9 +90,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       child: Container(
                         color: AppColors.primary,
                         padding: const EdgeInsets.all(16),
-                        child: ProfileInfoSection(
-                          onEditProfile: () => context.push(RoutePath.settings),
-                        ),
+                        child: const ProfileInfoSection(),
                       ),
                     ),
                     // 애니메이션으로 나타나는 차트 섹션

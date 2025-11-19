@@ -96,10 +96,11 @@ class CampaignMissionSection extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.assignment_turned_in_rounded,
-            color: Color(0xFF4A90E2),
-            size: 24,
+          Image.asset(
+            'assets/images/file_icon.png',
+            width: 36,
+            height: 36,
+            fit: BoxFit.contain,
           ),
           const SizedBox(width: 8),
           const Text(
