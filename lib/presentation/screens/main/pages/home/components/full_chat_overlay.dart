@@ -8,6 +8,7 @@ import 'ai_message_row.dart';
 import 'user_message_row.dart';
 import 'inline_chat_widget.dart';
 import 'typing_indicator.dart';
+import 'quick_action_chips.dart';
 
 /// 전체 화면 채팅 오버레이
 class FullChatOverlay extends ConsumerStatefulWidget {
@@ -64,6 +65,17 @@ class _FullChatOverlayState extends ConsumerState<FullChatOverlay> {
 
             // 채팅 메시지 영역
             Expanded(child: _buildChatArea(chatState)),
+
+            // 빠른 액션 칩 (메시지가 없을 때만 표시)
+            if (chatState.messages.isEmpty && !chatState.isLoading)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(17, 0, 17, 12),
+                child: QuickActionChips(
+                  onActionTap: (prompt) {
+                    ref.read(chatProvider.notifier).sendMessage(prompt);
+                  },
+                ),
+              ),
 
             // 입력창 (좌우 17px 여백)
             Padding(

@@ -40,13 +40,13 @@ class CampaignApi {
   }
 
   /// Participate in campaign
-  /// POST /api/v1/campaign-agent/campaigns/{campaignId}
+  /// POST /campaign-agent/campaigns/{campaignId}
   Future<CampaignParticipationResponseDto> participateInCampaign({
     required int campaignId,
     required String userId,
   }) async {
     final response = await _dio.post(
-      '/api/v1/campaign-agent/campaigns/$campaignId',
+      '/campaign-agent/campaigns/$campaignId',
       data: {'user_id': userId},
     );
 

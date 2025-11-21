@@ -1,11 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'mock/weekly_report_mock_data.dart';
+import '../../../../../../core/di/injection.dart';
+import '../../../../../../domain/model/report/monthly_report.dart';
+import '../../../../../../domain/repository/report_repository.dart';
 import '../../../../entry/state/auth_controller.dart';
 
-/// 주간보고서 목록을 관리하는 Notifier (Mock 데이터 사용)
-class WeeklyReportsNotifier extends Notifier<List<ProfileWeeklyReport>> {
+/// 월간 보고서 목록을 관리하는 AsyncNotifier
+class WeeklyReportsNotifier extends AsyncNotifier<List<MonthlyReport>> {
+  late final ReportRepository _reportRepository;
+
   @override
-  List<ProfileWeeklyReport> build() {
+  Future<List<MonthlyReport>> build() async {
+    _reportRepository = getIt<ReportRepository>();
+    return _loadReports();
+  }
+
+  /// 월간 보고서 로드
+  Future<List<MonthlyReport>> _loadReports() async {
     final user = ref.read(authProvider).currentUser;
 
     // 사용자 정보가 없으면 빈 배열 반환
@@ -13,32 +23,19 @@ class WeeklyReportsNotifier extends Notifier<List<ProfileWeeklyReport>> {
       return [];
     }
 
-    // Mock 데이터 반환 (userId와 username만 실제 값 사용)
-    return ProfileWeeklyReport.getMockWeeklyReports(
-      userId: user.id,
-      username: user.username,
-    );
+    final reports = await _reportRepository.getMonthlyReports(user.id);
+    return reports;
   }
 
-  /// 주간보고서 새로고침
-  void refresh() {
-    final user = ref.read(authProvider).currentUser;
-
-    // 사용자 정보가 없으면 빈 배열 설정
-    if (user == null) {
-      state = [];
-      return;
-    }
-
-    state = ProfileWeeklyReport.getMockWeeklyReports(
-      userId: user.id,
-      username: user.username,
-    );
+  /// 월간 보고서 새로고침
+  Future<void> refresh() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => _loadReports());
   }
 }
 
-/// 주간보고서 목록 Provider
+/// 월간 보고서 목록 Provider
 final weeklyReportsProvider =
-    NotifierProvider<WeeklyReportsNotifier, List<ProfileWeeklyReport>>(
+    AsyncNotifierProvider<WeeklyReportsNotifier, List<MonthlyReport>>(
       WeeklyReportsNotifier.new,
     );

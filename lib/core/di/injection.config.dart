@@ -16,6 +16,7 @@ import 'package:frontend/data/data_source/data_source_module.dart' as _i720;
 import 'package:frontend/data/data_source/leaderboard/leaderboard_remote_data_source.dart'
     as _i562;
 import 'package:frontend/data/data_source/mission/mission_api.dart' as _i800;
+import 'package:frontend/data/data_source/report/report_api.dart' as _i889;
 import 'package:frontend/data/data_source/storage_service.dart' as _i182;
 import 'package:frontend/data/data_source/user/user_remote_data_source.dart'
     as _i64;
@@ -27,6 +28,8 @@ import 'package:frontend/data/repository_impl/leaderboard_repository_impl.dart'
     as _i856;
 import 'package:frontend/data/repository_impl/mission_repository_impl.dart'
     as _i1053;
+import 'package:frontend/data/repository_impl/report_repository_impl.dart'
+    as _i76;
 import 'package:frontend/data/repository_impl/user_repository_impl.dart'
     as _i609;
 import 'package:frontend/domain/repository/agent_chat_repository.dart' as _i93;
@@ -34,6 +37,7 @@ import 'package:frontend/domain/repository/campaign_repository.dart' as _i737;
 import 'package:frontend/domain/repository/leaderboard_repository.dart'
     as _i362;
 import 'package:frontend/domain/repository/mission_repository.dart' as _i629;
+import 'package:frontend/domain/repository/report_repository.dart' as _i589;
 import 'package:frontend/domain/repository/user_repository.dart' as _i653;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
@@ -57,6 +61,10 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i64.UserRemoteDataSource(gh<_i361.Dio>()),
     );
     gh.factory<_i800.MissionApi>(() => _i800.MissionApi(gh<_i361.Dio>()));
+    gh.factory<_i889.ReportApi>(() => _i889.ReportApi(gh<_i361.Dio>()));
+    gh.factory<_i589.ReportRepository>(
+      () => _i76.ReportRepositoryImpl(gh<_i889.ReportApi>()),
+    );
     gh.factory<_i93.AgentChatRepository>(
       () => _i315.AgentChatRepositoryImpl(gh<_i65.AgentChatApi>()),
     );

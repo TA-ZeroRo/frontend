@@ -6,6 +6,7 @@ import '../../../../../core/theme/app_text_style.dart';
 import 'components/profile_info_section.dart';
 import 'components/point_chart_section.dart';
 import 'components/weekly_report_card.dart';
+import 'components/weekly_report_card_shimmer.dart';
 import 'state/profile_chart_state.dart';
 import 'state/weekly_report_controller.dart';
 
@@ -23,14 +24,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    // 가장 최근 보고서 자동 펼침
+    // 가장 최근 보고서 자동 펼침 (데이터 로드 완료 시)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final reports = ref.read(weeklyReportsProvider);
-      if (reports.isNotEmpty && _expandedReportId == null && mounted) {
-        setState(() {
-          _expandedReportId = reports.first.id;
+      ref.listen(weeklyReportsProvider, (previous, next) {
+        next.whenData((reports) {
+          if (reports.isNotEmpty && _expandedReportId == null && mounted) {
+            setState(() {
+              _expandedReportId = reports.first.period.startDate;
+            });
+          }
         });
-      }
+      });
     });
   }
 
@@ -67,7 +71,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final isChartExpanded = ref.watch(isChartExpandedProvider);
-    final reports = ref.watch(weeklyReportsProvider);
+    final reportsAsync = ref.watch(weeklyReportsProvider);
 
     return Scaffold(
       body: Stack(
@@ -147,75 +151,119 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         ),
                       ),
                     ),
-                    // 빈 상태 또는 카드 리스트
-                    if (reports.isEmpty)
-                      SliverToBoxAdapter(
-                        child: Container(
-                          color: AppColors.background,
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          height: 200,
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.assignment_outlined,
-                                  size: 48,
-                                  color: AppColors.textTertiary,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  '아직 월간보고서가 없어요',
-                                  style: AppTextStyle.bodyLarge.copyWith(
-                                    color: AppColors.textSecondary,
+                    // 로딩/에러/데이터 상태 처리
+                    ...reportsAsync.when(
+                      loading: () => [
+                        // Shimmer 로딩 UI
+                        SliverToBoxAdapter(
+                          child: Container(
+                            color: AppColors.background,
+                            child: const WeeklyReportSectionShimmer(itemCount: 2),
+                          ),
+                        ),
+                      ],
+                      error: (error, stack) => [
+                        // 에러 상태
+                        SliverToBoxAdapter(
+                          child: Container(
+                            color: AppColors.background,
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            height: 200,
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    size: 48,
+                                    color: AppColors.error,
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '매월 1일 자정에 월간보고서가 생성돼요',
-                                  style: AppTextStyle.bodyMedium.copyWith(
-                                    color: AppColors.textTertiary,
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    '보고서를 불러오는데 실패했어요',
+                                    style: AppTextStyle.bodyLarge.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      )
-                    else
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final report = reports[index];
-                          final isExpanded = _expandedReportId == report.id;
-
-                          // GlobalKey 생성 (없으면 생성)
-                          if (!_reportKeys.containsKey(report.id)) {
-                            _reportKeys[report.id] = GlobalKey();
-                          }
-
-                          return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 18),
-                            color: AppColors.background,
-                            child: WeeklyReportCard(
-                              key: _reportKeys[report.id],
-                              report: report,
-                              isExpanded: isExpanded,
-                              onTap: () {
-                                final wasExpanded = isExpanded;
-                                setState(() {
-                                  _expandedReportId = isExpanded
-                                      ? null
-                                      : report.id;
-                                });
-                                // 확장 시 중앙 정렬 스크롤 적용
-                                if (!wasExpanded) {
-                                  _scrollToReport(report.id);
-                                }
-                              },
+                      ],
+                      data: (reports) => [
+                        // 빈 상태 또는 카드 리스트
+                        if (reports.isEmpty)
+                          SliverToBoxAdapter(
+                            child: Container(
+                              color: AppColors.background,
+                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                              height: 200,
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.assignment_outlined,
+                                      size: 48,
+                                      color: AppColors.textTertiary,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      '아직 월간보고서가 없어요',
+                                      style: AppTextStyle.bodyLarge.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      '매월 1일 자정에 월간보고서가 생성돼요',
+                                      style: AppTextStyle.bodyMedium.copyWith(
+                                        color: AppColors.textTertiary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          );
-                        }, childCount: reports.length),
-                      ),
+                          )
+                        else
+                          SliverList(
+                            delegate: SliverChildBuilderDelegate((context, index) {
+                              final report = reports[index];
+                              final reportId = report.period.startDate;
+                              final isExpanded = _expandedReportId == reportId;
+
+                              // GlobalKey 생성 (없으면 생성)
+                              if (!_reportKeys.containsKey(reportId)) {
+                                _reportKeys[reportId] = GlobalKey();
+                              }
+
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 18),
+                                color: AppColors.background,
+                                child: WeeklyReportCard(
+                                  key: _reportKeys[reportId],
+                                  report: report,
+                                  isExpanded: isExpanded,
+                                  onTap: () {
+                                    final wasExpanded = isExpanded;
+                                    setState(() {
+                                      _expandedReportId = isExpanded
+                                          ? null
+                                          : reportId;
+                                    });
+                                    // 확장 시 중앙 정렬 스크롤 적용
+                                    if (!wasExpanded) {
+                                      _scrollToReport(reportId);
+                                    }
+                                  },
+                                ),
+                              );
+                            }, childCount: reports.length),
+                          ),
+                      ],
+                    ),
                     // 남은 공간을 배경색으로 채우기
                     SliverFillRemaining(
                       hasScrollBody: false,

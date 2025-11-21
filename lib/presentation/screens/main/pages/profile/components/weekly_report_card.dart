@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
-import '../state/mock/weekly_report_mock_data.dart';
+import '../../../../../../domain/model/report/monthly_report.dart';
 
 class WeeklyReportCard extends StatelessWidget {
-  final ProfileWeeklyReport report;
+  final MonthlyReport report;
   final bool isExpanded;
   final VoidCallback onTap;
 
@@ -83,7 +83,7 @@ class WeeklyReportCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            report.periodString,
+                            _formatPeriodString(report.period),
                             style: AppTextStyle.bodySmall.copyWith(
                               color: AppColors.onPrimary,
                               fontWeight: FontWeight.w500,
@@ -143,32 +143,26 @@ class WeeklyReportCard extends StatelessWidget {
       ),
     );
   }
+
+  /// 보고서 기간 문자열 포맷팅 (YY-MM-DD ~ YY-MM-DD)
+  String _formatPeriodString(ReportPeriod period) {
+    final start = DateTime.parse(period.startDate);
+    final end = DateTime.parse(period.endDate);
+
+    final startStr = '${start.year.toString().substring(2)}-'
+        '${start.month.toString().padLeft(2, '0')}-'
+        '${start.day.toString().padLeft(2, '0')}';
+    final endStr = '${end.year.toString().substring(2)}-'
+        '${end.month.toString().padLeft(2, '0')}-'
+        '${end.day.toString().padLeft(2, '0')}';
+    return '$startStr ~ $endStr';
+  }
 }
 
 class WeeklyReportContent extends StatelessWidget {
-  final ProfileWeeklyReport report;
+  final MonthlyReport report;
 
   const WeeklyReportContent({super.key, required this.report});
-
-  // 환경 관련 TMI 목록
-  static const List<String> _environmentTmiList = [
-    '미세플라스틱은 1주일에 신용카드 한 장 분량씩 인체에 축적됩니다',
-    '대기 오염으로 인한 조기 사망자는 연간 700만 명에 달합니다',
-    '플라스틱 제품의 화학물질은 호르몬 이상, 불임 등을 유발할 수 있습니다',
-    '버려진 담배꽁초는 1개당 물 500L를 1시간만에 오염시킵니다',
-    '숲 1헥타르는 연간 6톤의 CO2를 흡수하고 산소를 생성합니다',
-    '하루 평균 2만 번 숨쉬는데, 대기 오염은 폐 기능을 20% 감소시킬 수 있습니다',
-    '재활용되지 않은 플라스틱은 해양 생물을 통해 다시 우리 식탁으로 돌아옵니다',
-    '살충제와 제초제는 장기적인 노출 시 신경계 질환을 유발할 수 있습니다',
-    '불필요한 전력 소비는 미세먼지 배출의 주원인 중 하나입니다',
-    '일회용 컵 1개는 500년이 지나도 분해되지 않습니다',
-    '친환경 라이프스타일은 심혈관 질환 발병률을 30% 감소시킵니다',
-    '대기 중 오존은 천식과 폐 기능 저하의 주요 원인입니다',
-  ];
-
-  String _getRandomTmi() {
-    return _environmentTmiList[report.id.hashCode % _environmentTmiList.length];
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +171,7 @@ class WeeklyReportContent extends StatelessWidget {
       children: [
         // Title
         Text(
-          '${report.username}의 월간 활동',
+          '${report.user.username}의 월간 활동',
           style: AppTextStyle.headlineSmall.copyWith(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w500,
@@ -185,7 +179,7 @@ class WeeklyReportContent extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          report.periodString,
+          _formatPeriodString(report.period),
           style: AppTextStyle.bodyMedium.copyWith(
             color: AppColors.textSecondary,
           ),
@@ -220,7 +214,7 @@ class WeeklyReportContent extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  if (report.campaignList.isEmpty)
+                  if (report.campaigns.list.isEmpty)
                     Text(
                       '신청한 캠페인이 없어요',
                       style: AppTextStyle.bodyMedium.copyWith(
@@ -228,7 +222,7 @@ class WeeklyReportContent extends StatelessWidget {
                       ),
                     )
                   else
-                    _buildCampaignListByCategory(report.campaignList),
+                    _buildCampaignListByCategory(report.campaigns.list),
                 ],
               ),
             ),
@@ -236,15 +230,14 @@ class WeeklyReportContent extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         // 카테고리별 클리어한 미션 목록
-        if (report.missionCategoryCounts != null &&
-            report.missionCategoryCounts!.isNotEmpty) ...[
-          _buildMissionCategorySection(report.missionCategoryCounts!),
+        if (report.missions.completedByCategory.isNotEmpty) ...[
+          _buildMissionCategorySection(_convertMissionCategoriesToMap(report.missions.completedByCategory)),
           const SizedBox(height: 16),
         ],
         // 월간 획득 포인트 (저번달 대비 색상 및 차이 표기)
         _buildMonthlyPointsRow(
-          points: report.monthlyPointsEarned,
-          previousMonthPoints: report.previousMonthPoints,
+          points: report.points.currentMonth,
+          previousMonthPoints: report.points.previousMonth,
         ),
         // 환경 TMI 섹션
         const SizedBox(height: 24),
@@ -269,7 +262,7 @@ class WeeklyReportContent extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  _getRandomTmi(),
+                  report.tmi.content,
                   style: AppTextStyle.bodySmall.copyWith(
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w500,
@@ -280,6 +273,27 @@ class WeeklyReportContent extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  /// 보고서 기간 문자열 포맷팅 (YY-MM-DD ~ YY-MM-DD)
+  String _formatPeriodString(ReportPeriod period) {
+    final start = DateTime.parse(period.startDate);
+    final end = DateTime.parse(period.endDate);
+
+    final startStr = '${start.year.toString().substring(2)}-'
+        '${start.month.toString().padLeft(2, '0')}-'
+        '${start.day.toString().padLeft(2, '0')}';
+    final endStr = '${end.year.toString().substring(2)}-'
+        '${end.month.toString().padLeft(2, '0')}-'
+        '${end.day.toString().padLeft(2, '0')}';
+    return '$startStr ~ $endStr';
+  }
+
+  /// 미션 카테고리 리스트를 Map으로 변환
+  Map<String, int> _convertMissionCategoriesToMap(List<MissionCategory> categories) {
+    return Map.fromEntries(
+      categories.map((c) => MapEntry(c.category, c.count)),
     );
   }
 
@@ -517,16 +531,16 @@ class WeeklyReportContent extends StatelessWidget {
   }
 
   /// 캠페인 목록을 카테고리별로 그룹화하여 표시
-  Widget _buildCampaignListByCategory(List<String> campaignList) {
+  Widget _buildCampaignListByCategory(List<CampaignItem> campaignList) {
     // 캠페인을 카테고리별로 그룹화
     final Map<String, List<String>> groupedCampaigns = {};
 
     for (final campaign in campaignList) {
-      final category = _getCampaignCategory(campaign);
+      final category = _getCampaignCategory(campaign.title);
       if (!groupedCampaigns.containsKey(category)) {
         groupedCampaigns[category] = [];
       }
-      groupedCampaigns[category]!.add(campaign);
+      groupedCampaigns[category]!.add(campaign.title);
     }
 
     // 카테고리 순서 정렬 (백엔드 카테고리 순서)
