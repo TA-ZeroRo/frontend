@@ -47,12 +47,11 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
   Widget build(BuildContext context) {
     // 필터 상태 감지
     ref.listen(campaignFilterProvider, (previous, next) {
-      // 필터가 변경되면 캠페인 목록 새로고침
       ref.read(campaignListProvider.notifier).refresh();
     });
 
     final campaignListAsync = ref.watch(campaignListProvider);
-    final filter = ref.watch(campaignFilterProvider);
+    final campaignFilter = ref.watch(campaignFilterProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -65,7 +64,7 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
           controller: _scrollController,
           slivers: [
             _buildAppBar(),
-            _buildFilters(context, filter),
+            _buildFilters(context, campaignFilter),
             _buildCampaignList(context, campaignListAsync),
           ],
         ),
@@ -75,13 +74,10 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
 
   /// AppBar
   Widget _buildAppBar() =>
-      SliverToBoxAdapter(child: const CustomAppBar(title: '캠페인 둘러보기'));
+      const SliverToBoxAdapter(child: CustomAppBar(title: '캠페인 둘러보기'));
 
-  /// 필터 섹션
-  Widget _buildFilters(
-    BuildContext context,
-    CampaignFilter filter,
-  ) {
+  /// 캠페인 필터 섹션
+  Widget _buildFilters(BuildContext context, CampaignFilter filter) {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -144,7 +140,7 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
     return campaignListAsync.when(
       data: (campaigns) {
         if (campaigns.isEmpty) {
-          return _buildEmptyState();
+          return _buildEmptyState('해당 조건의 캠페인이 없어요');
         }
 
         final hasMore = ref.read(campaignListProvider.notifier).hasMore;
@@ -208,9 +204,7 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                 else if (hasMore) {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: 24),
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                    child: Center(child: CircularProgressIndicator()),
                   );
                 }
                 // 마지막 여백
@@ -229,7 +223,7 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
   }
 
   /// 빈 상태 UI
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(String message) {
     return SliverFillRemaining(
       hasScrollBody: false,
       child: Center(
@@ -243,7 +237,7 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              '해당 조건의 캠페인이 없어요',
+              message,
               style: AppTextStyle.bodyLarge.copyWith(
                 color: AppColors.textTertiary,
               ),
@@ -280,7 +274,7 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
             Icon(Icons.error_outline, size: 80, color: AppColors.textTertiary),
             const SizedBox(height: 16),
             Text(
-              '캠페인을 불러올 수 없어요',
+              '데이터를 불러올 수 없어요',
               style: AppTextStyle.bodyLarge.copyWith(
                 color: AppColors.textTertiary,
               ),

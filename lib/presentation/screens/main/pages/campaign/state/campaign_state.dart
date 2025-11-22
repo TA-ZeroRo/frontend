@@ -4,6 +4,7 @@ import '../../../../../../domain/model/campaign/campaign.dart';
 import '../../../../../../domain/repository/campaign_repository.dart';
 import '../../../../../../domain/repository/mission_repository.dart';
 import '../../../../entry/state/auth_controller.dart';
+import '../../activity/state/activity_state.dart';
 import '../models/campaign_data.dart';
 
 /// 캠페인 필터 상태
@@ -262,6 +263,8 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
           campaignId: id,
           userId: userId,
         );
+        // 활동하기 페이지 데이터 리프레쉬 트리거
+        ref.read(activityRefreshTriggerProvider.notifier).trigger();
       }
       // API 성공 시 상태 유지
     } catch (e) {

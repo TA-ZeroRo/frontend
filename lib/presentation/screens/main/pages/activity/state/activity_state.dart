@@ -7,69 +7,71 @@ import '../../../../../../domain/repository/leaderboard_repository.dart';
 import '../../../../../../domain/repository/mission_repository.dart';
 import '../../../../entry/state/auth_controller.dart';
 
-class RankingAsyncNotifier extends AsyncNotifier<List<LeaderboardEntry>> {
+// ========================================
+// COMBINED RANKING STATE (통합 리더보드 상태)
+// ========================================
+
+/// 통합 리더보드 상태 (상위 랭킹 + 내 순위)
+/// API 1회 호출로 두 데이터 모두 조회
+class CombinedRankingAsyncNotifier
+    extends AsyncNotifier<(List<LeaderboardEntry>, LeaderboardEntry?)> {
   late final LeaderboardRepository _repository;
 
   @override
-  Future<List<LeaderboardEntry>> build() async {
+  Future<(List<LeaderboardEntry>, LeaderboardEntry?)> build() async {
     _repository = getIt<LeaderboardRepository>();
+    // Watch trigger to auto-refresh when needed
+    ref.watch(activityRefreshTriggerProvider);
     return await _fetchRankings();
   }
 
-  Future<List<LeaderboardEntry>> _fetchRankings() async {
-    return await _repository.getRanking();
-  }
-
-  Future<void> refresh() async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      return await _repository.getRanking();
-    });
-  }
-}
-
-final rankingProvider =
-    AsyncNotifierProvider<RankingAsyncNotifier, List<LeaderboardEntry>>(
-      RankingAsyncNotifier.new,
-    );
-
-// ========================================
-// MY RANKING STATE
-// ========================================
-
-class MyRankingAsyncNotifier extends AsyncNotifier<LeaderboardEntry?> {
-  late final LeaderboardRepository _repository;
-
-  @override
-  Future<LeaderboardEntry?> build() async {
-    _repository = getIt<LeaderboardRepository>();
-    return await _fetchMyRanking();
-  }
-
-  Future<LeaderboardEntry?> _fetchMyRanking() async {
+  Future<(List<LeaderboardEntry>, LeaderboardEntry?)> _fetchRankings() async {
     final userId = ref.read(authProvider).currentUser?.id;
-    if (userId == null) {
-      return null;
-    }
-    return await _repository.getMyRanking(userId);
+    return await _repository.getRankingWithMyRank(userId);
   }
 
   Future<void> refresh() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final userId = ref.read(authProvider).currentUser?.id;
-      if (userId == null) {
-        return null;
-      }
-      return await _repository.getMyRanking(userId);
+      return await _repository.getRankingWithMyRank(userId);
     });
   }
 }
 
-final myRankingProvider =
-    AsyncNotifierProvider<MyRankingAsyncNotifier, LeaderboardEntry?>(
-      MyRankingAsyncNotifier.new,
-    );
+final combinedRankingProvider =
+    AsyncNotifierProvider<
+      CombinedRankingAsyncNotifier,
+      (List<LeaderboardEntry>, LeaderboardEntry?)
+    >(CombinedRankingAsyncNotifier.new);
+
+// ========================================
+// RANKING STATE (기존 인터페이스 유지)
+// ========================================
+
+/// 상위 리더보드 Provider (통합 Provider에서 데이터 추출)
+final rankingProvider = Provider<AsyncValue<List<LeaderboardEntry>>>((ref) {
+  final combined = ref.watch(combinedRankingProvider);
+  return combined.when(
+    data: (data) => AsyncValue.data(data.$1), // leaderboard
+    loading: () => const AsyncValue.loading(),
+    error: (error, stack) => AsyncValue.error(error, stack),
+  );
+});
+
+// ========================================
+// MY RANKING STATE (기존 인터페이스 유지)
+// ========================================
+
+/// 내 순위 Provider (통합 Provider에서 데이터 추출)
+final myRankingProvider = Provider<AsyncValue<LeaderboardEntry?>>((ref) {
+  final combined = ref.watch(combinedRankingProvider);
+  return combined.when(
+    data: (data) => AsyncValue.data(data.$2), // myRank
+    loading: () => const AsyncValue.loading(),
+    error: (error, stack) => AsyncValue.error(error, stack),
+  );
+});
 
 // ========================================
 // CAMPAIGN MISSION STATE
@@ -84,6 +86,8 @@ class CampaignMissionAsyncNotifier
   @override
   Future<Map<int, List<MissionWithTemplate>>> build() async {
     _repository = getIt<MissionRepository>();
+    // Watch trigger to auto-refresh when needed
+    ref.watch(activityRefreshTriggerProvider);
     return await _fetchCampaignMissions();
   }
 
@@ -118,10 +122,11 @@ class CampaignMissionAsyncNotifier
   }
 }
 
-final campaignMissionProvider = AsyncNotifierProvider<
-    CampaignMissionAsyncNotifier, Map<int, List<MissionWithTemplate>>>(
-  CampaignMissionAsyncNotifier.new,
-);
+final campaignMissionProvider =
+    AsyncNotifierProvider<
+      CampaignMissionAsyncNotifier,
+      Map<int, List<MissionWithTemplate>>
+    >(CampaignMissionAsyncNotifier.new);
 
 /// Derived provider for completed mission count
 final completedMissionCountProvider = Provider<int>((ref) {
@@ -173,3 +178,23 @@ final leaderboardExpandedProvider =
     NotifierProvider<LeaderboardExpandedNotifier, bool>(
       LeaderboardExpandedNotifier.new,
     );
+
+// ========================================
+// ACTIVITY REFRESH TRIGGER
+// ========================================
+
+/// Notifier for triggering activity page data refresh
+/// 캠페인 참가 등의 이벤트 후 활동하기 페이지 데이터를 리프레쉬하기 위한 트리거
+class ActivityRefreshTrigger extends Notifier<bool> {
+  @override
+  bool build() {
+    return false; // Initial value
+  }
+
+  void trigger() {
+    state = !state; // Toggle to trigger rebuild of dependent providers
+  }
+}
+
+final activityRefreshTriggerProvider =
+    NotifierProvider<ActivityRefreshTrigger, bool>(ActivityRefreshTrigger.new);

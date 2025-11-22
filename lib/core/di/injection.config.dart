@@ -57,11 +57,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i562.LeaderboardRemoteDataSource>(
       () => _i562.LeaderboardRemoteDataSource(gh<_i361.Dio>()),
     );
+    gh.factory<_i800.MissionApi>(() => _i800.MissionApi(gh<_i361.Dio>()));
+    gh.factory<_i889.ReportApi>(() => _i889.ReportApi(gh<_i361.Dio>()));
     gh.factory<_i64.UserRemoteDataSource>(
       () => _i64.UserRemoteDataSource(gh<_i361.Dio>()),
     );
-    gh.factory<_i800.MissionApi>(() => _i800.MissionApi(gh<_i361.Dio>()));
-    gh.factory<_i889.ReportApi>(() => _i889.ReportApi(gh<_i361.Dio>()));
     gh.factory<_i589.ReportRepository>(
       () => _i76.ReportRepositoryImpl(gh<_i889.ReportApi>()),
     );
