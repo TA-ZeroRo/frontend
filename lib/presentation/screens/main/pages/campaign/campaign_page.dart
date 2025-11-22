@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../../../core/components/custom_app_bar.dart';
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/theme/app_text_style.dart';
@@ -35,9 +36,9 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
 
   /// 스크롤 이벤트 리스너
   void _onScroll() {
-    // 스크롤이 끝에 가까워지면 다음 페이지 로드 (90% 지점)
+    // 페이지 끝에 도달하면 다음 페이지 로드 (인스타그램 스타일)
     if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent * 0.9) {
+        _scrollController.position.maxScrollExtent) {
       ref.read(campaignListProvider.notifier).loadMore();
     }
   }
@@ -171,21 +172,34 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                           ),
                         );
                       },
-                      onParticipate: () {
-                        ref
-                            .read(campaignListProvider.notifier)
-                            .toggleParticipation(campaign.id);
-                        ToastHelper.showSuccess(
-                          campaign.isParticipating
-                              ? '캠페인 참가가 취소되었어요'
-                              : '캠페인에 참가하셨어요!',
-                        );
+                      onParticipate: () async {
+                        try {
+                          await ref
+                              .read(campaignListProvider.notifier)
+                              .toggleParticipation(campaign.id);
+                          ToastHelper.showSuccess(
+                            campaign.isParticipating
+                                ? '캠페인 참가가 취소되었어요'
+                                : '캠페인에 참가하셨어요!',
+                          );
+                        } catch (e) {
+                          ToastHelper.showError(
+                            e.toString().replaceFirst('Exception: ', ''),
+                          );
+                        }
                       },
                       onCruiting: () {
                         ToastHelper.showInfo('크루팅 기능 준비중이에요');
                       },
-                      onShare: () {
-                        ToastHelper.showInfo('공유 기능 준비중이에요');
+                      onShare: () async {
+                        try {
+                          await Share.share(
+                            '${campaign.title}\n${campaign.url}',
+                            subject: campaign.title,
+                          );
+                        } catch (e) {
+                          ToastHelper.showError('공유하기에 실패했어요');
+                        }
                       },
                     ),
                   );

@@ -8,17 +8,19 @@ part 'campaign_participation_response_dto.g.dart';
 class CampaignParticipationResponseDto {
   final bool success;
   @JsonKey(name: 'campaign_id')
-  final int campaignId;
+  final int? campaignId;
   @JsonKey(name: 'missions_created')
-  final int missionsCreated;
+  final int? missionsCreated;
   @JsonKey(name: 'mission_logs')
-  final List<MissionLogDto> missionLogs;
+  final List<MissionLogDto>? missionLogs;
+  final String? error;
 
   const CampaignParticipationResponseDto({
     required this.success,
-    required this.campaignId,
-    required this.missionsCreated,
-    required this.missionLogs,
+    this.campaignId,
+    this.missionsCreated,
+    this.missionLogs,
+    this.error,
   });
 
   factory CampaignParticipationResponseDto.fromJson(

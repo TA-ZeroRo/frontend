@@ -55,8 +55,8 @@ class _PodiumListState extends State<PodiumList>
     final heightRatio = widget.height / 220.0;
     final profileSize = (50 * heightRatio).clamp(30.0, 50.0);
 
-    // 3등, 1등, 2등 순서 (3명이면)
-    final List<int> order = [2, 0, 1];
+    // 2등, 1등, 3등 순서 (3명이면)
+    final List<int> order = [1, 0, 2];
 
     return AnimatedBuilder(
       animation: _animationController,
@@ -138,43 +138,45 @@ class _PodiumListState extends State<PodiumList>
                 borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
               ),
               alignment: Alignment.center,
-              child: Opacity(
-                opacity: curvedValue > 0.3 ? 1.0 : 0.0,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: padding),
-                      child: Text(
-                        user.username ?? '알 수 없음',
-                        style: TextStyle(
-                          fontSize: fontSize,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+              child: ClipRect(
+                child: Opacity(
+                  opacity: curvedValue > 0.5 ? 1.0 : 0.0,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: padding),
+                        child: Text(
+                          user.username ?? '알 수 없음',
+                          style: TextStyle(
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${user.totalPoints}',
-                      style: TextStyle(
-                        fontSize: fontSize * 0.9,
-                        color: Colors.black54,
-                        fontWeight: FontWeight.w500,
+                      const SizedBox(height: 2),
+                      Text(
+                        '${user.totalPoints}',
+                        style: TextStyle(
+                          fontSize: fontSize * 0.9,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
             // Profile Image (애니메이션 완료 후 페이드인)
             if (curvedValue > 0.85)
               Positioned(
-                bottom: currentBarHeight - (profileSize / 2),
+                bottom: currentBarHeight - (profileSize / 2) + 5,
                 child: Opacity(
                   opacity: ((curvedValue - 0.85) / 0.15).clamp(0.0, 1.0),
                   child: _buildProfileImage(user, profileSize),
@@ -195,7 +197,7 @@ class _PodiumListState extends State<PodiumList>
         border: Border.all(color: Colors.white, width: 2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),

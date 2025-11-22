@@ -6,5 +6,6 @@ abstract class CampaignRepository {
     String? category,
     String? status,
     int offset = 0,
+    int limit = 20,
   });
 }

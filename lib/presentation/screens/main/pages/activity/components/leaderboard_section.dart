@@ -248,85 +248,20 @@ class LeaderboardSection extends ConsumerWidget {
   Widget _buildExpandedContent(AsyncValue rankingAsync) {
     return Container(
       constraints: const BoxConstraints(minHeight: 260, maxHeight: 440),
-      child: DefaultTabController(
-        length: 2,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildTabBar(),
-            const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-            Flexible(child: _buildTabBarView(rankingAsync)),
-          ],
+      child: rankingAsync.when(
+        data: (rankings) => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: RankingView(rankings: rankings),
         ),
-      ),
-    );
-  }
-
-  Widget _buildTabBar() {
-    return Container(
-      decoration: BoxDecoration(color: Colors.grey[100]),
-      child: TabBar(
-        indicator: BoxDecoration(color: Colors.blue[50]),
-        indicatorSize: TabBarIndicatorSize.tab,
-        dividerColor: Colors.transparent,
-        labelColor: Colors.blue[700],
-        unselectedLabelColor: Colors.black,
-        labelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
-        unselectedLabelStyle: const TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: 16,
-        ),
-        tabs: const [
-          Tab(text: '전체'),
-          Tab(text: '지역'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabBarView(AsyncValue rankingAsync) {
-    return TabBarView(
-      children: [
-        // 전체 랭킹 탭
-        rankingAsync.when(
-          data: (rankings) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: RankingView(rankings: rankings),
-          ),
-          loading: () => const PlaygroundShimmer(),
-          error: (error, stack) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
-                const SizedBox(height: 16),
-                Text(
-                  '랭킹을 불러올 수 없습니다',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  error.toString(),
-                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
-        // 지역 랭킹 탭
-        Center(
+        loading: () => const PlaygroundShimmer(),
+        error: (error, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.construction, size: 64, color: Colors.grey[400]),
+              Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
               const SizedBox(height: 16),
               Text(
-                '국외 랭킹 구현 예정',
+                '랭킹을 불러올 수 없습니다',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
@@ -335,13 +270,14 @@ class LeaderboardSection extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '곧 업데이트 예정입니다',
+                error.toString(),
                 style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

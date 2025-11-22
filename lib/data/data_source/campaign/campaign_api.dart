@@ -17,8 +17,12 @@ class CampaignApi {
     String? category,
     String? status,
     int offset = 0,
+    int limit = 20,
   }) async {
-    final queryParameters = <String, dynamic>{'offset': offset};
+    final queryParameters = <String, dynamic>{
+      'offset': offset,
+      'limit': limit,
+    };
 
     if (region != null) {
       queryParameters['region'] = region;

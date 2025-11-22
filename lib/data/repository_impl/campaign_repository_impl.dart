@@ -17,6 +17,7 @@ class CampaignRepositoryImpl implements CampaignRepository {
     String? category,
     String? status,
     int offset = 0,
+    int limit = 20,
   }) async {
     try {
       final result = await _campaignApi.getCampaigns(
@@ -24,11 +25,12 @@ class CampaignRepositoryImpl implements CampaignRepository {
         category: category,
         status: status,
         offset: offset,
+        limit: limit,
       );
       return result.map((dto) => dto.toModel()).toList();
     } catch (e) {
       CustomLogger.logger.e(
-        'getCampaigns - 캠페인 목록 조회 실패 (region: $region, category: $category, status: $status, offset: $offset)',
+        'getCampaigns - 캠페인 목록 조회 실패 (region: $region, category: $category, status: $status, offset: $offset, limit: $limit)',
         error: e,
       );
       rethrow;

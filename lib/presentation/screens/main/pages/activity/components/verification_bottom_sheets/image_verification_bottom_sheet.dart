@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:frontend/core/utils/toast_helper.dart';
 import 'package:frontend/domain/model/mission/mission_with_template.dart';
 
@@ -7,10 +10,7 @@ import '../../../../../../../core/theme/app_color.dart';
 class ImageVerificationBottomSheet extends StatefulWidget {
   final MissionWithTemplate mission;
 
-  const ImageVerificationBottomSheet({
-    super.key,
-    required this.mission,
-  });
+  const ImageVerificationBottomSheet({super.key, required this.mission});
 
   @override
   State<ImageVerificationBottomSheet> createState() =>
@@ -19,13 +19,14 @@ class ImageVerificationBottomSheet extends StatefulWidget {
 
 class _ImageVerificationBottomSheetState
     extends State<ImageVerificationBottomSheet> {
-  String? _selectedImagePath;
+  File? _selectedImage;
+  final ImagePicker _imagePicker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: AppColors.cardBackground,
+        color: Colors.white,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
@@ -34,132 +35,156 @@ class _ImageVerificationBottomSheetState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildHeader(),
-          _buildContent(),
-          _buildSubmitButton(),
-          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+          const SizedBox(height: 12),
+          // Drag Handle
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(),
+                const SizedBox(height: 24),
+                _buildImageSelectionArea(),
+                if (_selectedImage != null) ...[
+                  const SizedBox(height: 24),
+                  _buildImagePreview(),
+                ],
+                const SizedBox(height: 32),
+                _buildSubmitButton(),
+                SizedBox(height: MediaQuery.of(context).padding.bottom + 24),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const SizedBox(width: 40),
-          const Text(
-            '사진 인증',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.camera_alt_outlined,
+                color: AppColors.primary,
+                size: 24,
+              ),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.close, color: Colors.white),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContent() {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            widget.mission.missionTemplate.title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+            const SizedBox(width: 12),
+            const Text(
+              '사진 인증',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            widget.mission.missionTemplate.description,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 24),
-          _buildImageSelectionButtons(),
-          if (_selectedImagePath != null) ...[
-            const SizedBox(height: 24),
-            _buildImagePreview(),
           ],
-        ],
-      ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          widget.mission.missionTemplate.title,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+            height: 1.3,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          widget.mission.missionTemplate.description,
+          style: TextStyle(fontSize: 15, color: Colors.grey[600], height: 1.5),
+        ),
+      ],
     );
   }
 
-  Widget _buildImageSelectionButtons() {
+  Widget _buildImageSelectionArea() {
     return Row(
       children: [
         Expanded(
-          child: _buildImagePickerButton(
-            icon: Icons.camera_alt,
-            label: '카메라',
+          child: _buildSelectionCard(
+            icon: Icons.camera_alt_rounded,
+            label: '카메라 촬영',
             onTap: () => _handleImageSelection('camera'),
+            color: const Color(0xFFE3F2FD),
+            iconColor: const Color(0xFF2196F3),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 16),
         Expanded(
-          child: _buildImagePickerButton(
-            icon: Icons.photo_library,
-            label: '갤러리',
+          child: _buildSelectionCard(
+            icon: Icons.photo_library_rounded,
+            label: '앨범에서 선택',
             onTap: () => _handleImageSelection('gallery'),
+            color: const Color(0xFFE3F2FD),
+            iconColor: const Color(0xFF2196F3),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildImagePickerButton({
+  Widget _buildSelectionCard({
     required IconData icon,
     required String label,
     required VoidCallback onTap,
+    required Color color,
+    required Color iconColor,
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        height: 120,
         decoration: BoxDecoration(
-          color: AppColors.cardBackground.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.3),
-            width: 1,
-          ),
+          color: color,
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              color: AppColors.primary,
-              size: 32,
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: iconColor.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(icon, color: iconColor, size: 28),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               label,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
                 fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: iconColor.withValues(alpha: 0.8),
               ),
             ),
           ],
@@ -171,80 +196,128 @@ class _ImageVerificationBottomSheetState
   Widget _buildImagePreview() {
     return Container(
       width: double.infinity,
-      height: 200,
+      height: 240,
       decoration: BoxDecoration(
-        color: AppColors.cardBackground.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.3),
-          width: 1,
-        ),
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[300]!),
       ),
-      child: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.image,
-              color: AppColors.primary,
-              size: 48,
-            ),
-            SizedBox(height: 8),
-            Text(
-              '이미지 미리보기',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: _selectedImage != null
+                ? Image.file(
+                    _selectedImage!,
+                    width: double.infinity,
+                    height: 240,
+                    fit: BoxFit.cover,
+                  )
+                : const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.image, size: 48, color: Colors.grey),
+                        SizedBox(height: 8),
+                        Text('선택된 이미지', style: TextStyle(color: Colors.grey)),
+                      ],
+                    ),
+                  ),
+          ),
+          Positioned(
+            top: 8,
+            right: 8,
+            child: IconButton(
+              onPressed: () {
+                setState(() {
+                  _selectedImage = null;
+                });
+              },
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.black.withValues(alpha: 0.5),
+                foregroundColor: Colors.white,
               ),
+              icon: const Icon(Icons.close, size: 20),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildSubmitButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: _handleSubmit,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+    final bool isEnabled = _selectedImage != null;
+
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: ElevatedButton(
+        onPressed: isEnabled ? _handleSubmit : null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          child: const Text(
-            '제출하기',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          disabledBackgroundColor: Colors.grey[200],
+          disabledForegroundColor: Colors.grey[400],
+        ),
+        child: const Text(
+          '인증하기',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
     );
   }
 
   void _handleImageSelection(String source) {
-    // Mock 동작: 이미지 선택 기능은 구현하지 않음
-    ToastHelper.showInfo('이미지 선택 기능은 곧 구현됩니다');
-    setState(() {
-      _selectedImagePath = 'mock_image_path';
-    });
+    if (source == 'camera') {
+      _pickImageFromCamera();
+    } else if (source == 'gallery') {
+      _pickImageFromGallery();
+    }
+  }
+
+  Future<void> _pickImageFromCamera() async {
+    try {
+      final XFile? pickedFile = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80,
+      );
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ToastHelper.showError('카메라 오류: $e');
+      }
+    }
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    try {
+      final XFile? pickedFile = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ToastHelper.showError('갤러리 오류: $e');
+      }
+    }
   }
 
   void _handleSubmit() {
-    if (_selectedImagePath == null) {
-      ToastHelper.showWarning('이미지를 선택해주세요');
-      return;
-    }
+    if (_selectedImage == null) return;
 
-    // Mock 동작: 실제 제출은 구현하지 않음
     ToastHelper.showSuccess('이미지가 제출되었습니다');
     Navigator.of(context).pop();
   }

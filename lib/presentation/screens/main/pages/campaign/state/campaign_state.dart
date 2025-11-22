@@ -86,6 +86,9 @@ final campaignFilterProvider =
 
 /// 캠페인 목록 Notifier
 class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
+  /// 페이지당 로드할 캠페인 개수
+  static const int PAGE_SIZE = 20;
+
   late final CampaignRepository _repository;
   late final MissionRepository _missionRepository;
 
@@ -126,6 +129,7 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
       category: filter.category != '전체' ? filter.category : null,
       status: 'ACTIVE', // 진행 중인 캠페인만 조회
       offset: _offset,
+      limit: PAGE_SIZE,
     );
 
     if (resetOffset) {
@@ -134,8 +138,8 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
       _allCampaigns.addAll(campaigns);
     }
 
-    // 20개 미만이면 더 이상 로드할 데이터가 없음
-    if (campaigns.length < 20) {
+    // PAGE_SIZE 미만이면 더 이상 로드할 데이터가 없음
+    if (campaigns.length < PAGE_SIZE) {
       _hasMore = false;
     }
 
@@ -212,7 +216,7 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
     if (state.isLoading || !_hasMore || _isLoadingMore) return;
 
     _isLoadingMore = true;
-    _offset += 20;
+    _offset += PAGE_SIZE;
 
     try {
       state = await AsyncValue.guard(() async {
@@ -254,14 +258,10 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
     try {
       // 참가만 API 호출 (참가 취소는 추후 구현)
       if (!wasParticipating) {
-        final success = await _missionRepository.participateInCampaign(
+        await _missionRepository.participateInCampaign(
           campaignId: id,
           userId: userId,
         );
-
-        if (!success) {
-          throw Exception('캠페인 참가에 실패했습니다.');
-        }
       }
       // API 성공 시 상태 유지
     } catch (e) {
