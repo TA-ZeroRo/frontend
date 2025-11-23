@@ -7,10 +7,7 @@ import '../../../../../../../core/theme/app_color.dart';
 class QuizVerificationBottomSheet extends StatefulWidget {
   final MissionWithTemplate mission;
 
-  const QuizVerificationBottomSheet({
-    super.key,
-    required this.mission,
-  });
+  const QuizVerificationBottomSheet({super.key, required this.mission});
 
   @override
   State<QuizVerificationBottomSheet> createState() =>
@@ -25,7 +22,7 @@ class _QuizVerificationBottomSheetState
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: AppColors.cardBackground,
+        color: Colors.white,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
@@ -34,72 +31,82 @@ class _QuizVerificationBottomSheetState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildHeader(),
-          _buildContent(),
-          _buildSubmitButton(),
-          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+          const SizedBox(height: 12),
+          // Drag Handle
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(),
+                const SizedBox(height: 32),
+                _buildInfoCard(),
+                const SizedBox(height: 32),
+                _buildSubmitButton(),
+                SizedBox(height: MediaQuery.of(context).padding.bottom + 24),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.quiz_rounded,
+                color: AppColors.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              '퀴즈 인증',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+          ],
         ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const SizedBox(width: 40),
-          const Text(
-            '퀴즈 인증',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+        const SizedBox(height: 16),
+        Text(
+          widget.mission.missionTemplate.title,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+            height: 1.3,
           ),
-          IconButton(
-            icon: const Icon(Icons.close, color: Colors.white),
-            onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContent() {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            widget.mission.missionTemplate.title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            widget.mission.missionTemplate.description,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 32),
-          _buildInfoCard(),
-        ],
-      ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          widget.mission.missionTemplate.description,
+          style: TextStyle(fontSize: 15, color: Colors.grey[600], height: 1.5),
+        ),
+      ],
     );
   }
 
@@ -108,32 +115,29 @@ class _QuizVerificationBottomSheetState
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.3),
-          width: 1,
-        ),
+        color: const Color(0xFFFFF8E1), // Light Amber/Orange background
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFFFE082), width: 1),
       ),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.2),
+            decoration: const BoxDecoration(
+              color: Colors.white,
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              Icons.smart_toy,
-              color: AppColors.primary,
-              size: 48,
+              Icons.smart_toy_rounded,
+              color: Color(0xFFFFB300),
+              size: 40,
             ),
           ),
           const SizedBox(height: 16),
           const Text(
-            '이 미션은 퀴즈를 통해 수행됩니다',
+            '퀴즈 미션 진행 안내',
             style: TextStyle(
-              color: Colors.white,
+              color: Color(0xFFF57F17),
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -141,10 +145,11 @@ class _QuizVerificationBottomSheetState
           ),
           const SizedBox(height: 8),
           Text(
-            '버튼을 누르면 퀴즈를 통해\n미션이 완료됩니다',
+            '아래 버튼을 누르면 퀴즈가 시작됩니다.\n정답을 맞추면 미션이 완료됩니다.',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
+              color: Colors.grey[700],
               fontSize: 14,
+              height: 1.5,
             ),
             textAlign: TextAlign.center,
           ),
@@ -154,40 +159,34 @@ class _QuizVerificationBottomSheetState
   }
 
   Widget _buildSubmitButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: _isSubmitting ? null : _handleSubmit,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            disabledBackgroundColor:
-                AppColors.cardBackground.withValues(alpha: 0.5),
-            disabledForegroundColor: Colors.white.withValues(alpha: 0.5),
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: ElevatedButton(
+        onPressed: _isSubmitting ? null : _handleSubmit,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          child: _isSubmitting
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-              : const Text(
-                  '자동 제출 시작',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+          disabledBackgroundColor: Colors.grey[200],
+          disabledForegroundColor: Colors.grey[400],
         ),
+        child: _isSubmitting
+            ? const SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : const Text(
+                '퀴즈 시작하기',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
       ),
     );
   }
@@ -197,7 +196,7 @@ class _QuizVerificationBottomSheetState
       _isSubmitting = true;
     });
 
-    // Mock 동작: 1초 딜레이 후 완료 메시지 표시
+    // Mock 동작
     await Future.delayed(const Duration(seconds: 1));
 
     if (!mounted) return;
@@ -206,7 +205,6 @@ class _QuizVerificationBottomSheetState
       _isSubmitting = false;
     });
 
-    // Mock 동작: 실제 RPA 제출은 구현하지 않음
     ToastHelper.showSuccess('자동 제출이 완료되었습니다');
     Navigator.of(context).pop();
   }

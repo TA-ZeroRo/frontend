@@ -16,7 +16,7 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
   Future<List<LeaderboardEntry>> getRanking() async {
     try {
       final result = await _remoteDataSource.getRanking();
-      return result.map((dto) => dto.toModel()).toList();
+      return result.leaderboard.map((dto) => dto.toModel()).toList();
     } catch (e) {
       CustomLogger.logger.e('getRanking - 리더보드 조회 실패', error: e);
       rethrow;
@@ -30,6 +30,24 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
       return result.toModel();
     } catch (e) {
       CustomLogger.logger.e('getMyRanking - 내 순위 조회 실패', error: e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<(List<LeaderboardEntry>, LeaderboardEntry?)> getRankingWithMyRank(
+    String? userId,
+  ) async {
+    try {
+      final result = await _remoteDataSource.getRanking(userId: userId);
+
+      final leaderboard =
+          result.leaderboard.map((dto) => dto.toModel()).toList();
+      final myRank = result.myRank?.toModel();
+
+      return (leaderboard, myRank);
+    } catch (e) {
+      CustomLogger.logger.e('getRankingWithMyRank - 리더보드 조회 실패', error: e);
       rethrow;
     }
   }

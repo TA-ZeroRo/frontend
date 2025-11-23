@@ -21,22 +21,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   String? _expandedReportId;
   final Map<String, GlobalKey> _reportKeys = {};
 
-  @override
-  void initState() {
-    super.initState();
-    // 가장 최근 보고서 자동 펼침 (데이터 로드 완료 시)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.listen(weeklyReportsProvider, (previous, next) {
-        next.whenData((reports) {
-          if (reports.isNotEmpty && _expandedReportId == null && mounted) {
-            setState(() {
-              _expandedReportId = reports.first.period.startDate;
-            });
-          }
-        });
-      });
-    });
-  }
 
   void _scrollToReport(String reportId) {
     Future.delayed(const Duration(milliseconds: 250), () {
@@ -72,6 +56,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget build(BuildContext context) {
     final isChartExpanded = ref.watch(isChartExpandedProvider);
     final reportsAsync = ref.watch(weeklyReportsProvider);
+
+    // 가장 최근 보고서 자동 펼침 (데이터 로드 완료 시)
+    ref.listen(weeklyReportsProvider, (previous, next) {
+      next.whenData((reports) {
+        if (reports.isNotEmpty && _expandedReportId == null && mounted) {
+          setState(() {
+            _expandedReportId = reports.first.period.startDate;
+          });
+        }
+      });
+    });
 
     return Scaffold(
       body: Stack(

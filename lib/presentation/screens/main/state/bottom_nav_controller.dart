@@ -5,6 +5,7 @@ enum BottomNav {
   home('홈', Icons.eco),
   activity('활동', Icons.sports_esports),
   campaign('캠페인', Icons.campaign),
+  recruiting('리크루팅', Icons.people_alt),
   profile('프로필', Icons.person);
 
   final String title;

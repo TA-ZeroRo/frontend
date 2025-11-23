@@ -10,11 +10,12 @@ CampaignParticipationResponseDto _$CampaignParticipationResponseDtoFromJson(
   Map<String, dynamic> json,
 ) => CampaignParticipationResponseDto(
   success: json['success'] as bool,
-  campaignId: (json['campaign_id'] as num).toInt(),
-  missionsCreated: (json['missions_created'] as num).toInt(),
-  missionLogs: (json['mission_logs'] as List<dynamic>)
-      .map((e) => MissionLogDto.fromJson(e as Map<String, dynamic>))
+  campaignId: (json['campaign_id'] as num?)?.toInt(),
+  missionsCreated: (json['missions_created'] as num?)?.toInt(),
+  missionLogs: (json['mission_logs'] as List<dynamic>?)
+      ?.map((e) => MissionLogDto.fromJson(e as Map<String, dynamic>))
       .toList(),
+  error: json['error'] as String?,
 );
 
 Map<String, dynamic> _$CampaignParticipationResponseDtoToJson(
@@ -24,4 +25,5 @@ Map<String, dynamic> _$CampaignParticipationResponseDtoToJson(
   'campaign_id': instance.campaignId,
   'missions_created': instance.missionsCreated,
   'mission_logs': instance.missionLogs,
+  'error': instance.error,
 };

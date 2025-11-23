@@ -41,6 +41,16 @@ class MissionRepositoryImpl implements MissionRepository {
         campaignId: campaignId,
         userId: userId,
       );
+
+      if (!result.success) {
+        final errorMessage = result.error ?? '캠페인 참가에 실패했습니다';
+        CustomLogger.logger.w(
+          'participateInCampaign - 캠페인 참가 실패 응답 '
+          '(campaignId: $campaignId, userId: $userId, error: $errorMessage)',
+        );
+        throw Exception(errorMessage);
+      }
+
       CustomLogger.logger.i(
         'participateInCampaign - 캠페인 참가 성공 '
         '(campaignId: $campaignId, userId: $userId, '

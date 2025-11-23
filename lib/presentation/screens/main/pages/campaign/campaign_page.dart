@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../../../core/components/custom_app_bar.dart';
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/theme/app_text_style.dart';
@@ -35,9 +36,9 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
 
   /// 스크롤 이벤트 리스너
   void _onScroll() {
-    // 스크롤이 끝에 가까워지면 다음 페이지 로드 (90% 지점)
+    // 페이지 끝에 도달하면 다음 페이지 로드 (인스타그램 스타일)
     if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent * 0.9) {
+        _scrollController.position.maxScrollExtent) {
       ref.read(campaignListProvider.notifier).loadMore();
     }
   }
@@ -46,12 +47,11 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
   Widget build(BuildContext context) {
     // 필터 상태 감지
     ref.listen(campaignFilterProvider, (previous, next) {
-      // 필터가 변경되면 캠페인 목록 새로고침
       ref.read(campaignListProvider.notifier).refresh();
     });
 
     final campaignListAsync = ref.watch(campaignListProvider);
-    final filter = ref.watch(campaignFilterProvider);
+    final campaignFilter = ref.watch(campaignFilterProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -64,7 +64,7 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
           controller: _scrollController,
           slivers: [
             _buildAppBar(),
-            _buildFilters(context, filter),
+            _buildFilters(context, campaignFilter),
             _buildCampaignList(context, campaignListAsync),
           ],
         ),
@@ -74,13 +74,10 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
 
   /// AppBar
   Widget _buildAppBar() =>
-      SliverToBoxAdapter(child: const CustomAppBar(title: '캠페인 둘러보기'));
+      const SliverToBoxAdapter(child: CustomAppBar(title: '캠페인 둘러보기'));
 
-  /// 필터 섹션
-  Widget _buildFilters(
-    BuildContext context,
-    CampaignFilter filter,
-  ) {
+  /// 캠페인 필터 섹션
+  Widget _buildFilters(BuildContext context, CampaignFilter filter) {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -143,7 +140,7 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
     return campaignListAsync.when(
       data: (campaigns) {
         if (campaigns.isEmpty) {
-          return _buildEmptyState();
+          return _buildEmptyState('해당 조건의 캠페인이 없어요');
         }
 
         final hasMore = ref.read(campaignListProvider.notifier).hasMore;
@@ -171,21 +168,34 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                           ),
                         );
                       },
-                      onParticipate: () {
-                        ref
-                            .read(campaignListProvider.notifier)
-                            .toggleParticipation(campaign.id);
-                        ToastHelper.showSuccess(
-                          campaign.isParticipating
-                              ? '캠페인 참가가 취소되었어요'
-                              : '캠페인에 참가하셨어요!',
-                        );
+                      onParticipate: () async {
+                        try {
+                          await ref
+                              .read(campaignListProvider.notifier)
+                              .toggleParticipation(campaign.id);
+                          ToastHelper.showSuccess(
+                            campaign.isParticipating
+                                ? '캠페인 참가가 취소되었어요'
+                                : '캠페인에 참가하셨어요!',
+                          );
+                        } catch (e) {
+                          ToastHelper.showError(
+                            e.toString().replaceFirst('Exception: ', ''),
+                          );
+                        }
                       },
                       onCruiting: () {
                         ToastHelper.showInfo('크루팅 기능 준비중이에요');
                       },
-                      onShare: () {
-                        ToastHelper.showInfo('공유 기능 준비중이에요');
+                      onShare: () async {
+                        try {
+                          await Share.share(
+                            '${campaign.title}\n${campaign.url}',
+                            subject: campaign.title,
+                          );
+                        } catch (e) {
+                          ToastHelper.showError('공유하기에 실패했어요');
+                        }
                       },
                     ),
                   );
@@ -194,9 +204,7 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                 else if (hasMore) {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: 24),
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                    child: Center(child: CircularProgressIndicator()),
                   );
                 }
                 // 마지막 여백
@@ -215,7 +223,7 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
   }
 
   /// 빈 상태 UI
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(String message) {
     return SliverFillRemaining(
       hasScrollBody: false,
       child: Center(
@@ -229,7 +237,7 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              '해당 조건의 캠페인이 없어요',
+              message,
               style: AppTextStyle.bodyLarge.copyWith(
                 color: AppColors.textTertiary,
               ),
@@ -266,7 +274,7 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
             Icon(Icons.error_outline, size: 80, color: AppColors.textTertiary),
             const SizedBox(height: 16),
             Text(
-              '캠페인을 불러올 수 없어요',
+              '데이터를 불러올 수 없어요',
               style: AppTextStyle.bodyLarge.copyWith(
                 color: AppColors.textTertiary,
               ),

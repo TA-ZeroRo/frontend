@@ -6,6 +6,7 @@ import 'pages/campaign/campaign_page.dart';
 import 'pages/home/home_page.dart';
 import 'pages/activity/activity_page.dart';
 import 'pages/profile/profile_page.dart';
+import 'pages/recruiting/recruiting_page.dart';
 import 'state/bottom_nav_controller.dart';
 import 'pages/home/state/chat_controller.dart';
 import 'pages/home/components/full_chat_overlay.dart';
@@ -22,6 +23,7 @@ class MainScreen extends ConsumerWidget {
       BottomNav.home => const HomePage(),
       BottomNav.activity => const ActivityPage(),
       BottomNav.campaign => const CampaignPage(),
+      BottomNav.recruiting => const RecruitingPage(),
       BottomNav.profile => const ProfilePage(),
     };
 
@@ -80,8 +82,6 @@ class _BottomNavigationBar extends ConsumerWidget {
           currentIndex: nav.index,
           onTap: (index) =>
               ref.read(bottomNavProvider.notifier).setIndex(index),
-          showUnselectedLabels: false,
-          showSelectedLabels: false,
           selectedItemColor: AppColors.primary,
           type: BottomNavigationBarType.fixed,
           items: List.generate(
