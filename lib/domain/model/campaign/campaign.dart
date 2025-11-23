@@ -19,6 +19,13 @@ abstract class Campaign with _$Campaign {
     required String status,
     String? submissionType,
     required DateTime updatedAt,
+    // RPA WebView 관련 필드
+    int? rpaSiteConfigId,
+    String? rpaFormUrl,
+    Map<String, dynamic>? rpaFormConfig,
+    Map<String, dynamic>? rpaFieldMapping,
+    Map<String, dynamic>? rpaFormSelectorStrategies,
+    Map<String, dynamic>? webviewConfig,
   }) = _Campaign;
 
   factory Campaign.fromJson(Map<String, dynamic> json) =>

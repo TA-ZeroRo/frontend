@@ -5,6 +5,7 @@ import '../../../../../../core/utils/toast_helper.dart';
 import '../../../../../../domain/model/mission/mission_with_template.dart';
 import '../../../../../../domain/model/mission/verification_type.dart';
 import '../state/activity_state.dart';
+import '../../campaign/campaign_mission_webview_screen.dart';
 import 'shimmer_widgets.dart';
 import 'verification_bottom_sheets/image_verification_bottom_sheet.dart';
 import 'verification_bottom_sheets/quiz_verification_bottom_sheet.dart';
@@ -249,7 +250,7 @@ class CampaignMissionSection extends ConsumerWidget {
                   ),
                 ),
               ),
-              _buildCompleteButton(context, completedCount, totalCount),
+              _buildCompleteButton(context, completedCount, totalCount, missions),
             ],
           ),
         ),
@@ -339,18 +340,47 @@ class CampaignMissionSection extends ConsumerWidget {
     }
   }
 
+  /// WebView 화면 열기
+  void _openMissionWebView(
+    BuildContext context,
+    List<MissionWithTemplate> missions,
+  ) {
+    if (missions.isEmpty) {
+      ToastHelper.showError('미션 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    final mission = missions.first;
+
+    // RPA Form URL이 없으면 에러
+    if (mission.campaign.rpaFormUrl == null ||
+        mission.campaign.rpaFormUrl!.isEmpty) {
+      ToastHelper.showError('이 캠페인은 자동 제출을 지원하지 않습니다.');
+      return;
+    }
+
+    // WebView 화면으로 이동
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CampaignMissionWebViewScreen(mission: mission),
+      ),
+    );
+  }
+
   /// 완료 버튼 위젯 생성
   Widget _buildCompleteButton(
     BuildContext context,
     int completedCount,
     int totalCount,
+    List<MissionWithTemplate> missions,
   ) {
     final isAllCompleted = completedCount == totalCount;
 
     if (isAllCompleted) {
       return _CompleteButton(
         onPressed: () {
-          ToastHelper.showSuccess('캠페인 미션이 모두 완료되었습니다.');
+          _openMissionWebView(context, missions);
         },
       );
     } else {

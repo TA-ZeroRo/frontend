@@ -20,6 +20,8 @@ _Campaign _$CampaignFromJson(Map<String, dynamic> json) => _Campaign(
   status: json['status'] as String,
   submissionType: json['submissionType'] as String?,
   updatedAt: DateTime.parse(json['updatedAt'] as String),
+  rpaFormUrl: json['rpaFormUrl'] as String?,
+  rpaFieldMapping: json['rpaFieldMapping'] as Map<String, dynamic>?,
 );
 
 Map<String, dynamic> _$CampaignToJson(_Campaign instance) => <String, dynamic>{
@@ -36,4 +38,6 @@ Map<String, dynamic> _$CampaignToJson(_Campaign instance) => <String, dynamic>{
   'status': instance.status,
   'submissionType': instance.submissionType,
   'updatedAt': instance.updatedAt.toIso8601String(),
+  'rpaFormUrl': instance.rpaFormUrl,
+  'rpaFieldMapping': instance.rpaFieldMapping,
 };
