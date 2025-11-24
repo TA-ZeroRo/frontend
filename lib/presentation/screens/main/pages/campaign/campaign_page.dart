@@ -10,6 +10,7 @@ import 'state/campaign_state.dart';
 import 'components/campaign_card.dart';
 import 'components/campaign_card_shimmer.dart';
 import 'components/campaign_filters.dart';
+import 'recruiting_create_page.dart';
 
 class CampaignPage extends ConsumerStatefulWidget {
   const CampaignPage({super.key});
@@ -185,7 +186,14 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                         }
                       },
                       onCruiting: () {
-                        ToastHelper.showInfo('크루팅 기능 준비중이에요');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RecruitingCreatePage(
+                              campaign: campaign,
+                            ),
+                          ),
+                        );
                       },
                       onShare: () async {
                         try {
