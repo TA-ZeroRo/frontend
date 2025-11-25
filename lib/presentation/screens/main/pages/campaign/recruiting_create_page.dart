@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/theme/app_text_style.dart';
@@ -7,6 +8,8 @@ import '../../../../../core/utils/toast_helper.dart';
 import '../../../../../core/constants/regions.dart';
 import 'models/campaign_data.dart';
 import 'components/recruiting_inline_calendar.dart';
+import 'components/recruiting_age_picker.dart';
+import 'components/recruiting_region_card.dart';
 
 /// 크루팅 작성 페이지
 class RecruitingCreatePage extends StatefulWidget {
@@ -24,22 +27,17 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
 
   String? _selectedRegion;
   String? _selectedCity;
-  String? _selectedMinAge;
-  String? _selectedMaxAge;
+
+  // 나이 선택 관련 변수
+  int _minAge = 10;
+  int _maxAge = 60;
+  final List<int> _ageOptions = [10, 20, 30, 40, 50, 60];
+
   DateTime? _selectedStartDate;
   DateTime? _selectedEndDate;
 
-  /// 시/도 선택 펼침 상태
-  bool _isProvinceExpanded = false;
-
-  /// 시/구/군 선택 펼침 상태
-  bool _isCityExpanded = false;
-
-  /// 최소 나이 선택 펼침 상태
-  bool _isMinAgeExpanded = false;
-
-  /// 최대 나이 선택 펼침 상태
-  bool _isMaxAgeExpanded = false;
+  /// 나이 선택 펼침 상태 (통합)
+  bool _isAgeExpanded = false;
 
   /// 시작일 달력 펼침 상태
   bool _isStartDateExpanded = false;
@@ -47,19 +45,10 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
   /// 종료일 달력 펼침 상태
   bool _isEndDateExpanded = false;
 
-  /// 나이 선택지 (10살 단위)
-  static const List<String> _ageRanges = [
-    '10대',
-    '20대',
-    '30대',
-    '40대',
-    '50대',
-    '60대',
-    '70대',
-    '80대',
-    '90대',
-    '100대',
-  ];
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -68,56 +57,11 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
     super.dispose();
   }
 
-  /// 시/도 선택 토글
-  void _toggleProvince() {
+  /// 나이 선택 토글
+  void _toggleAge() {
     setState(() {
-      _isProvinceExpanded = !_isProvinceExpanded;
-      if (_isProvinceExpanded) {
-        _isCityExpanded = false;
-        _isMinAgeExpanded = false;
-        _isMaxAgeExpanded = false;
-        _isStartDateExpanded = false;
-        _isEndDateExpanded = false;
-      }
-    });
-  }
-
-  /// 시/구/군 선택 토글
-  void _toggleCity() {
-    setState(() {
-      _isCityExpanded = !_isCityExpanded;
-      if (_isCityExpanded) {
-        _isProvinceExpanded = false;
-        _isMinAgeExpanded = false;
-        _isMaxAgeExpanded = false;
-        _isStartDateExpanded = false;
-        _isEndDateExpanded = false;
-      }
-    });
-  }
-
-  /// 최소 나이 선택 토글
-  void _toggleMinAge() {
-    setState(() {
-      _isMinAgeExpanded = !_isMinAgeExpanded;
-      if (_isMinAgeExpanded) {
-        _isMaxAgeExpanded = false;
-        _isProvinceExpanded = false;
-        _isCityExpanded = false;
-        _isStartDateExpanded = false;
-        _isEndDateExpanded = false;
-      }
-    });
-  }
-
-  /// 최대 나이 선택 토글
-  void _toggleMaxAge() {
-    setState(() {
-      _isMaxAgeExpanded = !_isMaxAgeExpanded;
-      if (_isMaxAgeExpanded) {
-        _isMinAgeExpanded = false;
-        _isProvinceExpanded = false;
-        _isCityExpanded = false;
+      _isAgeExpanded = !_isAgeExpanded;
+      if (_isAgeExpanded) {
         _isStartDateExpanded = false;
         _isEndDateExpanded = false;
       }
@@ -130,10 +74,7 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
       _isStartDateExpanded = !_isStartDateExpanded;
       if (_isStartDateExpanded) {
         _isEndDateExpanded = false;
-        _isProvinceExpanded = false;
-        _isCityExpanded = false;
-        _isMinAgeExpanded = false;
-        _isMaxAgeExpanded = false;
+        _isAgeExpanded = false;
       }
     });
   }
@@ -144,10 +85,7 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
       _isEndDateExpanded = !_isEndDateExpanded;
       if (_isEndDateExpanded) {
         _isStartDateExpanded = false;
-        _isProvinceExpanded = false;
-        _isCityExpanded = false;
-        _isMinAgeExpanded = false;
-        _isMaxAgeExpanded = false;
+        _isAgeExpanded = false;
       }
     });
   }
@@ -178,21 +116,10 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
       return;
     }
 
-    // 나이조건 검사 (선택 사항)
-    // 최소 나이만 선택한 경우 오류
-    if (_selectedMinAge != null && _selectedMaxAge == null) {
-      ToastHelper.showError('최대 나이를 선택해주세요');
+    // 나이조건 검사
+    if (_minAge > _maxAge) {
+      ToastHelper.showError('최소 나이가 최대 나이보다 클 수 없습니다');
       return;
-    }
-
-    // 둘 다 선택한 경우 유효성 검사
-    if (_selectedMinAge != null && _selectedMaxAge != null) {
-      final minIndex = _ageRanges.indexOf(_selectedMinAge!);
-      final maxIndex = _ageRanges.indexOf(_selectedMaxAge!);
-      if (minIndex > maxIndex) {
-        ToastHelper.showError('최소 나이가 최대 나이보다 클 수 없습니다');
-        return;
-      }
     }
 
     // 크루팅 날짜 검사
@@ -410,89 +337,60 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
 
   /// 나이 조건 카드
   Widget _buildAgeCard() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _toggleAge,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '나이 조건 (선택)',
-            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 6),
-          const Divider(height: 1, thickness: 0.5, color: Color(0xFFE0E0E0)),
-          const SizedBox(height: 6),
-          // 최소/최대 나이 선택 버튼
-          Row(
-            children: [
-              Expanded(child: _buildMinAgeButton()),
-              const SizedBox(width: 8),
-              Expanded(child: _buildMaxAgeButton()),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 4,
+                offset: const Offset(0, 1),
+              ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-
-  /// 최소 나이 선택 버튼
-  Widget _buildMinAgeButton() {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: _toggleMinAge,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-          decoration: BoxDecoration(
-            color: _selectedMinAge != null
-                ? AppColors.primary.withValues(alpha: 0.12)
-                : Colors.white.withValues(alpha: 0.7),
-            border: Border.all(
-              color: _selectedMinAge != null
-                  ? AppColors.primary
-                  : AppColors.textTertiary.withValues(alpha: 0.25),
-              width: _selectedMinAge != null ? 1.5 : 1,
-            ),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(
-                  _selectedMinAge ?? '최소',
-                  style: TextStyle(
-                    color: _selectedMinAge != null
-                        ? AppColors.primary
-                        : AppColors.textTertiary,
-                    fontSize: 13,
-                    fontWeight: _selectedMinAge != null
-                        ? FontWeight.w600
-                        : FontWeight.w400,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
+              const Text(
+                '나이 조건',
+                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
               ),
-              Icon(
-                _isMinAgeExpanded ? Icons.expand_less : Icons.expand_more,
-                size: 14,
-                color: _selectedMinAge != null
-                    ? AppColors.primary
-                    : AppColors.textSecondary,
+              const SizedBox(height: 6),
+              const Divider(
+                height: 1,
+                thickness: 0.5,
+                color: Color(0xFFE0E0E0),
+              ),
+              const SizedBox(height: 6),
+              // 선택된 나이 범위 텍스트
+              SizedBox(
+                height: 32,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '$_minAge대 ~ $_maxAge대',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Icon(
+                      _isAgeExpanded ? Icons.expand_less : Icons.expand_more,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -501,401 +399,65 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
     );
   }
 
-  /// 최대 나이 선택 버튼
-  Widget _buildMaxAgeButton() {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: _toggleMaxAge,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-          decoration: BoxDecoration(
-            color: _selectedMaxAge != null
-                ? AppColors.primary.withValues(alpha: 0.12)
-                : Colors.white.withValues(alpha: 0.7),
-            border: Border.all(
-              color: _selectedMaxAge != null
-                  ? AppColors.primary
-                  : AppColors.textTertiary.withValues(alpha: 0.25),
-              width: _selectedMaxAge != null ? 1.5 : 1,
-            ),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  _selectedMaxAge ?? '최대',
-                  style: TextStyle(
-                    color: _selectedMaxAge != null
-                        ? AppColors.primary
-                        : AppColors.textTertiary,
-                    fontSize: 13,
-                    fontWeight: _selectedMaxAge != null
-                        ? FontWeight.w600
-                        : FontWeight.w400,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              Icon(
-                _isMaxAgeExpanded ? Icons.expand_less : Icons.expand_more,
-                size: 14,
-                color: _selectedMaxAge != null
-                    ? AppColors.primary
-                    : AppColors.textSecondary,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
+  /// 나이 조건 확장 영역 (CupertinoPicker)
   Widget _buildAgeExpansionArea() {
-    final isMinMode = _isMinAgeExpanded;
-    final isMaxMode = _isMaxAgeExpanded;
-    if (!isMinMode && !isMaxMode) {
+    if (!_isAgeExpanded) {
       return const SizedBox.shrink();
     }
 
     return AnimatedSize(
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
       alignment: Alignment.topCenter,
-      child: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.only(top: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
-        child: Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: _ageRanges.map((age) {
-            final isSelected = isMinMode
-                ? _selectedMinAge == age
-                : _selectedMaxAge == age;
-            final enabled = isMinMode
-                ? true
-                : (_selectedMinAge == null ||
-                      _ageRanges.indexOf(age) >=
-                          _ageRanges.indexOf(_selectedMinAge!));
-
-            return ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 72),
-              child: _buildChip(age, isSelected, () {
-                if (!enabled) return;
-                setState(() {
-                  if (isMinMode) {
-                    _selectedMinAge = age;
-                    if (_selectedMaxAge != null) {
-                      final minIndex = _ageRanges.indexOf(age);
-                      final maxIndex = _ageRanges.indexOf(_selectedMaxAge!);
-                      if (minIndex > maxIndex) {
-                        _selectedMaxAge = null;
-                      }
-                    }
-                    _isMinAgeExpanded = false;
-                  } else {
-                    _selectedMaxAge = age;
-                    _isMaxAgeExpanded = false;
-                  }
-                });
-              }, enabled: enabled),
-            );
-          }).toList(),
-        ),
+      child: RecruitingAgePicker(
+        minAge: _minAge,
+        maxAge: _maxAge,
+        ageOptions: _ageOptions,
+        onMinAgeChanged: (value) {
+          setState(() {
+            _minAge = value;
+            // 유효성 검사: 최소값이 최대값보다 커지면 최대값도 같이 올림
+            if (_minAge > _maxAge) {
+              _maxAge = _minAge;
+            }
+          });
+        },
+        onMaxAgeChanged: (value) {
+          setState(() {
+            _maxAge = value;
+            // 유효성 검사: 최대값이 최소값보다 작아지면 최소값도 같이 내림
+            if (_maxAge < _minAge) {
+              _minAge = _maxAge;
+            }
+          });
+        },
       ),
     );
   }
 
   /// 활동 지역 카드
   Widget _buildRegionCard() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 가이드 텍스트
-          const Text(
-            '활동 지역',
-            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 6),
-          Divider(
-            height: 1,
-            thickness: 0.5,
-            color: AppColors.textTertiary.withValues(alpha: 0.15),
-          ),
-          const SizedBox(height: 6),
-          // 시/도 및 시/구/군 선택 버튼
-          Row(
-            children: [
-              Expanded(child: _buildProvinceButton()),
-              const SizedBox(width: 8),
-              Expanded(child: _buildCityButton()),
-            ],
-          ),
-          // 시/도 확장 영역
-          _buildProvinceExpansion(),
-          // 시/구/군 확장 영역
-          _buildCityExpansion(),
-        ],
-      ),
+    return RecruitingRegionCard(
+      selectedRegion: _selectedRegion,
+      selectedCity: _selectedCity,
+      onRegionChanged: (region) {
+        setState(() {
+          _selectedRegion = region;
+        });
+      },
+      onCityChanged: (city) {
+        setState(() {
+          _selectedCity = city;
+        });
+      },
+      onToggle: () {
+        setState(() {
+          _isAgeExpanded = false;
+          _isStartDateExpanded = false;
+          _isEndDateExpanded = false;
+        });
+      },
     );
-  }
-
-  /// 시/도 선택 버튼
-  Widget _buildProvinceButton() {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: _toggleProvince,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: _getProvinceButtonColor(),
-            border: Border.all(
-              color: _getProvinceButtonBorderColor(),
-              width: _selectedRegion != null ? 1.5 : 1,
-            ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  _selectedRegion ?? '시/도',
-                  style: TextStyle(
-                    color: _getProvinceButtonTextColor(),
-                    fontSize: 14,
-                    fontWeight: _selectedRegion != null
-                        ? FontWeight.w600
-                        : FontWeight.w400,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              Icon(
-                _isProvinceExpanded ? Icons.expand_less : Icons.expand_more,
-                size: 16,
-                color: _getProvinceButtonIconColor(),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// 시/구/군 선택 버튼
-  Widget _buildCityButton() {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: _selectedRegion != null ? _toggleCity : null,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: _getCityButtonColor(),
-            border: Border.all(
-              color: _getCityButtonBorderColor(),
-              width: _selectedCity != null ? 1.5 : 1,
-            ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  _selectedCity ?? '시/구/군',
-                  style: TextStyle(
-                    color: _getCityButtonTextColor(),
-                    fontSize: 14,
-                    fontWeight: _selectedCity != null
-                        ? FontWeight.w600
-                        : FontWeight.w400,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              Icon(
-                _isCityExpanded ? Icons.expand_less : Icons.expand_more,
-                size: 16,
-                color: _getCityButtonIconColor(),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// 시/도 확장 영역
-  Widget _buildProvinceExpansion() {
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      alignment: Alignment.topCenter,
-      child: _isProvinceExpanded
-          ? Container(
-              width: double.infinity,
-              margin: const EdgeInsets.only(top: 12),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.3),
-                  width: 1,
-                ),
-              ),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: KoreanRegions.provinces.map((region) {
-                  return _buildChip(region, _selectedRegion == region, () {
-                    setState(() {
-                      _selectedRegion = region;
-                      _selectedCity = null;
-                      _isProvinceExpanded = false;
-                    });
-                  });
-                }).toList(),
-              ),
-            )
-          : const SizedBox.shrink(),
-    );
-  }
-
-  /// 시/구/군 확장 영역
-  Widget _buildCityExpansion() {
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      alignment: Alignment.topCenter,
-      child: _isCityExpanded
-          ? Container(
-              width: double.infinity,
-              margin: const EdgeInsets.only(top: 12),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.3),
-                  width: 1,
-                ),
-              ),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: (KoreanRegions.cities[_selectedRegion!] ?? []).map((
-                  city,
-                ) {
-                  return _buildChip(city, _selectedCity == city, () {
-                    setState(() {
-                      _selectedCity = city;
-                      _isCityExpanded = false;
-                    });
-                  });
-                }).toList(),
-              ),
-            )
-          : const SizedBox.shrink(),
-    );
-  }
-
-  // 스타일링 헬퍼 메서드들
-
-  Color _getProvinceButtonColor() {
-    return _selectedRegion != null
-        ? AppColors.primary.withValues(alpha: 0.12)
-        : Colors.white.withValues(alpha: 0.7);
-  }
-
-  Color _getProvinceButtonBorderColor() {
-    return _selectedRegion != null
-        ? AppColors.primary
-        : AppColors.textTertiary.withValues(alpha: 0.25);
-  }
-
-  Color _getProvinceButtonTextColor() {
-    return _selectedRegion != null ? AppColors.primary : AppColors.textTertiary;
-  }
-
-  Color _getProvinceButtonIconColor() {
-    return _selectedRegion != null
-        ? AppColors.primary
-        : AppColors.textSecondary;
-  }
-
-  Color _getCityButtonColor() {
-    if (_selectedCity != null) {
-      return AppColors.primary.withValues(alpha: 0.12);
-    }
-    if (_selectedRegion != null) {
-      return Colors.white.withValues(alpha: 0.7);
-    }
-    return Colors.white.withValues(alpha: 0.5);
-  }
-
-  Color _getCityButtonBorderColor() {
-    if (_selectedCity != null) {
-      return AppColors.primary;
-    }
-    if (_selectedRegion != null) {
-      return AppColors.textTertiary.withValues(alpha: 0.25);
-    }
-    return AppColors.textTertiary.withValues(alpha: 0.15);
-  }
-
-  Color _getCityButtonTextColor() {
-    if (_selectedCity != null) {
-      return AppColors.primary;
-    }
-    if (_selectedRegion != null) {
-      return AppColors.textTertiary;
-    }
-    return AppColors.textTertiary.withValues(alpha: 0.5);
-  }
-
-  Color _getCityButtonIconColor() {
-    if (_selectedCity != null) {
-      return AppColors.primary;
-    }
-    if (_selectedRegion != null) {
-      return AppColors.textSecondary;
-    }
-    return AppColors.textSecondary.withValues(alpha: 0.5);
   }
 
   /// 크루팅 날짜 카드
@@ -1133,64 +695,6 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
               ),
             )
           : const SizedBox.shrink(),
-    );
-  }
-
-  /// 칩 위젯
-  Widget _buildChip(
-    String label,
-    bool isSelected,
-    VoidCallback onTap, {
-    bool enabled = true,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: enabled ? onTap : null,
-        borderRadius: BorderRadius.circular(18),
-        splashColor: AppColors.primary.withValues(alpha: 0.2),
-        highlightColor: AppColors.primary.withValues(alpha: 0.1),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-          decoration: BoxDecoration(
-            color: enabled
-                ? (isSelected ? AppColors.primary : Colors.white)
-                : Colors.white.withValues(alpha: 0.5),
-            border: Border.all(
-              color: enabled
-                  ? (isSelected
-                        ? AppColors.primary
-                        : AppColors.textTertiary.withValues(alpha: 0.3))
-                  : AppColors.textTertiary.withValues(alpha: 0.2),
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.25),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: enabled
-                  ? (isSelected ? Colors.white : AppColors.textPrimary)
-                  : AppColors.textTertiary,
-              fontSize: 13,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-            ),
-            maxLines: 1,
-            softWrap: false,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
     );
   }
 }
