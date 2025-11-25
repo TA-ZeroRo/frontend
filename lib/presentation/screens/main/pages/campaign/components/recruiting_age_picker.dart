@@ -1,21 +1,22 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../../../../core/theme/app_color.dart';
 
 class RecruitingAgePicker extends StatefulWidget {
   final int minAge;
   final int maxAge;
-  final List<int> ageOptions;
+  final bool isAny;
   final ValueChanged<int> onMinAgeChanged;
   final ValueChanged<int> onMaxAgeChanged;
+  final ValueChanged<bool> onAnyChanged;
 
   const RecruitingAgePicker({
     super.key,
     required this.minAge,
     required this.maxAge,
-    required this.ageOptions,
+    required this.isAny,
     required this.onMinAgeChanged,
     required this.onMaxAgeChanged,
+    required this.onAnyChanged,
   });
 
   @override
@@ -23,51 +24,12 @@ class RecruitingAgePicker extends StatefulWidget {
 }
 
 class _RecruitingAgePickerState extends State<RecruitingAgePicker> {
-  late FixedExtentScrollController _minAgeScrollController;
-  late FixedExtentScrollController _maxAgeScrollController;
-
-  @override
-  void initState() {
-    super.initState();
-    _minAgeScrollController = FixedExtentScrollController(
-      initialItem: widget.ageOptions.indexOf(widget.minAge),
-    );
-    _maxAgeScrollController = FixedExtentScrollController(
-      initialItem: widget.ageOptions.indexOf(widget.maxAge),
-    );
-  }
-
-  @override
-  void didUpdateWidget(covariant RecruitingAgePicker oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // 외부에서 값이 변경되었을 때 (예: 최소값이 올라가서 최대값이 강제로 변경된 경우) 스크롤 위치 동기화
-    if (oldWidget.minAge != widget.minAge && _minAgeScrollController.hasClients) {
-      final index = widget.ageOptions.indexOf(widget.minAge);
-      if (_minAgeScrollController.selectedItem != index) {
-        _minAgeScrollController.jumpToItem(index);
-      }
-    }
-    if (oldWidget.maxAge != widget.maxAge && _maxAgeScrollController.hasClients) {
-      final index = widget.ageOptions.indexOf(widget.maxAge);
-      if (_maxAgeScrollController.selectedItem != index) {
-        _maxAgeScrollController.jumpToItem(index);
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _minAgeScrollController.dispose();
-    _maxAgeScrollController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 12),
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
@@ -77,113 +39,96 @@ class _RecruitingAgePickerState extends State<RecruitingAgePicker> {
         ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 슬라이더
+          AbsorbPointer(
+            absorbing: widget.isAny,
+            child: Opacity(
+              opacity: widget.isAny ? 0.5 : 1.0,
+              child: Column(
+                children: [
+                  RangeSlider(
+                    values: RangeValues(
+                      widget.minAge.toDouble(),
+                      widget.maxAge.toDouble(),
+                    ),
+                    min: 10,
+                    max: 90,
+                    divisions: 8,
+                    labels: RangeLabels(
+                      '${widget.minAge}대',
+                      '${widget.maxAge}대',
+                    ),
+                    activeColor: AppColors.primary,
+                    inactiveColor: AppColors.textTertiary.withValues(
+                      alpha: 0.3,
+                    ),
+                    onChanged: (RangeValues values) {
+                      // 10단위로 스냅핑된 값 전달
+                      widget.onMinAgeChanged(values.start.round());
+                      widget.onMaxAgeChanged(values.end.round());
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: List.generate(9, (index) {
+                        final age = 10 + (index * 10);
+                        return Text(
+                          '$age',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: AppColors.textTertiary,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          // 상관없음 체크박스
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text(
-                '최소 나이',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
+              SizedBox(
+                height: 24,
+                width: 24,
+                child: Checkbox(
+                  value: widget.isAny,
+                  onChanged: (value) {
+                    widget.onAnyChanged(value ?? false);
+                  },
+                  activeColor: AppColors.primary,
+                  side: const BorderSide(
+                    color: AppColors.textSubtle,
+                    width: 1.5,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               Text(
-                '최대 나이',
+                '상관없음',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
+                  color: widget.isAny
+                      ? AppColors.textPrimary
+                      : AppColors.textSubtle,
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            height: 120,
-            child: Row(
-              children: [
-                // 최소 나이 피커
-                Expanded(
-                  child: CupertinoPicker(
-                    scrollController: _minAgeScrollController,
-                    itemExtent: 36,
-                    onSelectedItemChanged: (index) {
-                      final val = widget.ageOptions[index];
-                      widget.onMinAgeChanged(val);
-                    },
-                    selectionOverlay: Container(
-                      decoration: BoxDecoration(
-                        border: Border.symmetric(
-                          horizontal: BorderSide(
-                            color: AppColors.primary.withValues(alpha: 0.3),
-                          ),
-                        ),
-                      ),
-                    ),
-                    children: widget.ageOptions
-                        .map(
-                          (age) => Center(
-                            child: Text(
-                              '$age대',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ),
-                // 구분선
-                Container(
-                  width: 1,
-                  height: 80,
-                  color: AppColors.textTertiary.withValues(alpha: 0.2),
-                ),
-                // 최대 나이 피커
-                Expanded(
-                  child: CupertinoPicker(
-                    scrollController: _maxAgeScrollController,
-                    itemExtent: 36,
-                    onSelectedItemChanged: (index) {
-                      final val = widget.ageOptions[index];
-                      widget.onMaxAgeChanged(val);
-                    },
-                    selectionOverlay: Container(
-                      decoration: BoxDecoration(
-                        border: Border.symmetric(
-                          horizontal: BorderSide(
-                            color: AppColors.primary.withValues(alpha: 0.3),
-                          ),
-                        ),
-                      ),
-                    ),
-                    children: widget.ageOptions
-                        .map(
-                          (age) => Center(
-                            child: Text(
-                              '$age대',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),
     );
   }
 }
-

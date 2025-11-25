@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/theme/app_text_style.dart';
 import '../../../../../core/utils/toast_helper.dart';
-import '../../../../../core/constants/regions.dart';
 import 'models/campaign_data.dart';
 import 'components/recruiting_inline_calendar.dart';
 import 'components/recruiting_age_picker.dart';
@@ -29,9 +27,9 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
   String? _selectedCity;
 
   // 나이 선택 관련 변수
-  int _minAge = 10;
-  int _maxAge = 60;
-  final List<int> _ageOptions = [10, 20, 30, 40, 50, 60];
+  int _minAge = 20;
+  int _maxAge = 30;
+  bool _isAnyAge = false;
 
   DateTime? _selectedStartDate;
   DateTime? _selectedEndDate;
@@ -360,7 +358,7 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                '나이 조건',
+                '연령층',
                 style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
               ),
               const SizedBox(height: 6),
@@ -377,7 +375,7 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '$_minAge대 ~ $_maxAge대',
+                      _isAnyAge ? '상관없음' : '$_minAge대 ~ $_maxAge대',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -412,7 +410,7 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
       child: RecruitingAgePicker(
         minAge: _minAge,
         maxAge: _maxAge,
-        ageOptions: _ageOptions,
+        isAny: _isAnyAge,
         onMinAgeChanged: (value) {
           setState(() {
             _minAge = value;
@@ -420,6 +418,7 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
             if (_minAge > _maxAge) {
               _maxAge = _minAge;
             }
+            if (_isAnyAge) _isAnyAge = false;
           });
         },
         onMaxAgeChanged: (value) {
@@ -429,6 +428,12 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
             if (_maxAge < _minAge) {
               _minAge = _maxAge;
             }
+            if (_isAnyAge) _isAnyAge = false;
+          });
+        },
+        onAnyChanged: (value) {
+          setState(() {
+            _isAnyAge = value;
           });
         },
       ),
