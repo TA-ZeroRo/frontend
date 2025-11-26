@@ -21,7 +21,10 @@
       "Bash(dir:*)",
       "Bash(move Mock temp_mock)",
       "Bash(move temp_mock mock)",
-      "Bash(xargs ls:*)"
+      "Bash(xargs ls:*)",
+      "Bash(git pull:*)",
+      "Bash(git add:*)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []
