@@ -174,8 +174,9 @@ final recruitingListProvider = FutureProvider<List<RecruitingPost>>((
   return allPosts.where((post) {
     if (filter.region != '전체' && post.region != filter.region) return false;
     if (filter.city != '전체' && post.city != filter.city) return false;
-    if (filter.minCapacity != null && post.capacity < filter.minCapacity!)
+    if (filter.minCapacity != null && post.capacity < filter.minCapacity!) {
       return false;
+    }
     // 날짜, 나이 등 추가 필터링 로직은 필요에 따라 구현
     return true;
   }).toList();

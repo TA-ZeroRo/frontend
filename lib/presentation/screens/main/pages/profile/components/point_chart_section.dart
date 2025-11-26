@@ -59,7 +59,7 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
             ),
           ),
           child: Text(
-            '$dateStr : ${score}점',
+            '$dateStr : $score점',
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
