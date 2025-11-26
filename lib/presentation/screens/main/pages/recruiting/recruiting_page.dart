@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../../core/components/custom_app_bar.dart';
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/theme/app_text_style.dart';
@@ -7,6 +8,7 @@ import '../../../../../core/utils/toast_helper.dart';
 import '../campaign/state/recruiting_state.dart';
 import '../campaign/components/recruiting_filters.dart';
 import '../campaign/components/recruiting_card.dart';
+import '../campaign/models/recruiting_post.dart';
 
 class RecruitingPage extends ConsumerWidget {
   const RecruitingPage({super.key});
@@ -31,6 +33,7 @@ class RecruitingPage extends ConsumerWidget {
         child: CustomScrollView(
           slivers: [
             _buildAppBar(),
+            _buildParticipationTabs(context, ref, recruitingFilter),
             _buildRecruitingFilters(context, ref, recruitingFilter),
             _buildRecruitingList(context, recruitingListAsync),
           ],
@@ -42,6 +45,86 @@ class RecruitingPage extends ConsumerWidget {
   /// AppBar
   Widget _buildAppBar() =>
       const SliverToBoxAdapter(child: CustomAppBar(title: '리크루팅'));
+
+  /// 참여 상태 탭
+  Widget _buildParticipationTabs(
+    BuildContext context,
+    WidgetRef ref,
+    RecruitingFilter filter,
+  ) {
+    return SliverToBoxAdapter(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: _buildTabButton(
+                context: context,
+                ref: ref,
+                label: '전체',
+                status: ParticipationStatus.all,
+                isSelected: filter.participationStatus == ParticipationStatus.all,
+              ),
+            ),
+            Expanded(
+              child: _buildTabButton(
+                context: context,
+                ref: ref,
+                label: '참여중',
+                status: ParticipationStatus.participating,
+                isSelected:
+                    filter.participationStatus == ParticipationStatus.participating,
+              ),
+            ),
+            Expanded(
+              child: _buildTabButton(
+                context: context,
+                ref: ref,
+                label: '모집중',
+                status: ParticipationStatus.recruiting,
+                isSelected:
+                    filter.participationStatus == ParticipationStatus.recruiting,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 탭 버튼
+  Widget _buildTabButton({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String label,
+    required ParticipationStatus status,
+    required bool isSelected,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        ref.read(recruitingFilterProvider.notifier).setParticipationStatus(status);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: AppTextStyle.bodyMedium.copyWith(
+            color: isSelected ? Colors.white : AppColors.textSecondary,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+          ),
+        ),
+      ),
+    );
+  }
 
   /// 리크루팅 필터 섹션
   Widget _buildRecruitingFilters(
@@ -125,7 +208,28 @@ class RecruitingPage extends ConsumerWidget {
                 child: RecruitingCard(
                   post: post,
                   onTap: () {
-                    ToastHelper.showInfo('모집글 상세 페이지 준비중');
+                    // 카드 클릭 시 상세 페이지로 이동
+                    context.pushNamed(
+                      'recruiting-detail',
+                      pathParameters: {'id': post.id},
+                      queryParameters:
+                          post.isParticipating ? {'tab': 'chat'} : {},
+                      extra: post,
+                    );
+                  },
+                  onActionButtonTap: () {
+                    if (post.isParticipating) {
+                      // 채팅 보기 - 상세 페이지로 이동 (채팅 탭)
+                      context.pushNamed(
+                        'recruiting-detail',
+                        pathParameters: {'id': post.id},
+                        queryParameters: {'tab': 'chat'},
+                        extra: post,
+                      );
+                    } else {
+                      // 참여하기 - 확인 다이얼로그 후 참여
+                      _showParticipateDialog(context, post);
+                    }
                   },
                 ),
               );
@@ -201,6 +305,39 @@ class RecruitingPage extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// 참여 확인 다이얼로그
+  void _showParticipateDialog(
+    BuildContext context,
+    RecruitingPost post,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('리크루팅 참여'),
+        content: Text('${post.title}\n\n이 모집글에 참여하시겠습니까?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ToastHelper.showSuccess('리크루팅에 참여했습니다!');
+              // TODO: 실제로는 여기서 API 호출 후 상태 업데이트
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('참여하기'),
+          ),
+        ],
       ),
     );
   }

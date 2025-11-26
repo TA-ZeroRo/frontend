@@ -13,6 +13,8 @@ class RecruitingPost {
   final int minAge;
   final int maxAge;
   final bool isRecruiting;
+  final bool isParticipating;
+  final String? chatRoomId;
 
   const RecruitingPost({
     required this.id,
@@ -29,6 +31,8 @@ class RecruitingPost {
     required this.minAge,
     required this.maxAge,
     this.isRecruiting = false,
+    this.isParticipating = false,
+    this.chatRoomId,
   });
 
   RecruitingPost copyWith({
@@ -46,6 +50,8 @@ class RecruitingPost {
     int? minAge,
     int? maxAge,
     bool? isRecruiting,
+    bool? isParticipating,
+    String? chatRoomId,
   }) {
     return RecruitingPost(
       id: id ?? this.id,
@@ -62,6 +68,8 @@ class RecruitingPost {
       minAge: minAge ?? this.minAge,
       maxAge: maxAge ?? this.maxAge,
       isRecruiting: isRecruiting ?? this.isRecruiting,
+      isParticipating: isParticipating ?? this.isParticipating,
+      chatRoomId: chatRoomId ?? this.chatRoomId,
     );
   }
 }

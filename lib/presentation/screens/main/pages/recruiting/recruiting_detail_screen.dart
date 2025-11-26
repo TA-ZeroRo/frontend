@@ -1,0 +1,185 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../core/theme/app_color.dart';
+import '../../../../../core/theme/app_text_style.dart';
+import '../campaign/models/recruiting_post.dart';
+import 'components/recruiting_info_tab.dart';
+import 'components/recruiting_chat_tab.dart';
+import 'components/recruiting_members_tab.dart';
+
+class RecruitingDetailScreen extends ConsumerStatefulWidget {
+  final RecruitingPost post;
+  final int initialTabIndex;
+
+  const RecruitingDetailScreen({
+    super.key,
+    required this.post,
+    this.initialTabIndex = 0,
+  });
+
+  @override
+  ConsumerState<RecruitingDetailScreen> createState() =>
+      _RecruitingDetailScreenState();
+}
+
+class _RecruitingDetailScreenState
+    extends ConsumerState<RecruitingDetailScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: widget.initialTabIndex,
+    );
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Column(
+        children: [
+          _buildHeader(context),
+          _buildTabBar(),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                RecruitingInfoTab(post: widget.post),
+                RecruitingChatTab(post: widget.post),
+                RecruitingMembersTab(post: widget.post),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 헤더 (캠페인 이미지 + 타이틀)
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      height: 240,
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: NetworkImage(widget.post.campaignImageUrl),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Stack(
+        children: [
+          // 어두운 그라데이션
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withValues(alpha: 0.3),
+                  Colors.black.withValues(alpha: 0.7),
+                ],
+              ),
+            ),
+          ),
+          // 뒤로가기 버튼
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.black.withValues(alpha: 0.3),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // 하단 정보
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 16,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 캠페인 태그
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    widget.post.campaignTitle,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // 모집글 제목
+                Text(
+                  widget.post.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        offset: Offset(0, 1),
+                        blurRadius: 3,
+                        color: Colors.black54,
+                      ),
+                    ],
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 탭바
+  Widget _buildTabBar() {
+    return Container(
+      color: Colors.white,
+      child: TabBar(
+        controller: _tabController,
+        labelColor: AppColors.primary,
+        unselectedLabelColor: AppColors.textSecondary,
+        labelStyle: AppTextStyle.bodyMedium.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+        unselectedLabelStyle: AppTextStyle.bodyMedium,
+        indicatorColor: AppColors.primary,
+        indicatorWeight: 3,
+        tabs: const [
+          Tab(text: '정보'),
+          Tab(text: '채팅'),
+          Tab(text: '참여자'),
+        ],
+      ),
+    );
+  }
+}
