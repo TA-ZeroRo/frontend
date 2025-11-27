@@ -1,10 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../core/di/injection.dart';
+import '../../../../../../data/data_source/location/location_service.dart';
 import '../../../../../../domain/model/leaderboard/leaderboard_entry.dart';
 import '../../../../../../domain/model/mission/mission_with_template.dart';
+import '../../../../../../domain/model/verification/location_verification_result.dart';
 import '../../../../../../domain/repository/leaderboard_repository.dart';
 import '../../../../../../domain/repository/mission_repository.dart';
+import '../../../../../../domain/repository/verification_repository.dart';
 import '../../../../entry/state/auth_controller.dart';
 
 // ========================================
@@ -198,3 +201,209 @@ class ActivityRefreshTrigger extends Notifier<bool> {
 
 final activityRefreshTriggerProvider =
     NotifierProvider<ActivityRefreshTrigger, bool>(ActivityRefreshTrigger.new);
+
+// ========================================
+// LOCATION VERIFICATION STATE (위치 인증 상태)
+// ========================================
+
+/// 위치 인증 진행 상태
+enum LocationVerificationStatus {
+  /// 초기 상태 (권한 확인 전)
+  initial,
+
+  /// 권한 요청 중
+  requestingPermission,
+
+  /// 위치 가져오는 중
+  fetchingLocation,
+
+  /// 서버에 인증 요청 중
+  verifying,
+
+  /// 인증 성공
+  success,
+
+  /// 인증 실패 (위치가 맞지 않음)
+  failed,
+
+  /// 에러 발생
+  error,
+}
+
+/// 위치 인증 상태 데이터
+class LocationVerificationState {
+  final LocationVerificationStatus status;
+  final LocationPermissionStatus? permissionStatus;
+  final LocationVerificationResult? result;
+  final String? errorMessage;
+
+  const LocationVerificationState({
+    this.status = LocationVerificationStatus.initial,
+    this.permissionStatus,
+    this.result,
+    this.errorMessage,
+  });
+
+  LocationVerificationState copyWith({
+    LocationVerificationStatus? status,
+    LocationPermissionStatus? permissionStatus,
+    LocationVerificationResult? result,
+    String? errorMessage,
+    bool clearResult = false,
+    bool clearError = false,
+  }) {
+    return LocationVerificationState(
+      status: status ?? this.status,
+      permissionStatus: permissionStatus ?? this.permissionStatus,
+      result: clearResult ? null : (result ?? this.result),
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+    );
+  }
+
+  /// 인증 버튼 활성화 여부
+  bool get canVerify =>
+      permissionStatus != LocationPermissionStatus.serviceDisabled &&
+      permissionStatus != LocationPermissionStatus.permanentlyDenied;
+
+  /// 로딩 중 여부
+  bool get isLoading =>
+      status == LocationVerificationStatus.requestingPermission ||
+      status == LocationVerificationStatus.fetchingLocation ||
+      status == LocationVerificationStatus.verifying;
+}
+
+/// 위치 인증 상태 Notifier
+/// 현재 진행 중인 위치 인증의 상태를 관리합니다.
+class LocationVerificationNotifier extends Notifier<LocationVerificationState> {
+  late final LocationService _locationService;
+  late final VerificationRepository _verificationRepository;
+  int? _currentCampaignId;
+
+  @override
+  LocationVerificationState build() {
+    _locationService = getIt<LocationService>();
+    _verificationRepository = getIt<VerificationRepository>();
+    return const LocationVerificationState();
+  }
+
+  /// 특정 캠페인에 대한 위치 인증 초기화
+  Future<void> initialize(int campaignId) async {
+    _currentCampaignId = campaignId;
+    state = const LocationVerificationState();
+    await _checkPermissionStatus();
+  }
+
+  /// 권한 상태 확인
+  Future<void> _checkPermissionStatus() async {
+    final status = await _locationService.checkPermissionStatus();
+    state = state.copyWith(permissionStatus: status);
+  }
+
+  /// 권한 상태 재확인 (외부에서 호출 가능)
+  Future<void> checkPermissionStatus() async {
+    await _checkPermissionStatus();
+  }
+
+  /// 위치 인증 시작
+  Future<void> startVerification() async {
+    if (_currentCampaignId == null) {
+      state = state.copyWith(
+        status: LocationVerificationStatus.error,
+        errorMessage: '캠페인 정보가 없습니다.',
+      );
+      return;
+    }
+
+    try {
+      // 1. 권한 요청
+      state = state.copyWith(
+        status: LocationVerificationStatus.requestingPermission,
+        clearError: true,
+        clearResult: true,
+      );
+
+      final permissionStatus = await _locationService.requestPermission();
+
+      if (permissionStatus != LocationPermissionStatus.granted) {
+        state = state.copyWith(
+          status: LocationVerificationStatus.initial,
+          permissionStatus: permissionStatus,
+        );
+        return;
+      }
+
+      // 2. 위치 가져오기
+      state = state.copyWith(
+        status: LocationVerificationStatus.fetchingLocation,
+        permissionStatus: permissionStatus,
+      );
+
+      final location = await _locationService.getCurrentLocation();
+
+      // 3. 서버에 인증 요청
+      state = state.copyWith(status: LocationVerificationStatus.verifying);
+
+      final result = await _verificationRepository.verifyLocation(
+        campaignId: _currentCampaignId!,
+        latitude: location.latitude,
+        longitude: location.longitude,
+      );
+
+      // 4. 결과 처리
+      if (result.isValid) {
+        state = state.copyWith(
+          status: LocationVerificationStatus.success,
+          result: result,
+        );
+        // 활동하기 페이지 데이터 리프레쉬 트리거
+        ref.read(activityRefreshTriggerProvider.notifier).trigger();
+      } else {
+        state = state.copyWith(
+          status: LocationVerificationStatus.failed,
+          result: result,
+        );
+      }
+    } on LocationException catch (e) {
+      state = state.copyWith(
+        status: LocationVerificationStatus.error,
+        errorMessage: e.message,
+        permissionStatus: e.permissionStatus,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        status: LocationVerificationStatus.error,
+        errorMessage: '위치 인증 중 오류가 발생했습니다.',
+      );
+    }
+  }
+
+  /// 재시도
+  void retry() {
+    state = const LocationVerificationState();
+    _checkPermissionStatus();
+  }
+
+  /// 설정 화면 열기 후 권한 상태 재확인
+  Future<void> openSettingsAndRefresh() async {
+    await _locationService.openSettings();
+    await _checkPermissionStatus();
+  }
+
+  /// 위치 설정 화면 열기 후 권한 상태 재확인
+  Future<void> openLocationSettingsAndRefresh() async {
+    await _locationService.openLocationSettings();
+    await _checkPermissionStatus();
+  }
+
+  /// 상태 초기화
+  void reset() {
+    _currentCampaignId = null;
+    state = const LocationVerificationState();
+  }
+}
+
+/// 위치 인증 Provider
+final locationVerificationProvider =
+    NotifierProvider<LocationVerificationNotifier, LocationVerificationState>(
+  LocationVerificationNotifier.new,
+);

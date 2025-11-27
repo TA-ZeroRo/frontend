@@ -6,8 +6,11 @@ enum VerificationType {
   /// 텍스트 리뷰 작성
   textReview('TEXT_REVIEW'),
 
-  /// RPA 자동 제출
-  quiz('QUIZ');
+  /// 퀴즈
+  quiz('QUIZ'),
+
+  /// 위치 인증
+  location('LOCATION');
 
   const VerificationType(this.value);
 

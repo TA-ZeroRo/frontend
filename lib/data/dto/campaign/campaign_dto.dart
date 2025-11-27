@@ -15,11 +15,11 @@ class CampaignDto {
   @JsonKey(name: 'image_url')
   final String? imageUrl;
   @JsonKey(name: 'start_date')
-  final String startDate;
+  final String? startDate;
   @JsonKey(name: 'end_date')
   final String? endDate;
-  final String region;
-  final String category;
+  final String? region;
+  final String? category;
   final String status;
   @JsonKey(name: 'submission_type')
   final String? submissionType;
@@ -39,10 +39,10 @@ class CampaignDto {
     required this.hostOrganizer,
     required this.campaignUrl,
     this.imageUrl,
-    required this.startDate,
+    this.startDate,
     this.endDate,
-    required this.region,
-    required this.category,
+    this.region,
+    this.category,
     required this.status,
     this.submissionType,
     required this.updatedAt,
