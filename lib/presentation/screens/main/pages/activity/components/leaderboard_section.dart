@@ -52,11 +52,14 @@ class LeaderboardSection extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Image.asset(
-            'assets/images/trophy_icon.png',
-            width: 40,
-            height: 40,
-            fit: BoxFit.contain,
+          Transform.translate(
+            offset: const Offset(0, -2),
+            child: Image.asset(
+              'assets/images/trophy_icon.png',
+              width: 40,
+              height: 40,
+              fit: BoxFit.contain,
+            ),
           ),
           const SizedBox(width: 8),
           const Text(

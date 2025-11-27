@@ -141,11 +141,14 @@ class CampaignMissionSection extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Image.asset(
-            'assets/images/file_icon.png',
-            width: 36,
-            height: 36,
-            fit: BoxFit.contain,
+          Transform.translate(
+            offset: const Offset(0, -2),
+            child: Image.asset(
+              'assets/images/file_icon.png',
+              width: 36,
+              height: 36,
+              fit: BoxFit.contain,
+            ),
           ),
           const SizedBox(width: 8),
           const Text(
