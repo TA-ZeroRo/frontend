@@ -270,7 +270,7 @@ class LeaderboardSection extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                error.toString(),
+                '잠시 후 다시 시도해주세요',
                 style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                 textAlign: TextAlign.center,
               ),
