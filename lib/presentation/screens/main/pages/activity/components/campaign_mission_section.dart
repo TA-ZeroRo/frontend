@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../core/utils/toast_helper.dart';
+import '../../../../../../core/utils/character_notification_helper.dart';
 import '../../../../../../domain/model/mission/mission_template.dart';
 import '../../../../../../domain/model/mission/mission_with_template.dart';
 import '../../../../../../domain/model/mission/verification_type.dart';
@@ -31,6 +32,40 @@ class CampaignMissionSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 미션 완료 상태 감지
+    ref.listen(campaignMissionProvider, (previous, next) {
+      next.whenData((currentMap) {
+        previous?.whenData((previousMap) {
+          for (final entry in currentMap.entries) {
+            final campaignId = entry.key;
+            final currentMissions = entry.value;
+            final previousMissions = previousMap[campaignId];
+
+            if (previousMissions == null) continue;
+
+            final isCurrentAllCompleted = currentMissions.every(
+              (m) => m.missionLog.status.value == 'COMPLETED',
+            );
+            final isPreviousAllCompleted = previousMissions.every(
+              (m) => m.missionLog.status.value == 'COMPLETED',
+            );
+
+            // 이전에 완료되지 않았다가 이번에 모두 완료된 경우
+            if (!isPreviousAllCompleted && isCurrentAllCompleted) {
+              CharacterNotificationHelper.show(
+                context,
+                message: '미션 완료 ~\n완료 버튼을 눌러봐요',
+                characterImage: 'assets/images/earth_zeroro_magic.png',
+                bubbleColor: Colors.white,
+                alignment: const Alignment(0.85, -0.4),
+                duration: const Duration(seconds: 3),
+              );
+            }
+          }
+        });
+      });
+    });
+
     final asyncCampaignMap = ref.watch(campaignMissionProvider);
 
     return asyncCampaignMap.when(
@@ -242,7 +277,12 @@ class CampaignMissionSection extends ConsumerWidget {
                   ),
                 ),
               ),
-              _buildCompleteButton(context, completedCount, totalCount, missions),
+              _buildCompleteButton(
+                context,
+                completedCount,
+                totalCount,
+                missions,
+              ),
             ],
           ),
         ),
@@ -506,7 +546,9 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isCompleted ? const Color(0xFFE0E0E0) : const Color(0xFFEEEEEE),
+          color: isCompleted
+              ? const Color(0xFFE0E0E0)
+              : const Color(0xFFEEEEEE),
           width: 1,
         ),
         boxShadow: const [CampaignMissionSection._kMissionTileShadow],
@@ -628,10 +670,7 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
     );
   }
 
-  Widget _buildActionFooter(
-    BuildContext context,
-    MissionTemplate mission,
-  ) {
+  Widget _buildActionFooter(BuildContext context, MissionTemplate mission) {
     return InkWell(
       onTap: () => _showVerificationBottomSheet(context, widget.mission),
       borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
@@ -670,7 +709,9 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
               _isExpanded = !_isExpanded;
             });
           },
-          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(16),
+          ),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
@@ -761,10 +802,10 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
                 ),
               )
             else if (proofData['image'] != null)
-               // Assuming 'image' might be a local path or similar in some contexts, 
-               // but for network images usually it's a URL.
-               // Just in case it's a different key.
-               ClipRRect(
+              // Assuming 'image' might be a local path or similar in some contexts,
+              // but for network images usually it's a URL.
+              // Just in case it's a different key.
+              ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
                   proofData['image'],
@@ -793,7 +834,10 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
                 border: Border.all(color: Colors.grey[300]!),
               ),
               child: Text(
-                proofData['text'] ?? proofData['content'] ?? proofData['review'] ?? '내용 없음',
+                proofData['text'] ??
+                    proofData['content'] ??
+                    proofData['review'] ??
+                    '내용 없음',
                 style: const TextStyle(
                   fontSize: 14,
                   color: Colors.black87,
