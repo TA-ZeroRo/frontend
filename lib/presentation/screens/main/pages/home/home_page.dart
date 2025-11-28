@@ -51,7 +51,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       final animations = await _3DController.getAvailableAnimations();
       _logger.d('사용 가능한 애니메이션: $animations');
 
-      if (animations != null && animations.isNotEmpty && mounted) {
+      if (animations.isNotEmpty && mounted) {
         _startAnimationWithInterval(animations[0]);
       } else if (mounted) {
         _startAnimationWithInterval(null);
