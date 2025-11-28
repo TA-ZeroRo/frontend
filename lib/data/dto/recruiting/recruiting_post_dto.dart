@@ -31,6 +31,7 @@ class RecruitingPostDto {
   @JsonKey(name: 'updated_at')
   final String updatedAt;
   final Map<String, dynamic>? profiles;
+  final Map<String, dynamic>? campaigns;
   @JsonKey(name: 'chat_room_id')
   final int? chatRoomId;
   @JsonKey(name: 'is_participating')
@@ -53,6 +54,7 @@ class RecruitingPostDto {
     required this.createdAt,
     required this.updatedAt,
     this.profiles,
+    this.campaigns,
     this.chatRoomId,
     this.isParticipating = false,
   });
@@ -62,16 +64,13 @@ class RecruitingPostDto {
 
   Map<String, dynamic> toJson() => _$RecruitingPostDtoToJson(this);
 
-  RecruitingPost toModel({
-    String? campaignTitle,
-    String? campaignImageUrl,
-  }) {
+  RecruitingPost toModel() {
     return RecruitingPost(
       id: id.toString(),
       hostId: userId,
       campaignId: campaignId.toString(),
-      campaignTitle: campaignTitle ?? '',
-      campaignImageUrl: campaignImageUrl ?? '',
+      campaignTitle: campaigns?['title'] as String? ?? '',
+      campaignImageUrl: campaigns?['image_url'] as String? ?? '',
       title: title,
       region: region,
       city: city,
