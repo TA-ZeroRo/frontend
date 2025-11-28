@@ -1,5 +1,5 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format width=80
+// GENERATED CODE - DO NOT MODIFY BY HAND
 
 // **************************************************************************
 // InjectableConfigGenerator
@@ -18,6 +18,7 @@ import 'package:frontend/data/data_source/leaderboard/leaderboard_remote_data_so
 import 'package:frontend/data/data_source/location/location_service.dart'
     as _i912;
 import 'package:frontend/data/data_source/mission/mission_api.dart' as _i800;
+import 'package:frontend/data/data_source/point/point_api.dart' as _i116;
 import 'package:frontend/data/data_source/recruiting/recruiting_api.dart'
     as _i324;
 import 'package:frontend/data/data_source/recruiting/recruiting_chat_realtime_service.dart'
@@ -36,6 +37,8 @@ import 'package:frontend/data/repository_impl/leaderboard_repository_impl.dart'
     as _i856;
 import 'package:frontend/data/repository_impl/mission_repository_impl.dart'
     as _i1053;
+import 'package:frontend/data/repository_impl/point_repository_impl.dart'
+    as _i278;
 import 'package:frontend/data/repository_impl/recruiting_repository_impl.dart'
     as _i491;
 import 'package:frontend/data/repository_impl/report_repository_impl.dart'
@@ -49,6 +52,7 @@ import 'package:frontend/domain/repository/campaign_repository.dart' as _i737;
 import 'package:frontend/domain/repository/leaderboard_repository.dart'
     as _i362;
 import 'package:frontend/domain/repository/mission_repository.dart' as _i629;
+import 'package:frontend/domain/repository/point_repository.dart' as _i974;
 import 'package:frontend/domain/repository/recruiting_repository.dart' as _i138;
 import 'package:frontend/domain/repository/report_repository.dart' as _i589;
 import 'package:frontend/domain/repository/user_repository.dart' as _i653;
@@ -68,6 +72,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i877.RecruitingChatRealtimeService>(
       () => _i877.RecruitingChatRealtimeService(),
     );
+    gh.singleton<_i912.LocationService>(() => _i912.LocationService());
     gh.singleton<_i182.StorageService>(() => _i182.StorageService());
     gh.lazySingleton<_i361.Dio>(() => dioModule.dio);
     gh.factory<_i65.AgentChatApi>(() => _i65.AgentChatApi(gh<_i361.Dio>()));
@@ -76,16 +81,23 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i562.LeaderboardRemoteDataSource(gh<_i361.Dio>()),
     );
     gh.factory<_i800.MissionApi>(() => _i800.MissionApi(gh<_i361.Dio>()));
+    gh.factory<_i116.PointApi>(() => _i116.PointApi(gh<_i361.Dio>()));
     gh.factory<_i324.RecruitingApi>(() => _i324.RecruitingApi(gh<_i361.Dio>()));
     gh.factory<_i889.ReportApi>(() => _i889.ReportApi(gh<_i361.Dio>()));
     gh.factory<_i64.UserRemoteDataSource>(
       () => _i64.UserRemoteDataSource(gh<_i361.Dio>()),
+    );
+    gh.factory<_i876.VerificationApi>(
+      () => _i876.VerificationApi(gh<_i361.Dio>()),
     );
     gh.factory<_i138.RecruitingRepository>(
       () => _i491.RecruitingRepositoryImpl(
         gh<_i324.RecruitingApi>(),
         gh<_i877.RecruitingChatRealtimeService>(),
       ),
+    );
+    gh.factory<_i974.PointRepository>(
+      () => _i278.PointRepositoryImpl(gh<_i116.PointApi>()),
     );
     gh.factory<_i589.ReportRepository>(
       () => _i76.ReportRepositoryImpl(gh<_i889.ReportApi>()),
