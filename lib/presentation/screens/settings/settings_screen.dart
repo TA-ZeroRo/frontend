@@ -7,6 +7,7 @@ import '../../../core/utils/toast_helper.dart';
 import '../../routes/router_path.dart';
 import '../entry/state/auth_controller.dart';
 import 'state/settings_controller.dart';
+import '../../../core/utils/character_notification_helper.dart';
 
 /// 설정 화면 섹션 컴포넌트
 class SettingsSection extends StatelessWidget {
@@ -143,6 +144,20 @@ class SettingsScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
+        // 다이얼로그가 빌드된 후 캐릭터 알림 표시
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (dialogContext.mounted) {
+            CharacterNotificationHelper.show(
+              dialogContext,
+              message: '정말 로그아웃 하실거에요..?',
+              characterImage: 'assets/images/earth_zeroro_sad.png',
+              bubbleColor: Colors.white,
+              duration: const Duration(minutes: 5), // 다이얼로그가 닫힐 때까지 유지
+              alignment: const Alignment(0, -0.43),
+            );
+          }
+        });
+
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -198,7 +213,10 @@ class SettingsScreen extends ConsumerWidget {
           ],
         );
       },
-    );
+    ).then((_) {
+      // 다이얼로그가 닫히면 캐릭터 알림도 숨김
+      CharacterNotificationHelper.hide();
+    });
   }
 
   /// 계정 삭제 확인 다이얼로그
@@ -206,6 +224,20 @@ class SettingsScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
+        // 다이얼로그가 빌드된 후 캐릭터 알림 표시
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (dialogContext.mounted) {
+            CharacterNotificationHelper.show(
+              dialogContext,
+              message: '떠나지마요 ㅠㅠ',
+              characterImage: 'assets/images/earth_zeroro_sad.png',
+              bubbleColor: Colors.white,
+              duration: const Duration(minutes: 5),
+              alignment: const Alignment(0, -0.6), // 모달이 커서 더 위로 배치
+            );
+          }
+        });
+
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -286,7 +318,10 @@ class SettingsScreen extends ConsumerWidget {
           ],
         );
       },
-    );
+    ).then((_) {
+      // 다이얼로그가 닫히면 캐릭터 알림도 숨김
+      CharacterNotificationHelper.hide();
+    });
   }
 
   @override

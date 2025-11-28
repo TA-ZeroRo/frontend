@@ -1,5 +1,6 @@
 class RecruitingPost {
   final String id;
+  final String hostId; // 주최자 ID
   final String campaignId;
   final String campaignTitle;
   final String campaignImageUrl;
@@ -18,6 +19,7 @@ class RecruitingPost {
 
   const RecruitingPost({
     required this.id,
+    required this.hostId,
     required this.campaignId,
     required this.campaignTitle,
     required this.campaignImageUrl,
@@ -37,6 +39,7 @@ class RecruitingPost {
 
   RecruitingPost copyWith({
     String? id,
+    String? hostId,
     String? campaignId,
     String? campaignTitle,
     String? campaignImageUrl,
@@ -55,6 +58,7 @@ class RecruitingPost {
   }) {
     return RecruitingPost(
       id: id ?? this.id,
+      hostId: hostId ?? this.hostId,
       campaignId: campaignId ?? this.campaignId,
       campaignTitle: campaignTitle ?? this.campaignTitle,
       campaignImageUrl: campaignImageUrl ?? this.campaignImageUrl,

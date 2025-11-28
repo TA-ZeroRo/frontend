@@ -97,18 +97,32 @@ class RecruitingCard extends StatelessWidget {
   }
 
   Widget _buildCampaignHeader() {
+    final hasImage = post.campaignImageUrl.isNotEmpty;
+
     return Container(
       height: 80,
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        image: DecorationImage(
-          image: NetworkImage(post.campaignImageUrl),
-          fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(
-            Colors.black.withValues(alpha: 0.4),
-            BlendMode.darken,
-          ),
-        ),
+        gradient: hasImage
+            ? null
+            : LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.primary,
+                  AppColors.primary.withValues(alpha: 0.7),
+                ],
+              ),
+        image: hasImage
+            ? DecorationImage(
+                image: NetworkImage(post.campaignImageUrl),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withValues(alpha: 0.4),
+                  BlendMode.darken,
+                ),
+              )
+            : null,
       ),
       padding: const EdgeInsets.all(12),
       alignment: Alignment.bottomLeft,
