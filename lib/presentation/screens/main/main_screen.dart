@@ -10,6 +10,10 @@ import 'pages/recruiting/recruiting_page.dart';
 import 'state/bottom_nav_controller.dart';
 import 'pages/home/state/chat_controller.dart';
 import 'pages/home/components/full_chat_overlay.dart';
+import 'pages/activity/state/activity_state.dart';
+import 'pages/campaign/state/campaign_state.dart';
+import 'pages/campaign/state/recruiting_state.dart';
+import 'pages/profile/state/weekly_report_controller.dart';
 
 class MainScreen extends ConsumerWidget {
   const MainScreen({super.key});
@@ -18,6 +22,13 @@ class MainScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final BottomNav nav = ref.watch(bottomNavProvider);
     final chatState = ref.watch(chatProvider);
+
+    // 탭 변경 감지 및 자동 새로고침
+    ref.listen<BottomNav>(bottomNavProvider, (previous, next) {
+      if (previous != null && previous != next) {
+        _refreshTabData(ref, next);
+      }
+    });
 
     final Widget page = switch (nav) {
       BottomNav.home => const HomePage(),
@@ -94,5 +105,27 @@ class _BottomNavigationBar extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+/// 탭별 데이터 새로고침
+void _refreshTabData(WidgetRef ref, BottomNav tab) {
+  switch (tab) {
+    case BottomNav.home:
+      // Home은 3D 모델/채팅이라 별도 refresh 불필요
+      break;
+    case BottomNav.activity:
+      ref.read(combinedRankingProvider.notifier).refresh();
+      ref.read(campaignMissionProvider.notifier).refresh();
+      break;
+    case BottomNav.campaign:
+      ref.read(campaignListProvider.notifier).refresh();
+      break;
+    case BottomNav.recruiting:
+      ref.invalidate(recruitingListProvider);
+      break;
+    case BottomNav.profile:
+      ref.read(weeklyReportsProvider.notifier).refresh();
+      break;
   }
 }
