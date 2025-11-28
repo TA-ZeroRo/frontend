@@ -1,6 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/recruiting_post.dart';
+import '../../../../../../core/di/injection.dart';
+import '../../../../../../domain/repository/recruiting_repository.dart';
+
+// 참여 상태 필터 타입
+enum ParticipationStatus {
+  all, // 전체
+  participating, // 참여중
+  recruiting, // 모집중
+}
 
 // 필터 상태 모델
 class RecruitingFilter {
@@ -11,6 +21,7 @@ class RecruitingFilter {
   final DateTime? endDate;
   final int? minAge;
   final int? maxAge;
+  final ParticipationStatus participationStatus;
 
   const RecruitingFilter({
     this.region = '전체',
@@ -20,6 +31,7 @@ class RecruitingFilter {
     this.endDate,
     this.minAge,
     this.maxAge,
+    this.participationStatus = ParticipationStatus.all,
   });
 
   RecruitingFilter copyWith({
@@ -30,6 +42,7 @@ class RecruitingFilter {
     DateTime? endDate,
     int? minAge,
     int? maxAge,
+    ParticipationStatus? participationStatus,
   }) {
     return RecruitingFilter(
       region: region ?? this.region,
@@ -39,6 +52,7 @@ class RecruitingFilter {
       endDate: endDate ?? this.endDate,
       minAge: minAge ?? this.minAge,
       maxAge: maxAge ?? this.maxAge,
+      participationStatus: participationStatus ?? this.participationStatus,
     );
   }
 }
@@ -88,96 +102,72 @@ class RecruitingFilterNotifier extends StateNotifier<RecruitingFilter> {
     state = state.copyWith(minAge: min, maxAge: max);
   }
 
+  void setParticipationStatus(ParticipationStatus status) {
+    state = state.copyWith(participationStatus: status);
+  }
+
   void reset() {
     state = const RecruitingFilter();
   }
 }
 
-// 리크루팅 목록 프로바이더 (Mock Data)
+// 리크루팅 목록 프로바이더 (API 연동)
 final recruitingListProvider = FutureProvider<List<RecruitingPost>>((
   ref,
 ) async {
   final filter = ref.watch(recruitingFilterProvider);
+  final repository = getIt<RecruitingRepository>();
 
-  // API 호출 시뮬레이션
-  await Future.delayed(const Duration(milliseconds: 500));
+  // 현재 사용자 ID 가져오기
+  final userId = Supabase.instance.client.auth.currentSession?.user.id;
 
-  // Mock Data
-  final allPosts = [
-    RecruitingPost(
-      id: '1',
-      campaignId: 'c1',
-      campaignTitle: '한강 플로깅 캠페인',
-      campaignImageUrl: 'https://picsum.photos/id/10/400/300',
-      title: '이번 주말 한강에서 같이 쓰레기 주우실 분!',
-      region: '서울',
-      city: '영등포구',
-      capacity: 4,
-      currentMembers: 2,
-      startDate: DateTime.now().add(const Duration(days: 2)),
-      endDate: DateTime.now().add(const Duration(days: 2)),
-      minAge: 20,
-      maxAge: 30,
-      isRecruiting: true,
-    ),
-    RecruitingPost(
-      id: '2',
-      campaignId: 'c2',
-      campaignTitle: '유기견 봉사활동',
-      campaignImageUrl: 'https://picsum.photos/id/237/400/300',
-      title: '강아지 산책 봉사 같이 가요',
-      region: '경기',
-      city: '수원시',
-      capacity: 6,
-      currentMembers: 5,
-      startDate: DateTime.now().add(const Duration(days: 5)),
-      endDate: DateTime.now().add(const Duration(days: 5)),
-      minAge: 20,
-      maxAge: 40,
-      isRecruiting: true,
-    ),
-    RecruitingPost(
-      id: '3',
-      campaignId: 'c3',
-      campaignTitle: '연탄 나눔 봉사',
-      campaignImageUrl: 'https://picsum.photos/id/106/400/300',
-      title: '따뜻한 겨울 만들기 연탄 봉사 모집합니다',
-      region: '서울',
-      city: '노원구',
-      capacity: 10,
-      currentMembers: 3,
-      startDate: DateTime.now().add(const Duration(days: 10)),
-      endDate: DateTime.now().add(const Duration(days: 10)),
-      minAge: 0, // 제한 없음
-      maxAge: 0,
-      isRecruiting: true,
-    ),
-    RecruitingPost(
-      id: '4',
-      campaignId: 'c4',
-      campaignTitle: '해변 정화 활동',
-      campaignImageUrl: 'https://picsum.photos/id/1040/400/300',
-      title: '부산 해운대 비치코밍 함께해요',
-      region: '부산',
-      city: '해운대구',
-      capacity: 8,
-      currentMembers: 1,
-      startDate: DateTime.now().add(const Duration(days: 7)),
-      endDate: DateTime.now().add(const Duration(days: 7)),
-      minAge: 25,
-      maxAge: 35,
-      isRecruiting: true,
-    ),
-  ];
+  // 참여 상태에 따른 필터 값 변환
+  String? participationStatus;
+  if (filter.participationStatus == ParticipationStatus.participating) {
+    participationStatus = 'participating';
+  } else if (filter.participationStatus == ParticipationStatus.recruiting) {
+    participationStatus = 'recruiting';
+  }
 
-  // 필터링 로직 적용
-  return allPosts.where((post) {
-    if (filter.region != '전체' && post.region != filter.region) return false;
-    if (filter.city != '전체' && post.city != filter.city) return false;
-    if (filter.minCapacity != null && post.capacity < filter.minCapacity!) {
-      return false;
-    }
-    // 날짜, 나이 등 추가 필터링 로직은 필요에 따라 구현
-    return true;
-  }).toList();
+  try {
+    // 백엔드 API 호출
+    final posts = await repository.getRecruitingPosts(
+      offset: 0,
+      region: filter.region != '전체' ? filter.region : null,
+      participationStatus: participationStatus,
+      userId: userId,
+    );
+
+    // 추가 클라이언트 필터링 (API에서 지원하지 않는 필터)
+    return posts.where((post) {
+      // 도시 필터
+      if (filter.city != '전체' && post.city != filter.city) return false;
+
+      // 인원 필터
+      if (filter.minCapacity != null && post.capacity < filter.minCapacity!) {
+        return false;
+      }
+
+      return true;
+    }).toList();
+  } catch (e) {
+    // API 오류 시 빈 리스트 반환 (또는 에러 처리)
+    print('리크루팅 목록 조회 오류: $e');
+    return [];
+  }
 });
+
+// 리크루팅 참여하기 함수
+Future<RecruitingPost> joinRecruiting(int postId) async {
+  final repository = getIt<RecruitingRepository>();
+  final userId = Supabase.instance.client.auth.currentSession?.user.id;
+
+  if (userId == null) {
+    throw Exception('로그인이 필요합니다');
+  }
+
+  return await repository.joinRecruiting(
+    postId: postId,
+    userId: userId,
+  );
+}

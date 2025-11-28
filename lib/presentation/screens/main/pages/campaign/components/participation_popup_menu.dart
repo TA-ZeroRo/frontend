@@ -60,7 +60,7 @@ class ParticipationPopupMenu extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               const Text(
-                '크루팅',
+                '리크루팅',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,

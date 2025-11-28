@@ -1,5 +1,6 @@
 class RecruitingPost {
   final String id;
+  final String hostId; // 주최자 ID
   final String campaignId;
   final String campaignTitle;
   final String campaignImageUrl;
@@ -13,9 +14,12 @@ class RecruitingPost {
   final int minAge;
   final int maxAge;
   final bool isRecruiting;
+  final bool isParticipating;
+  final String? chatRoomId;
 
   const RecruitingPost({
     required this.id,
+    required this.hostId,
     required this.campaignId,
     required this.campaignTitle,
     required this.campaignImageUrl,
@@ -29,10 +33,13 @@ class RecruitingPost {
     required this.minAge,
     required this.maxAge,
     this.isRecruiting = false,
+    this.isParticipating = false,
+    this.chatRoomId,
   });
 
   RecruitingPost copyWith({
     String? id,
+    String? hostId,
     String? campaignId,
     String? campaignTitle,
     String? campaignImageUrl,
@@ -46,9 +53,12 @@ class RecruitingPost {
     int? minAge,
     int? maxAge,
     bool? isRecruiting,
+    bool? isParticipating,
+    String? chatRoomId,
   }) {
     return RecruitingPost(
       id: id ?? this.id,
+      hostId: hostId ?? this.hostId,
       campaignId: campaignId ?? this.campaignId,
       campaignTitle: campaignTitle ?? this.campaignTitle,
       campaignImageUrl: campaignImageUrl ?? this.campaignImageUrl,
@@ -62,6 +72,8 @@ class RecruitingPost {
       minAge: minAge ?? this.minAge,
       maxAge: maxAge ?? this.maxAge,
       isRecruiting: isRecruiting ?? this.isRecruiting,
+      isParticipating: isParticipating ?? this.isParticipating,
+      chatRoomId: chatRoomId ?? this.chatRoomId,
     );
   }
 }
