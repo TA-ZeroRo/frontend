@@ -50,5 +50,9 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+		<string>미션 위치 인증을 위해 위치 정보가 필요합니다.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+		<string>미션 위치 인증을 위해 위치 정보가 필요합니다.</string>
 </dict>
 </plist>

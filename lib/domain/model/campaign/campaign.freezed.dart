@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Campaign {
 
- int get id; String get title; String? get description; String get hostOrganizer; String get campaignUrl; String? get imageUrl; String get startDate; String? get endDate; String get region; String get category; String get status; String? get submissionType; DateTime get updatedAt;// RPA WebView 관련 필드
+ int get id; String get title; String? get description; String get hostOrganizer; String get campaignUrl; String? get imageUrl; String? get startDate; String? get endDate; String? get region; String? get category; String get status; String? get submissionType; DateTime get updatedAt;// RPA WebView 관련 필드
  int? get rpaSiteConfigId; String? get rpaFormUrl; Map<String, dynamic>? get rpaFormConfig; Map<String, dynamic>? get rpaFieldMapping; Map<String, dynamic>? get rpaFormSelectorStrategies; Map<String, dynamic>? get webviewConfig;
 /// Create a copy of Campaign
 /// with the given fields replaced by the non-null parameter values.
@@ -49,7 +49,7 @@ abstract mixin class $CampaignCopyWith<$Res>  {
   factory $CampaignCopyWith(Campaign value, $Res Function(Campaign) _then) = _$CampaignCopyWithImpl;
 @useResult
 $Res call({
- int id, String title, String? description, String hostOrganizer, String campaignUrl, String? imageUrl, String startDate, String? endDate, String region, String category, String status, String? submissionType, DateTime updatedAt, int? rpaSiteConfigId, String? rpaFormUrl, Map<String, dynamic>? rpaFormConfig, Map<String, dynamic>? rpaFieldMapping, Map<String, dynamic>? rpaFormSelectorStrategies, Map<String, dynamic>? webviewConfig
+ int id, String title, String? description, String hostOrganizer, String campaignUrl, String? imageUrl, String? startDate, String? endDate, String? region, String? category, String status, String? submissionType, DateTime updatedAt, int? rpaSiteConfigId, String? rpaFormUrl, Map<String, dynamic>? rpaFormConfig, Map<String, dynamic>? rpaFieldMapping, Map<String, dynamic>? rpaFormSelectorStrategies, Map<String, dynamic>? webviewConfig
 });
 
 
@@ -66,7 +66,7 @@ class _$CampaignCopyWithImpl<$Res>
 
 /// Create a copy of Campaign
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? hostOrganizer = null,Object? campaignUrl = null,Object? imageUrl = freezed,Object? startDate = null,Object? endDate = freezed,Object? region = null,Object? category = null,Object? status = null,Object? submissionType = freezed,Object? updatedAt = null,Object? rpaSiteConfigId = freezed,Object? rpaFormUrl = freezed,Object? rpaFormConfig = freezed,Object? rpaFieldMapping = freezed,Object? rpaFormSelectorStrategies = freezed,Object? webviewConfig = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? hostOrganizer = null,Object? campaignUrl = null,Object? imageUrl = freezed,Object? startDate = freezed,Object? endDate = freezed,Object? region = freezed,Object? category = freezed,Object? status = null,Object? submissionType = freezed,Object? updatedAt = null,Object? rpaSiteConfigId = freezed,Object? rpaFormUrl = freezed,Object? rpaFormConfig = freezed,Object? rpaFieldMapping = freezed,Object? rpaFormSelectorStrategies = freezed,Object? webviewConfig = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -74,11 +74,11 @@ as String,description: freezed == description ? _self.description : description 
 as String?,hostOrganizer: null == hostOrganizer ? _self.hostOrganizer : hostOrganizer // ignore: cast_nullable_to_non_nullable
 as String,campaignUrl: null == campaignUrl ? _self.campaignUrl : campaignUrl // ignore: cast_nullable_to_non_nullable
 as String,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
-as String?,startDate: null == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
-as String,endDate: freezed == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
-as String?,region: null == region ? _self.region : region // ignore: cast_nullable_to_non_nullable
-as String,category: null == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
-as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String?,startDate: freezed == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
+as String?,endDate: freezed == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
+as String?,region: freezed == region ? _self.region : region // ignore: cast_nullable_to_non_nullable
+as String?,category: freezed == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
+as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,submissionType: freezed == submissionType ? _self.submissionType : submissionType // ignore: cast_nullable_to_non_nullable
 as String?,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,rpaSiteConfigId: freezed == rpaSiteConfigId ? _self.rpaSiteConfigId : rpaSiteConfigId // ignore: cast_nullable_to_non_nullable
@@ -172,7 +172,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String title,  String? description,  String hostOrganizer,  String campaignUrl,  String? imageUrl,  String startDate,  String? endDate,  String region,  String category,  String status,  String? submissionType,  DateTime updatedAt,  int? rpaSiteConfigId,  String? rpaFormUrl,  Map<String, dynamic>? rpaFormConfig,  Map<String, dynamic>? rpaFieldMapping,  Map<String, dynamic>? rpaFormSelectorStrategies,  Map<String, dynamic>? webviewConfig)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String title,  String? description,  String hostOrganizer,  String campaignUrl,  String? imageUrl,  String? startDate,  String? endDate,  String? region,  String? category,  String status,  String? submissionType,  DateTime updatedAt,  int? rpaSiteConfigId,  String? rpaFormUrl,  Map<String, dynamic>? rpaFormConfig,  Map<String, dynamic>? rpaFieldMapping,  Map<String, dynamic>? rpaFormSelectorStrategies,  Map<String, dynamic>? webviewConfig)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Campaign() when $default != null:
 return $default(_that.id,_that.title,_that.description,_that.hostOrganizer,_that.campaignUrl,_that.imageUrl,_that.startDate,_that.endDate,_that.region,_that.category,_that.status,_that.submissionType,_that.updatedAt,_that.rpaSiteConfigId,_that.rpaFormUrl,_that.rpaFormConfig,_that.rpaFieldMapping,_that.rpaFormSelectorStrategies,_that.webviewConfig);case _:
@@ -193,7 +193,7 @@ return $default(_that.id,_that.title,_that.description,_that.hostOrganizer,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String title,  String? description,  String hostOrganizer,  String campaignUrl,  String? imageUrl,  String startDate,  String? endDate,  String region,  String category,  String status,  String? submissionType,  DateTime updatedAt,  int? rpaSiteConfigId,  String? rpaFormUrl,  Map<String, dynamic>? rpaFormConfig,  Map<String, dynamic>? rpaFieldMapping,  Map<String, dynamic>? rpaFormSelectorStrategies,  Map<String, dynamic>? webviewConfig)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String title,  String? description,  String hostOrganizer,  String campaignUrl,  String? imageUrl,  String? startDate,  String? endDate,  String? region,  String? category,  String status,  String? submissionType,  DateTime updatedAt,  int? rpaSiteConfigId,  String? rpaFormUrl,  Map<String, dynamic>? rpaFormConfig,  Map<String, dynamic>? rpaFieldMapping,  Map<String, dynamic>? rpaFormSelectorStrategies,  Map<String, dynamic>? webviewConfig)  $default,) {final _that = this;
 switch (_that) {
 case _Campaign():
 return $default(_that.id,_that.title,_that.description,_that.hostOrganizer,_that.campaignUrl,_that.imageUrl,_that.startDate,_that.endDate,_that.region,_that.category,_that.status,_that.submissionType,_that.updatedAt,_that.rpaSiteConfigId,_that.rpaFormUrl,_that.rpaFormConfig,_that.rpaFieldMapping,_that.rpaFormSelectorStrategies,_that.webviewConfig);case _:
@@ -213,7 +213,7 @@ return $default(_that.id,_that.title,_that.description,_that.hostOrganizer,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String title,  String? description,  String hostOrganizer,  String campaignUrl,  String? imageUrl,  String startDate,  String? endDate,  String region,  String category,  String status,  String? submissionType,  DateTime updatedAt,  int? rpaSiteConfigId,  String? rpaFormUrl,  Map<String, dynamic>? rpaFormConfig,  Map<String, dynamic>? rpaFieldMapping,  Map<String, dynamic>? rpaFormSelectorStrategies,  Map<String, dynamic>? webviewConfig)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String title,  String? description,  String hostOrganizer,  String campaignUrl,  String? imageUrl,  String? startDate,  String? endDate,  String? region,  String? category,  String status,  String? submissionType,  DateTime updatedAt,  int? rpaSiteConfigId,  String? rpaFormUrl,  Map<String, dynamic>? rpaFormConfig,  Map<String, dynamic>? rpaFieldMapping,  Map<String, dynamic>? rpaFormSelectorStrategies,  Map<String, dynamic>? webviewConfig)?  $default,) {final _that = this;
 switch (_that) {
 case _Campaign() when $default != null:
 return $default(_that.id,_that.title,_that.description,_that.hostOrganizer,_that.campaignUrl,_that.imageUrl,_that.startDate,_that.endDate,_that.region,_that.category,_that.status,_that.submissionType,_that.updatedAt,_that.rpaSiteConfigId,_that.rpaFormUrl,_that.rpaFormConfig,_that.rpaFieldMapping,_that.rpaFormSelectorStrategies,_that.webviewConfig);case _:
@@ -228,7 +228,7 @@ return $default(_that.id,_that.title,_that.description,_that.hostOrganizer,_that
 @JsonSerializable()
 
 class _Campaign implements Campaign {
-  const _Campaign({required this.id, required this.title, this.description, required this.hostOrganizer, required this.campaignUrl, this.imageUrl, required this.startDate, this.endDate, required this.region, required this.category, required this.status, this.submissionType, required this.updatedAt, this.rpaSiteConfigId, this.rpaFormUrl, final  Map<String, dynamic>? rpaFormConfig, final  Map<String, dynamic>? rpaFieldMapping, final  Map<String, dynamic>? rpaFormSelectorStrategies, final  Map<String, dynamic>? webviewConfig}): _rpaFormConfig = rpaFormConfig,_rpaFieldMapping = rpaFieldMapping,_rpaFormSelectorStrategies = rpaFormSelectorStrategies,_webviewConfig = webviewConfig;
+  const _Campaign({required this.id, required this.title, this.description, required this.hostOrganizer, required this.campaignUrl, this.imageUrl, this.startDate, this.endDate, this.region, this.category, required this.status, this.submissionType, required this.updatedAt, this.rpaSiteConfigId, this.rpaFormUrl, final  Map<String, dynamic>? rpaFormConfig, final  Map<String, dynamic>? rpaFieldMapping, final  Map<String, dynamic>? rpaFormSelectorStrategies, final  Map<String, dynamic>? webviewConfig}): _rpaFormConfig = rpaFormConfig,_rpaFieldMapping = rpaFieldMapping,_rpaFormSelectorStrategies = rpaFormSelectorStrategies,_webviewConfig = webviewConfig;
   factory _Campaign.fromJson(Map<String, dynamic> json) => _$CampaignFromJson(json);
 
 @override final  int id;
@@ -237,10 +237,10 @@ class _Campaign implements Campaign {
 @override final  String hostOrganizer;
 @override final  String campaignUrl;
 @override final  String? imageUrl;
-@override final  String startDate;
+@override final  String? startDate;
 @override final  String? endDate;
-@override final  String region;
-@override final  String category;
+@override final  String? region;
+@override final  String? category;
 @override final  String status;
 @override final  String? submissionType;
 @override final  DateTime updatedAt;
@@ -317,7 +317,7 @@ abstract mixin class _$CampaignCopyWith<$Res> implements $CampaignCopyWith<$Res>
   factory _$CampaignCopyWith(_Campaign value, $Res Function(_Campaign) _then) = __$CampaignCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String title, String? description, String hostOrganizer, String campaignUrl, String? imageUrl, String startDate, String? endDate, String region, String category, String status, String? submissionType, DateTime updatedAt, int? rpaSiteConfigId, String? rpaFormUrl, Map<String, dynamic>? rpaFormConfig, Map<String, dynamic>? rpaFieldMapping, Map<String, dynamic>? rpaFormSelectorStrategies, Map<String, dynamic>? webviewConfig
+ int id, String title, String? description, String hostOrganizer, String campaignUrl, String? imageUrl, String? startDate, String? endDate, String? region, String? category, String status, String? submissionType, DateTime updatedAt, int? rpaSiteConfigId, String? rpaFormUrl, Map<String, dynamic>? rpaFormConfig, Map<String, dynamic>? rpaFieldMapping, Map<String, dynamic>? rpaFormSelectorStrategies, Map<String, dynamic>? webviewConfig
 });
 
 
@@ -334,7 +334,7 @@ class __$CampaignCopyWithImpl<$Res>
 
 /// Create a copy of Campaign
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? hostOrganizer = null,Object? campaignUrl = null,Object? imageUrl = freezed,Object? startDate = null,Object? endDate = freezed,Object? region = null,Object? category = null,Object? status = null,Object? submissionType = freezed,Object? updatedAt = null,Object? rpaSiteConfigId = freezed,Object? rpaFormUrl = freezed,Object? rpaFormConfig = freezed,Object? rpaFieldMapping = freezed,Object? rpaFormSelectorStrategies = freezed,Object? webviewConfig = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? hostOrganizer = null,Object? campaignUrl = null,Object? imageUrl = freezed,Object? startDate = freezed,Object? endDate = freezed,Object? region = freezed,Object? category = freezed,Object? status = null,Object? submissionType = freezed,Object? updatedAt = null,Object? rpaSiteConfigId = freezed,Object? rpaFormUrl = freezed,Object? rpaFormConfig = freezed,Object? rpaFieldMapping = freezed,Object? rpaFormSelectorStrategies = freezed,Object? webviewConfig = freezed,}) {
   return _then(_Campaign(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -342,11 +342,11 @@ as String,description: freezed == description ? _self.description : description 
 as String?,hostOrganizer: null == hostOrganizer ? _self.hostOrganizer : hostOrganizer // ignore: cast_nullable_to_non_nullable
 as String,campaignUrl: null == campaignUrl ? _self.campaignUrl : campaignUrl // ignore: cast_nullable_to_non_nullable
 as String,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
-as String?,startDate: null == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
-as String,endDate: freezed == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
-as String?,region: null == region ? _self.region : region // ignore: cast_nullable_to_non_nullable
-as String,category: null == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
-as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String?,startDate: freezed == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
+as String?,endDate: freezed == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
+as String?,region: freezed == region ? _self.region : region // ignore: cast_nullable_to_non_nullable
+as String?,category: freezed == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
+as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,submissionType: freezed == submissionType ? _self.submissionType : submissionType // ignore: cast_nullable_to_non_nullable
 as String?,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,rpaSiteConfigId: freezed == rpaSiteConfigId ? _self.rpaSiteConfigId : rpaSiteConfigId // ignore: cast_nullable_to_non_nullable

@@ -46,3 +46,6 @@ app.*.map.json
 
 # 환경 변수
 .env
+
+# Claude
+.claude/settings.local.json

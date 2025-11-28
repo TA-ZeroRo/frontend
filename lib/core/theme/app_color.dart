@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -23,6 +22,7 @@ class AppColors {
   static const Color textPrimary = Color(0xFF1A1A1A);
   static const Color textSecondary = Color(0xFF666666);
   static const Color textTertiary = Color(0xFF999999);
+  static const Color textSubtle = Color(0xFFB0B0B0);
 
   // Action colors
   static const Color likeActive = Color(0xFFFF6B6B);

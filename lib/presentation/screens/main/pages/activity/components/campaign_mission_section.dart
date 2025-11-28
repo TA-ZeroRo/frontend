@@ -9,6 +9,7 @@ import '../state/activity_state.dart';
 import '../../campaign/campaign_mission_webview_screen.dart';
 import 'shimmer_widgets.dart';
 import 'verification_bottom_sheets/image_verification_bottom_sheet.dart';
+import 'verification_bottom_sheets/location_verification_bottom_sheet.dart';
 import 'verification_bottom_sheets/quiz_verification_bottom_sheet.dart';
 import 'verification_bottom_sheets/text_review_verification_bottom_sheet.dart';
 
@@ -225,7 +226,7 @@ class CampaignMissionSection extends ConsumerWidget {
         // Campaign header with highlight color
         Container(
           decoration: BoxDecoration(
-            color: _getCampaignHeaderColor(campaign.category),
+            color: _getCampaignHeaderColor(campaign.category ?? '기타'),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
@@ -292,6 +293,8 @@ class CampaignMissionSection extends ConsumerWidget {
         return '글쓰기';
       case VerificationType.quiz:
         return '퀴즈';
+      case VerificationType.location:
+        return '위치 인증';
     }
   }
 
@@ -303,6 +306,8 @@ class CampaignMissionSection extends ConsumerWidget {
         return Icons.edit_outlined;
       case VerificationType.quiz:
         return Icons.quiz_outlined;
+      case VerificationType.location:
+        return Icons.location_on_outlined;
     }
   }
 
@@ -314,6 +319,8 @@ class CampaignMissionSection extends ConsumerWidget {
         return const Color(0xFF2196F3); // Blue
       case VerificationType.quiz:
         return const Color(0xFFFF9800); // Orange
+      case VerificationType.location:
+        return const Color(0xFF9C27B0); // Purple
     }
   }
 
@@ -794,6 +801,60 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
                 ),
               ),
             ),
+          ] else if (verificationType == VerificationType.location) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.location_on,
+                    color: Color(0xFF9C27B0),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '위치 인증 완료',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        if (proofData['address'] != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            proofData['address'],
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                        if (proofData['distance'] != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            '거리: ${proofData['distance']}m',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ] else ...[
             const Text('퀴즈 완료'),
           ],
@@ -832,6 +893,15 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
           backgroundColor: Colors.transparent,
           isScrollControlled: true,
           builder: (context) => QuizVerificationBottomSheet(mission: mission),
+        );
+        break;
+      case VerificationType.location:
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          isScrollControlled: true,
+          builder: (context) =>
+              LocationVerificationBottomSheet(mission: mission),
         );
         break;
     }

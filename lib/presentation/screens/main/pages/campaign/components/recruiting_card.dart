@@ -6,8 +6,14 @@ import '../models/recruiting_post.dart';
 class RecruitingCard extends StatelessWidget {
   final RecruitingPost post;
   final VoidCallback? onTap;
+  final VoidCallback? onActionButtonTap;
 
-  const RecruitingCard({super.key, required this.post, this.onTap});
+  const RecruitingCard({
+    super.key,
+    required this.post,
+    this.onTap,
+    this.onActionButtonTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +83,10 @@ class RecruitingCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 12),
+
+                  // 참여 버튼
+                  _buildActionButton(),
                 ],
               ),
             ),
@@ -140,6 +150,49 @@ class RecruitingCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onActionButtonTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor:
+              post.isParticipating ? AppColors.primary : Colors.white,
+          foregroundColor:
+              post.isParticipating ? Colors.white : AppColors.primary,
+          side: post.isParticipating
+              ? null
+              : const BorderSide(color: AppColors.primary, width: 1.5),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          elevation: 0,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (post.isParticipating)
+              const Icon(Icons.check_circle, size: 18)
+            else
+              const Icon(Icons.person_add, size: 18),
+            const SizedBox(width: 6),
+            Text(
+              post.isParticipating ? '채팅 보기' : '참여하기',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color:
+                    post.isParticipating ? Colors.white : AppColors.primary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

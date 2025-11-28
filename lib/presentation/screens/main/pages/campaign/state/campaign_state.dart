@@ -155,7 +155,7 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
       // 기간 필터 (로컬)
       if (filter.startDate != null && filter.endDate != null) {
         final campaignStart =
-            DateTime.tryParse(campaign.startDate) ?? DateTime(1900, 1, 1);
+            DateTime.tryParse(campaign.startDate ?? '') ?? DateTime(1900, 1, 1);
         final campaignEnd =
             (campaign.endDate != null
                 ? DateTime.tryParse(campaign.endDate!)
@@ -189,15 +189,15 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
       title: campaign.title,
       imageUrl: campaign.imageUrl ?? '',
       url: campaign.campaignUrl,
-      startDate: DateTime.tryParse(campaign.startDate) ?? DateTime.now(),
+      startDate: DateTime.tryParse(campaign.startDate ?? '') ?? DateTime.now(),
       endDate:
           (campaign.endDate != null
               ? DateTime.tryParse(campaign.endDate!)
               : null) ??
-          (DateTime.tryParse(campaign.startDate) ?? DateTime.now()),
-      region: campaign.region,
+          (DateTime.tryParse(campaign.startDate ?? '') ?? DateTime.now()),
+      region: campaign.region ?? '전국',
       city: '전체', // API에 city가 없으므로 기본값
-      category: campaign.category,
+      category: campaign.category ?? '기타',
       isParticipating: _participatingCampaignIds.contains(campaign.id),
       isAutoProcessable: isAutoProcessable,
     );
