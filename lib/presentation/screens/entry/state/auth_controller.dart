@@ -184,6 +184,21 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
+  /// 현재 사용자 정보 새로고침 (미션 완료 등 포인트 변경 시 사용)
+  Future<void> refreshCurrentUser() async {
+    try {
+      final userId = _supabase.auth.currentSession?.user.id;
+      if (userId == null) {
+        return;
+      }
+
+      final user = await _userRepository.getUser(userId);
+      state = state.copyWith(currentUser: user);
+    } catch (e) {
+      // 새로고침 실패 시 에러 무시 (기존 상태 유지)
+    }
+  }
+
   /// 세션 체크 및 자동 로그인
   /// SplashScreen에서 호출
   Future<void> checkAndRestoreSession() async {
