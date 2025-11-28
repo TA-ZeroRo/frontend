@@ -483,7 +483,7 @@ class _ProfileEditDialogState extends ConsumerState<ProfileEditDialog> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                initialValue: _selectedProvince,
+                value: _selectedProvince,
                 decoration: InputDecoration(
                   hintText: '도를 선택하세요',
                   border: OutlineInputBorder(
@@ -533,7 +533,7 @@ class _ProfileEditDialogState extends ConsumerState<ProfileEditDialog> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                initialValue: _selectedCity,
+                value: _selectedCity,
                 decoration: InputDecoration(
                   hintText: _selectedProvince == null
                       ? '먼저 도를 선택하세요'

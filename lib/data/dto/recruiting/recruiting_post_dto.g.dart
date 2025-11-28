@@ -24,6 +24,7 @@ RecruitingPostDto _$RecruitingPostDtoFromJson(Map<String, dynamic> json) =>
       createdAt: json['created_at'] as String,
       updatedAt: json['updated_at'] as String,
       profiles: json['profiles'] as Map<String, dynamic>?,
+      campaigns: json['campaigns'] as Map<String, dynamic>?,
       chatRoomId: (json['chat_room_id'] as num?)?.toInt(),
       isParticipating: json['is_participating'] as bool? ?? false,
     );
@@ -46,6 +47,7 @@ Map<String, dynamic> _$RecruitingPostDtoToJson(RecruitingPostDto instance) =>
       'created_at': instance.createdAt,
       'updated_at': instance.updatedAt,
       'profiles': instance.profiles,
+      'campaigns': instance.campaigns,
       'chat_room_id': instance.chatRoomId,
       'is_participating': instance.isParticipating,
     };
