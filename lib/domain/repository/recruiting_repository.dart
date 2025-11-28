@@ -84,6 +84,13 @@ abstract class RecruitingRepository {
 
   /// 채팅방 실시간 메시지 구독 해제
   void unsubscribeFromChatRoom();
+
+  /// 참여자 강퇴 (주최자 전용)
+  Future<void> kickParticipant({
+    required int postId,
+    required String hostUserId,
+    required String targetUserId,
+  });
 }
 
 /// 채팅방 참여자 모델

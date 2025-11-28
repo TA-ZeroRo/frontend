@@ -198,4 +198,17 @@ class RecruitingRepositoryImpl implements RecruitingRepository {
   void unsubscribeFromChatRoom() {
     _realtimeService.unsubscribe();
   }
+
+  @override
+  Future<void> kickParticipant({
+    required int postId,
+    required String hostUserId,
+    required String targetUserId,
+  }) async {
+    await _recruitingApi.kickParticipant(
+      postId: postId,
+      hostUserId: hostUserId,
+      targetUserId: targetUserId,
+    );
+  }
 }

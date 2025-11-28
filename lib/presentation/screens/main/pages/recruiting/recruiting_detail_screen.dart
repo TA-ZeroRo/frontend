@@ -86,7 +86,13 @@ class _RecruitingDetailScreenState
                   },
                 ),
                 RecruitingChatTab(post: _currentPost),
-                RecruitingMembersTab(post: _currentPost),
+                RecruitingMembersTab(
+                  post: _currentPost,
+                  onMemberKicked: () {
+                    _refreshPost();
+                    ref.invalidate(recruitingListProvider);
+                  },
+                ),
               ],
             ),
           ),

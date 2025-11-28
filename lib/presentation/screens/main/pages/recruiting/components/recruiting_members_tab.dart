@@ -2,14 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
+import '../../../../../../core/utils/toast_helper.dart';
 import '../../../../../../core/di/injection.dart';
 import '../../../../../../domain/repository/recruiting_repository.dart';
 import '../../campaign/models/recruiting_post.dart';
 
 class RecruitingMembersTab extends StatefulWidget {
   final RecruitingPost post;
+  final VoidCallback? onMemberKicked;
 
-  const RecruitingMembersTab({super.key, required this.post});
+  const RecruitingMembersTab({
+    super.key,
+    required this.post,
+    this.onMemberKicked,
+  });
 
   @override
   State<RecruitingMembersTab> createState() => _RecruitingMembersTabState();
@@ -23,6 +29,9 @@ class _RecruitingMembersTabState extends State<RecruitingMembersTab> {
 
   String? get _currentUserId =>
       Supabase.instance.client.auth.currentSession?.user.id;
+
+  bool get _isHost =>
+      _currentUserId != null && _currentUserId == widget.post.hostId;
 
   @override
   void initState() {
@@ -99,7 +108,7 @@ class _RecruitingMembersTabState extends State<RecruitingMembersTab> {
             separatorBuilder: (context, index) => const Divider(height: 24),
             itemBuilder: (context, index) {
               final member = _members[index];
-              return _buildMemberCard(member, index == 0);
+              return _buildMemberCard(member);
             },
           ),
         ),
@@ -156,8 +165,11 @@ class _RecruitingMembersTabState extends State<RecruitingMembersTab> {
   }
 
   /// 참여자 카드
-  Widget _buildMemberCard(ChatRoomParticipant member, bool isHost) {
+  Widget _buildMemberCard(ChatRoomParticipant member) {
     final isMe = member.userId == _currentUserId;
+    final isMemberHost = member.userId == widget.post.hostId;
+    // 강퇴 버튼 표시 조건: 내가 호스트이고, 대상이 나도 아니고 호스트도 아닐 때
+    final showKickButton = _isHost && !isMe && !isMemberHost;
 
     return Row(
       children: [
@@ -187,7 +199,7 @@ class _RecruitingMembersTabState extends State<RecruitingMembersTab> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  if (isHost)
+                  if (isMemberHost)
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,
@@ -218,8 +230,69 @@ class _RecruitingMembersTabState extends State<RecruitingMembersTab> {
             ],
           ),
         ),
+        // 강퇴 버튼
+        if (showKickButton)
+          IconButton(
+            onPressed: () => _showKickConfirmation(member),
+            icon: const Icon(Icons.person_remove_outlined),
+            color: AppColors.error,
+            tooltip: '강퇴',
+            style: IconButton.styleFrom(
+              backgroundColor: AppColors.error.withValues(alpha: 0.1),
+            ),
+          ),
       ],
     );
+  }
+
+  /// 강퇴 확인 다이얼로그
+  Future<void> _showKickConfirmation(ChatRoomParticipant member) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('참여자 강퇴'),
+        content: Text('${member.username}님을 강퇴하시겠습니까?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('강퇴'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    // 로딩 표시
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      await _repository.kickParticipant(
+        postId: int.parse(widget.post.id),
+        hostUserId: _currentUserId!,
+        targetUserId: member.userId,
+      );
+
+      if (mounted) Navigator.pop(context); // 로딩 닫기
+
+      // 목록 새로고침
+      await _loadMembers();
+      widget.onMemberKicked?.call();
+
+      ToastHelper.showSuccess('${member.username}님을 강퇴했습니다');
+    } catch (e) {
+      if (mounted) Navigator.pop(context); // 로딩 닫기
+      ToastHelper.showError('강퇴에 실패했습니다');
+    }
   }
 
   /// 참여 시간 포맷팅

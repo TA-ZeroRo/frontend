@@ -219,4 +219,20 @@ class RecruitingApi {
     final List<dynamic> data = response.data;
     return data.map((json) => ChatRoomParticipantDto.fromJson(json)).toList();
   }
+
+  /// 참여자 강퇴 (주최자 전용)
+  /// DELETE /recruiting/posts/{postId}/kick
+  Future<void> kickParticipant({
+    required int postId,
+    required String hostUserId,
+    required String targetUserId,
+  }) async {
+    await _dio.delete(
+      '/recruiting/posts/$postId/kick',
+      data: {
+        'host_user_id': hostUserId,
+        'target_user_id': targetUserId,
+      },
+    );
+  }
 }

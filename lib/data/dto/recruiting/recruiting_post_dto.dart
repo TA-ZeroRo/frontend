@@ -68,6 +68,7 @@ class RecruitingPostDto {
   }) {
     return RecruitingPost(
       id: id.toString(),
+      hostId: userId,
       campaignId: campaignId.toString(),
       campaignTitle: campaignTitle ?? '',
       campaignImageUrl: campaignImageUrl ?? '',
