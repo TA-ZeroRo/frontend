@@ -6,6 +6,7 @@ import 'package:frontend/core/theme/app_color.dart';
 import 'package:logger/logger.dart';
 import '../../../../../core/components/custom_app_bar.dart';
 import '../../../../../core/utils/toast_helper.dart';
+import 'components/character_select_modal.dart';
 import 'components/simple_chat_area.dart';
 import 'components/inline_chat_widget.dart';
 import 'state/chat_controller.dart';
@@ -15,7 +16,7 @@ class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-ConsumerState<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
@@ -113,7 +114,37 @@ class _HomePageState extends ConsumerState<HomePage> {
     });
 
     return Scaffold(
-      appBar: !chatState.isFullChatOpen ? CustomAppBar(title: 'ZeroRo') : null,
+      appBar: !chatState.isFullChatOpen
+          ? CustomAppBar(
+              title: 'ZeroRo',
+              additionalActions: [
+                IconButton(
+                  onPressed: () {
+                    // TODO: Implement gacha game feature
+                    ToastHelper.showInfo('준비 중인 기능입니다!');
+                  },
+                  icon: Image.asset(
+                    'assets/images/casino_icon.png',
+                    width: 32,
+                    height: 32,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => const CharacterSelectModal(),
+                    );
+                  },
+                  icon: Image.asset(
+                    'assets/images/change_character.png',
+                    width: 32,
+                    height: 32,
+                  ),
+                ),
+              ],
+            )
+          : null,
       body: Container(
         color: AppColors.background,
         child: Stack(
