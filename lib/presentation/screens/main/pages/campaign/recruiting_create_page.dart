@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../../core/di/injection.dart';
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/theme/app_text_style.dart';
 import '../../../../../core/utils/toast_helper.dart';
+import '../../../../../domain/repository/recruiting_repository.dart';
 import 'models/campaign_data.dart';
 import 'components/recruiting_inline_calendar.dart';
 import 'components/recruiting_age_picker.dart';
 import 'components/recruiting_region_card.dart';
 
-/// 크루팅 작성 페이지
+/// 리크루팅 작성 페이지
 class RecruitingCreatePage extends StatefulWidget {
   final CampaignData campaign;
 
@@ -89,7 +92,7 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
   }
 
   /// 작성 완료
-  void _handleSubmit() {
+  Future<void> _handleSubmit() async {
     // 제목 검사
     if (_titleController.text.trim().isEmpty) {
       ToastHelper.showError('제목을 입력해주세요');
@@ -120,9 +123,9 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
       return;
     }
 
-    // 크루팅 날짜 검사
+    // 리크루팅 날짜 검사
     if (_selectedStartDate == null || _selectedEndDate == null) {
-      ToastHelper.showError('크루팅 날짜를 선택해주세요');
+      ToastHelper.showError('리크루팅 날짜를 선택해주세요');
       return;
     }
 
@@ -131,9 +134,44 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
       return;
     }
 
-    // TODO: API 호출하여 크루팅 게시글 작성
-    ToastHelper.showSuccess('크루팅 게시글이 작성되었습니다');
-    Navigator.pop(context);
+    // 로그인 확인
+    final userId = Supabase.instance.client.auth.currentSession?.user.id;
+    if (userId == null) {
+      ToastHelper.showError('로그인이 필요합니다');
+      return;
+    }
+
+    // 로딩 표시
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final repository = getIt<RecruitingRepository>();
+
+      await repository.createRecruitingPost(
+        userId: userId,
+        campaignId: int.parse(widget.campaign.id),
+        title: _titleController.text.trim(),
+        region: _selectedRegion!,
+        city: _selectedCity!,
+        capacity: capacity,
+        startDate: _selectedStartDate!,
+        endDate: _selectedEndDate,
+        minAge: _isAnyAge ? 0 : _minAge,
+        maxAge: _isAnyAge ? 0 : _maxAge,
+      );
+
+      if (mounted) Navigator.pop(context); // 로딩 닫기
+
+      ToastHelper.showSuccess('리크루팅 게시글이 작성되었습니다');
+      if (mounted) Navigator.pop(context); // 작성 화면 닫기
+    } catch (e) {
+      if (mounted) Navigator.pop(context); // 로딩 닫기
+      ToastHelper.showError('리크루팅 작성에 실패했습니다');
+    }
   }
 
   @override
@@ -149,7 +187,7 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
           color: AppColors.onPrimary,
         ),
         title: Text(
-          '크루팅 작성',
+          '리크루팅 작성',
           style: AppTextStyle.titleLarge.copyWith(
             color: AppColors.onPrimary,
             fontWeight: FontWeight.w500,
@@ -209,7 +247,7 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
               // 활동 지역 카드
               _buildRegionCard(),
               const SizedBox(height: 15),
-              // 크루팅 날짜 카드
+              // 리크루팅 날짜 카드
               _buildDateCard(),
               const SizedBox(height: 30),
               // 작성 완료 버튼
@@ -257,7 +295,7 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
       child: TextField(
         controller: _titleController,
         decoration: InputDecoration(
-          hintText: '크루팅 제목을 입력해주세요',
+          hintText: '리크루팅 제목을 입력해주세요',
           hintStyle: TextStyle(
             fontSize: 14,
             color: AppColors.textTertiary,
@@ -465,7 +503,7 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
     );
   }
 
-  /// 크루팅 날짜 카드
+  /// 리크루팅 날짜 카드
   Widget _buildDateCard() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -485,7 +523,7 @@ class _RecruitingCreatePageState extends State<RecruitingCreatePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            '크루팅 날짜',
+            '리크루팅 날짜',
             style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 6),
