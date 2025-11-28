@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -7,6 +9,7 @@ import '../../../../../../core/di/injection.dart';
 import '../../../../../../domain/repository/recruiting_repository.dart';
 import '../../campaign/models/recruiting_post.dart';
 import '../../../../../../domain/model/recruiting/chat_message.dart';
+import '../state/recruiting_chat_state.dart';
 import 'recruiting_message_bubble.dart';
 import 'recruiting_chat_input.dart';
 
@@ -23,9 +26,11 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _messageController = TextEditingController();
   final RecruitingRepository _repository = getIt<RecruitingRepository>();
-  List<ChatMessage> _messages = [];
+  List<ChatMessageWithStatus> _messages = [];
   bool _isLoading = true;
+  bool _isSending = false;
   String? _error;
+  StreamSubscription<ChatMessage>? _realtimeSubscription;
 
   String? get _currentUserId =>
       Supabase.instance.client.auth.currentSession?.user.id;
@@ -33,7 +38,37 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
   @override
   void initState() {
     super.initState();
-    _loadMessages();
+    _loadMessages().then((_) => _subscribeToRealtime());
+  }
+
+  /// 실시간 메시지 구독
+  void _subscribeToRealtime() {
+    final chatRoomId = widget.post.chatRoomId;
+    if (chatRoomId == null) return;
+
+    _realtimeSubscription = _repository
+        .subscribeToChatRoom(int.parse(chatRoomId))
+        .listen(_onNewRealtimeMessage);
+  }
+
+  /// 실시간 메시지 수신 처리
+  void _onNewRealtimeMessage(ChatMessage message) {
+    // 중복 방지 (내가 보낸 메시지는 이미 낙관적 업데이트로 추가됨)
+    final isDuplicate = _messages.any((m) => m.message.id == message.id);
+    final isMyMessage = message.userId == _currentUserId;
+
+    if (!isDuplicate && !isMyMessage) {
+      setState(() {
+        _messages = [
+          ..._messages,
+          ChatMessageWithStatus(
+            message: message,
+            status: MessageStatus.sent,
+          ),
+        ];
+      });
+      Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
+    }
   }
 
   Future<void> _loadMessages() async {
@@ -53,7 +88,13 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
         userId: userId,
       );
       setState(() {
-        _messages = messages;
+        // ChatMessage를 ChatMessageWithStatus로 변환
+        _messages = messages
+            .map((m) => ChatMessageWithStatus(
+                  message: m,
+                  status: MessageStatus.sent,
+                ))
+            .toList();
         _isLoading = false;
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -69,6 +110,8 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
 
   @override
   void dispose() {
+    _realtimeSubscription?.cancel();
+    _repository.unsubscribeFromChatRoom();
     _scrollController.dispose();
     _messageController.dispose();
     super.dispose();
@@ -85,7 +128,7 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
   }
 
   Future<void> _sendMessage(String message) async {
-    if (message.trim().isEmpty) return;
+    if (message.trim().isEmpty || _isSending) return;
 
     final chatRoomId = widget.post.chatRoomId;
     final userId = _currentUserId;
@@ -93,27 +136,117 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
 
     _messageController.clear();
 
+    // 로컬 ID 생성 (낙관적 업데이트 추적용)
+    final localId = 'local_${DateTime.now().millisecondsSinceEpoch}';
+
+    // 1. 낙관적 업데이트 - 즉시 표시
+    final optimisticMessage = ChatMessageWithStatus(
+      message: ChatMessage(
+        id: localId,
+        chatRoomId: chatRoomId,
+        userId: userId,
+        username: '나', // 임시 표시
+        userImageUrl: null,
+        message: message,
+        timestamp: DateTime.now(),
+      ),
+      status: MessageStatus.sending,
+      localId: localId,
+    );
+
+    setState(() {
+      _isSending = true;
+      _messages = [..._messages, optimisticMessage];
+    });
+
+    // 즉시 스크롤
+    Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
+
     try {
-      // API로 메시지 전송
+      // 2. API로 메시지 전송
       final newMessage = await _repository.sendChatMessage(
         roomId: int.parse(chatRoomId),
         userId: userId,
         message: message,
       );
 
+      // 3. 낙관적 메시지를 실제 메시지로 교체
       setState(() {
-        _messages = [..._messages, newMessage];
+        _messages = _messages.map((m) {
+          if (m.localId == localId) {
+            return ChatMessageWithStatus(
+              message: newMessage,
+              status: MessageStatus.sent,
+            );
+          }
+          return m;
+        }).toList();
+        _isSending = false;
       });
-
-      // 메시지 전송 후 스크롤
-      Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
     } catch (e) {
-      // 에러 시 사용자에게 알림
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('메시지 전송 실패: $e')),
-        );
-      }
+      // 4. 실패 시 상태 업데이트
+      setState(() {
+        _messages = _messages.map((m) {
+          if (m.localId == localId) {
+            return m.copyWith(status: MessageStatus.failed);
+          }
+          return m;
+        }).toList();
+        _isSending = false;
+      });
+    }
+  }
+
+  /// 실패한 메시지 재전송
+  Future<void> _retryMessage(ChatMessageWithStatus failedMessage) async {
+    if (failedMessage.status != MessageStatus.failed || _isSending) return;
+
+    final chatRoomId = widget.post.chatRoomId;
+    final userId = _currentUserId;
+    if (chatRoomId == null || userId == null) return;
+
+    final localId = failedMessage.localId ?? failedMessage.message.id;
+
+    // 전송 중 상태로 변경
+    setState(() {
+      _isSending = true;
+      _messages = _messages.map((m) {
+        if (m.localId == localId || m.message.id == localId) {
+          return m.copyWith(status: MessageStatus.sending);
+        }
+        return m;
+      }).toList();
+    });
+
+    try {
+      final newMessage = await _repository.sendChatMessage(
+        roomId: int.parse(chatRoomId),
+        userId: userId,
+        message: failedMessage.message.message,
+      );
+
+      setState(() {
+        _messages = _messages.map((m) {
+          if (m.localId == localId || m.message.id == localId) {
+            return ChatMessageWithStatus(
+              message: newMessage,
+              status: MessageStatus.sent,
+            );
+          }
+          return m;
+        }).toList();
+        _isSending = false;
+      });
+    } catch (e) {
+      setState(() {
+        _messages = _messages.map((m) {
+          if (m.localId == localId || m.message.id == localId) {
+            return m.copyWith(status: MessageStatus.failed);
+          }
+          return m;
+        }).toList();
+        _isSending = false;
+      });
     }
   }
 
@@ -163,7 +296,8 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
                   padding: const EdgeInsets.all(16),
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
-                    final message = messages[index];
+                    final messageWithStatus = messages[index];
+                    final message = messageWithStatus.message;
                     final isMe = message.userId == _currentUserId;
 
                     // 날짜 구분선 표시 여부 확인
@@ -171,7 +305,7 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
                     if (index == 0) {
                       showDateSeparator = true;
                     } else {
-                      final prevMessage = messages[index - 1];
+                      final prevMessage = messages[index - 1].message;
                       showDateSeparator = !_isSameDay(
                         prevMessage.timestamp,
                         message.timestamp,
@@ -185,6 +319,10 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
                         RecruitingMessageBubble(
                           message: message,
                           isMe: isMe,
+                          status: messageWithStatus.status,
+                          onRetry: messageWithStatus.status == MessageStatus.failed
+                              ? () => _retryMessage(messageWithStatus)
+                              : null,
                         ),
                       ],
                     );
@@ -195,6 +333,7 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
         RecruitingChatInput(
           controller: _messageController,
           onSend: _sendMessage,
+          isEnabled: !_isSending,
         ),
       ],
     );

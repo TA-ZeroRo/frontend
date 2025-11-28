@@ -4,11 +4,13 @@ import '../../../../../../core/theme/app_color.dart';
 class RecruitingChatInput extends StatelessWidget {
   final TextEditingController controller;
   final Function(String) onSend;
+  final bool isEnabled;
 
   const RecruitingChatInput({
     super.key,
     required this.controller,
     required this.onSend,
+    this.isEnabled = true,
   });
 
   @override
@@ -32,8 +34,9 @@ class RecruitingChatInput extends StatelessWidget {
             Expanded(
               child: TextField(
                 controller: controller,
+                enabled: isEnabled,
                 decoration: InputDecoration(
-                  hintText: '메시지를 입력하세요',
+                  hintText: isEnabled ? '메시지를 입력하세요' : '전송 중...',
                   hintStyle: TextStyle(color: AppColors.textTertiary),
                   filled: true,
                   fillColor: AppColors.background,
@@ -48,33 +51,49 @@ class RecruitingChatInput extends StatelessWidget {
                 ),
                 maxLines: null,
                 textInputAction: TextInputAction.send,
-                onSubmitted: (value) {
-                  if (value.trim().isNotEmpty) {
-                    onSend(value);
-                  }
-                },
+                onSubmitted: isEnabled
+                    ? (value) {
+                        if (value.trim().isNotEmpty) {
+                          onSend(value);
+                        }
+                      }
+                    : null,
               ),
             ),
             const SizedBox(width: 8),
             GestureDetector(
-              onTap: () {
-                final message = controller.text;
-                if (message.trim().isNotEmpty) {
-                  onSend(message);
-                }
-              },
+              onTap: isEnabled
+                  ? () {
+                      final message = controller.text;
+                      if (message.trim().isNotEmpty) {
+                        onSend(message);
+                      }
+                    }
+                  : null,
               child: Container(
                 width: 44,
                 height: 44,
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
+                decoration: BoxDecoration(
+                  color: isEnabled
+                      ? AppColors.primary
+                      : AppColors.primary.withValues(alpha: 0.5),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.send,
-                  color: Colors.white,
-                  size: 20,
-                ),
+                child: isEnabled
+                    ? const Icon(
+                        Icons.send,
+                        color: Colors.white,
+                        size: 20,
+                      )
+                    : const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      ),
               ),
             ),
           ],

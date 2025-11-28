@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../../core/di/injection.dart';
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/theme/app_text_style.dart';
+import '../../../../../domain/repository/recruiting_repository.dart';
 import '../campaign/models/recruiting_post.dart';
+import '../campaign/state/recruiting_state.dart';
 import 'components/recruiting_info_tab.dart';
 import 'components/recruiting_chat_tab.dart';
 import 'components/recruiting_members_tab.dart';
@@ -26,10 +30,12 @@ class _RecruitingDetailScreenState
     extends ConsumerState<RecruitingDetailScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late RecruitingPost _currentPost;
 
   @override
   void initState() {
     super.initState();
+    _currentPost = widget.post;
     _tabController = TabController(
       length: 3,
       vsync: this,
@@ -41,6 +47,23 @@ class _RecruitingDetailScreenState
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  /// 게시글 정보 새로고침
+  Future<void> _refreshPost() async {
+    try {
+      final repository = getIt<RecruitingRepository>();
+      final userId = Supabase.instance.client.auth.currentSession?.user.id;
+      final updatedPost = await repository.getRecruitingPost(
+        postId: int.parse(widget.post.id),
+        userId: userId,
+      );
+      setState(() {
+        _currentPost = updatedPost;
+      });
+    } catch (e) {
+      // 에러 발생 시 무시 (기존 데이터 유지)
+    }
   }
 
   @override
@@ -55,9 +78,15 @@ class _RecruitingDetailScreenState
             child: TabBarView(
               controller: _tabController,
               children: [
-                RecruitingInfoTab(post: widget.post),
-                RecruitingChatTab(post: widget.post),
-                RecruitingMembersTab(post: widget.post),
+                RecruitingInfoTab(
+                  post: _currentPost,
+                  onJoinSuccess: () {
+                    _refreshPost();
+                    ref.invalidate(recruitingListProvider);
+                  },
+                ),
+                RecruitingChatTab(post: _currentPost),
+                RecruitingMembersTab(post: _currentPost),
               ],
             ),
           ),
@@ -72,7 +101,7 @@ class _RecruitingDetailScreenState
       height: 240,
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: NetworkImage(widget.post.campaignImageUrl),
+          image: NetworkImage(_currentPost.campaignImageUrl),
           fit: BoxFit.cover,
         ),
       ),
@@ -125,7 +154,7 @@ class _RecruitingDetailScreenState
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    widget.post.campaignTitle,
+                    _currentPost.campaignTitle,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
@@ -136,7 +165,7 @@ class _RecruitingDetailScreenState
                 const SizedBox(height: 8),
                 // 모집글 제목
                 Text(
-                  widget.post.title,
+                  _currentPost.title,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,

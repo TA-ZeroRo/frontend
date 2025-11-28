@@ -35,7 +35,7 @@ class RecruitingPage extends ConsumerWidget {
             _buildAppBar(),
             _buildParticipationTabs(context, ref, recruitingFilter),
             _buildRecruitingFilters(context, ref, recruitingFilter),
-            _buildRecruitingList(context, recruitingListAsync),
+            _buildRecruitingList(context, ref, recruitingListAsync),
           ],
         ),
       ),
@@ -190,6 +190,7 @@ class RecruitingPage extends ConsumerWidget {
   /// 리크루팅 목록
   Widget _buildRecruitingList(
     BuildContext context,
+    WidgetRef ref,
     AsyncValue recruitingListAsync,
   ) {
     return recruitingListAsync.when(
@@ -228,7 +229,7 @@ class RecruitingPage extends ConsumerWidget {
                       );
                     } else {
                       // 참여하기 - 확인 다이얼로그 후 참여
-                      _showParticipateDialog(context, post);
+                      _showParticipateDialog(context, post, ref);
                     }
                   },
                 ),
@@ -313,23 +314,65 @@ class RecruitingPage extends ConsumerWidget {
   void _showParticipateDialog(
     BuildContext context,
     RecruitingPost post,
+    WidgetRef ref,
   ) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('리크루팅 참여'),
         content: Text('${post.title}\n\n이 모집글에 참여하시겠습니까?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('취소'),
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ToastHelper.showSuccess('리크루팅에 참여했습니다!');
-              // TODO: 실제로는 여기서 API 호출 후 상태 업데이트
+            onPressed: () async {
+              // 다이얼로그 닫기
+              Navigator.pop(dialogContext);
+
+              // 로딩 다이얼로그 표시
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+
+              try {
+                await joinRecruiting(int.parse(post.id));
+
+                // 로딩 닫기
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+
+                // 목록 새로고침
+                ref.invalidate(recruitingListProvider);
+
+                // 성공 토스트
+                ToastHelper.showSuccess('리크루팅에 참여했습니다!');
+
+                // 상세 페이지 채팅 탭으로 이동
+                if (context.mounted) {
+                  context.pushNamed(
+                    'recruiting-detail',
+                    pathParameters: {'id': post.id},
+                    queryParameters: {'tab': 'chat'},
+                    extra: post.copyWith(isParticipating: true),
+                  );
+                }
+              } catch (e) {
+                // 로딩 닫기
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+
+                // 에러 메시지 처리
+                ToastHelper.showError(_getErrorMessage(e));
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
@@ -340,5 +383,20 @@ class RecruitingPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// 에러 메시지 변환
+  String _getErrorMessage(dynamic error) {
+    final errorStr = error.toString();
+    if (errorStr.contains('이미 참여') || errorStr.contains('already')) {
+      return '이미 참여 중인 리크루팅입니다';
+    } else if (errorStr.contains('정원') || errorStr.contains('full')) {
+      return '정원이 가득 찼습니다';
+    } else if (errorStr.contains('마감') || errorStr.contains('closed')) {
+      return '모집이 마감되었습니다';
+    } else if (errorStr.contains('로그인') || errorStr.contains('login')) {
+      return '로그인이 필요합니다';
+    }
+    return '참여에 실패했습니다';
   }
 }

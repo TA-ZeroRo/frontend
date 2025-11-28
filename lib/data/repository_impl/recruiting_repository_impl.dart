@@ -5,12 +5,14 @@ import '../../domain/model/recruiting/chat_message.dart';
 import '../../domain/repository/recruiting_repository.dart';
 import '../../presentation/screens/main/pages/campaign/models/recruiting_post.dart';
 import '../data_source/recruiting/recruiting_api.dart';
+import '../data_source/recruiting/recruiting_chat_realtime_service.dart';
 
 @Injectable(as: RecruitingRepository)
 class RecruitingRepositoryImpl implements RecruitingRepository {
   final RecruitingApi _recruitingApi;
+  final RecruitingChatRealtimeService _realtimeService;
 
-  RecruitingRepositoryImpl(this._recruitingApi);
+  RecruitingRepositoryImpl(this._recruitingApi, this._realtimeService);
 
   @override
   Future<List<RecruitingPost>> getRecruitingPosts({
@@ -184,5 +186,16 @@ class RecruitingRepositoryImpl implements RecruitingRepository {
               joinedAt: dto.joinedAtDateTime,
             ))
         .toList();
+  }
+
+  @override
+  Stream<ChatMessage> subscribeToChatRoom(int roomId) {
+    _realtimeService.subscribeToRoom(roomId);
+    return _realtimeService.messageStream.map((dto) => dto.toModel());
+  }
+
+  @override
+  void unsubscribeFromChatRoom() {
+    _realtimeService.unsubscribe();
   }
 }

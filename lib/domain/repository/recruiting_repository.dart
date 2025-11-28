@@ -78,6 +78,12 @@ abstract class RecruitingRepository {
     required int roomId,
     required String userId,
   });
+
+  /// 채팅방 실시간 메시지 구독
+  Stream<ChatMessage> subscribeToChatRoom(int roomId);
+
+  /// 채팅방 실시간 메시지 구독 해제
+  void unsubscribeFromChatRoom();
 }
 
 /// 채팅방 참여자 모델
