@@ -5,6 +5,7 @@ import '../../../../../core/components/custom_app_bar.dart';
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/theme/app_text_style.dart';
 import '../../../../../core/utils/toast_helper.dart';
+import '../../../../../core/utils/character_notification_helper.dart';
 import 'campaign_webview_screen.dart';
 import 'state/campaign_state.dart';
 import 'components/campaign_card.dart';
@@ -26,6 +27,20 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+
+    // 페이지 진입 시 캐릭터 알림 표시
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        CharacterNotificationHelper.show(
+          context,
+          message: '캠페인 도전 ~ !',
+          characterImage: 'assets/images/cloud_zeroro_onehand.png',
+          bubbleColor: Colors.white,
+          duration: const Duration(seconds: 2),
+          alignment: const Alignment(0.85, 0.7), // 우측 하단
+        );
+      }
+    });
   }
 
   @override
@@ -174,11 +189,24 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                           await ref
                               .read(campaignListProvider.notifier)
                               .toggleParticipation(campaign.id);
-                          ToastHelper.showSuccess(
-                            campaign.isParticipating
-                                ? '캠페인 참가가 취소되었어요'
-                                : '캠페인에 참가하셨어요!',
-                          );
+                          
+                          if (campaign.isParticipating) {
+                            // 취소됨
+                             CharacterNotificationHelper.show(
+                              context,
+                              message: '캠페인 참가가 취소되었어요',
+                              characterImage: 'assets/images/earth_zeroro.png',
+                              alignment: const Alignment(0.85, -0.4),
+                            );
+                          } else {
+                            // 성공함
+                            CharacterNotificationHelper.show(
+                              context,
+                              message: '캠페인 참가에 성공했어요!',
+                              characterImage: 'assets/images/cloud_zeroro_sunglasses.png',
+                              alignment: const Alignment(0.85, -0.4),
+                            );
+                          }
                         } catch (e) {
                           ToastHelper.showError(
                             e.toString().replaceFirst('Exception: ', ''),
@@ -202,7 +230,14 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                             subject: campaign.title,
                           );
                         } catch (e) {
-                          ToastHelper.showError('공유하기에 실패했어요');
+                          if (mounted) {
+                            CharacterNotificationHelper.show(
+                              context,
+                              message: '공유에 실패했어요ㅠㅠ',
+                              characterImage: 'assets/images/cloud_zeroro_sad.png',
+                              alignment: const Alignment(0.85, -0.4),
+                            );
+                          }
                         }
                       },
                     ),

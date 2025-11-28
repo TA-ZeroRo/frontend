@@ -10,6 +10,7 @@ class CharacterNotification {
   final double characterSize;
   final Duration duration;
   final double borderRadius;
+  final Alignment? alignment;
 
   const CharacterNotification({
     required this.message,
@@ -20,5 +21,6 @@ class CharacterNotification {
     this.characterSize = 50.0,
     this.duration = const Duration(seconds: 3),
     this.borderRadius = 16.0,
+    this.alignment,
   });
 }
