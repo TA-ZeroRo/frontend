@@ -41,7 +41,30 @@ class AiMessageRow extends StatelessWidget {
                   ),
                 ],
               ),
-              child: MarkdownBody(data: message.text, selectable: true),
+              child: MarkdownBody(
+                data: message.text,
+                selectable: true,
+                styleSheet: MarkdownStyleSheet(
+                  p: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                    height: 1.5,
+                  ),
+                  strong: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                  a: TextStyle(
+                    color: AppColors.primary,
+                    decoration: TextDecoration.underline,
+                  ),
+                  code: TextStyle(
+                    backgroundColor: Colors.grey.shade200,
+                    color: Colors.black87,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ),
             ),
           ),
         ],
