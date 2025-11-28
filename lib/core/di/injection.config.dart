@@ -68,6 +68,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i877.RecruitingChatRealtimeService>(
       () => _i877.RecruitingChatRealtimeService(),
     );
+    gh.singleton<_i912.LocationService>(() => _i912.LocationService());
     gh.singleton<_i182.StorageService>(() => _i182.StorageService());
     gh.lazySingleton<_i361.Dio>(() => dioModule.dio);
     gh.factory<_i65.AgentChatApi>(() => _i65.AgentChatApi(gh<_i361.Dio>()));
@@ -80,6 +81,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i889.ReportApi>(() => _i889.ReportApi(gh<_i361.Dio>()));
     gh.factory<_i64.UserRemoteDataSource>(
       () => _i64.UserRemoteDataSource(gh<_i361.Dio>()),
+    );
+    gh.factory<_i876.VerificationApi>(
+      () => _i876.VerificationApi(gh<_i361.Dio>()),
     );
     gh.factory<_i138.RecruitingRepository>(
       () => _i491.RecruitingRepositoryImpl(

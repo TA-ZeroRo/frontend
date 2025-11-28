@@ -7,10 +7,13 @@ class AgentChatRequest {
   @JsonKey(name: 'user_id')
   final String userId;
   final String message;
+  @JsonKey(name: 'selected_character')
+  final String? selectedCharacter;
 
   const AgentChatRequest({
     required this.userId,
     required this.message,
+    this.selectedCharacter = 'earth_zeroro',
   });
 
   factory AgentChatRequest.fromJson(Map<String, dynamic> json) =>
