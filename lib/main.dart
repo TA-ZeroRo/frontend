@@ -36,9 +36,7 @@ class MainApp extends StatelessWidget {
           routerConfig: router,
           theme: ThemeData(
             // 기본 텍스트 테마에 Jua 폰트 적용
-            textTheme: GoogleFonts.juaTextTheme(
-              ThemeData.light().textTheme,
-            ),
+            textTheme: GoogleFonts.juaTextTheme(ThemeData.light().textTheme),
             // 주요 텍스트 테마에도 Jua 폰트 적용
             primaryTextTheme: GoogleFonts.juaTextTheme(
               ThemeData.light().primaryTextTheme,
