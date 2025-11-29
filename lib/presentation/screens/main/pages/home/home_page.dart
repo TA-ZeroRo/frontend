@@ -7,6 +7,7 @@ import 'package:logger/logger.dart';
 import '../../../../../core/components/custom_app_bar.dart';
 import '../../../../../core/utils/toast_helper.dart';
 import 'components/character_select_modal.dart';
+import 'components/gacha_dialog.dart';
 import 'components/simple_chat_area.dart';
 import 'components/inline_chat_widget.dart';
 import 'state/chat_controller.dart';
@@ -120,8 +121,10 @@ class _HomePageState extends ConsumerState<HomePage> {
               additionalActions: [
                 IconButton(
                   onPressed: () {
-                    // TODO: Implement gacha game feature
-                    ToastHelper.showInfo('준비 중인 기능입니다!');
+                    showDialog(
+                      context: context,
+                      builder: (context) => const GachaDialog(),
+                    );
                   },
                   icon: Image.asset(
                     'assets/images/casino_icon.png',
