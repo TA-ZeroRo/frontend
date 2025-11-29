@@ -407,20 +407,16 @@ class CampaignMissionSection extends ConsumerWidget {
       return;
     }
 
-    final mission = missions.first;
+    final campaignId = missions.first.campaign.id;
 
-    // RPA Form URL이 없으면 에러
-    if (mission.campaign.rpaFormUrl == null ||
-        mission.campaign.rpaFormUrl!.isEmpty) {
-      ToastHelper.showError('이 캠페인은 자동 제출을 지원하지 않습니다.');
-      return;
-    }
-
-    // WebView 화면으로 이동
+    // WebView 화면으로 이동 (설정은 WebView 화면에서 로드)
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => CampaignMissionWebViewScreen(mission: mission),
+        builder: (_) => CampaignMissionWebViewScreen(
+          missions: missions,
+          campaignId: campaignId,
+        ),
       ),
     );
   }
