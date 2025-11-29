@@ -27,20 +27,6 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-
-    // 페이지 진입 시 캐릭터 알림 표시
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        CharacterNotificationHelper.show(
-          context,
-          message: '캠페인 도전 ~ !',
-          characterImage: 'assets/images/cloud_zeroro_onehand.png',
-          bubbleColor: Colors.white,
-          duration: const Duration(seconds: 2),
-          alignment: const Alignment(0.85, 0.7), // 우측 하단
-        );
-      }
-    });
   }
 
   @override
@@ -189,10 +175,10 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                           await ref
                               .read(campaignListProvider.notifier)
                               .toggleParticipation(campaign.id);
-                          
+
                           if (campaign.isParticipating) {
                             // 취소됨
-                             CharacterNotificationHelper.show(
+                            CharacterNotificationHelper.show(
                               context,
                               message: '캠페인 참가가 취소되었어요',
                               characterImage: 'assets/images/earth_zeroro.png',
@@ -203,7 +189,8 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                             CharacterNotificationHelper.show(
                               context,
                               message: '캠페인 참가에 성공했어요!',
-                              characterImage: 'assets/images/cloud_zeroro_sunglasses.png',
+                              characterImage:
+                                  'assets/images/cloud_zeroro_sunglasses.png',
                               alignment: const Alignment(0.85, -0.4),
                             );
                           }
@@ -217,9 +204,8 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => RecruitingCreatePage(
-                              campaign: campaign,
-                            ),
+                            builder: (context) =>
+                                RecruitingCreatePage(campaign: campaign),
                           ),
                         );
                       },
@@ -234,7 +220,8 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                             CharacterNotificationHelper.show(
                               context,
                               message: '공유에 실패했어요ㅠㅠ',
-                              characterImage: 'assets/images/cloud_zeroro_sad.png',
+                              characterImage:
+                                  'assets/images/cloud_zeroro_sad.png',
                               alignment: const Alignment(0.85, -0.4),
                             );
                           }

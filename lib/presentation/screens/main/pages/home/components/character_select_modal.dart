@@ -99,7 +99,7 @@ class CharacterSelectModal extends ConsumerWidget {
                 Expanded(
                   child: _CharacterOptionCard(
                     id: 'cloud',
-                    name: '구름 제로로',
+                    name: '먼지 제로로',
                     imagePath: 'assets/images/cloud_zeroro.png',
                     isSelected: selectedCharacter == 'cloud',
                     onTap: () {
@@ -107,6 +107,53 @@ class CharacterSelectModal extends ConsumerWidget {
                           .read(appSettingsProvider.notifier)
                           .updateCharacter('cloud');
                     },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: const Text(
+                      '닫기',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      '선택하기',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ],

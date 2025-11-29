@@ -7,6 +7,7 @@ import 'package:logger/logger.dart';
 import '../../../../../core/components/custom_app_bar.dart';
 import '../../../../../core/utils/toast_helper.dart';
 import 'components/character_select_modal.dart';
+import 'components/gacha_dialog.dart';
 import 'components/simple_chat_area.dart';
 import 'components/inline_chat_widget.dart';
 import 'state/chat_controller.dart';
@@ -30,8 +31,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   // 리스너 참조를 저장하여 나중에 제거할 수 있도록 함
   VoidCallback? _modelLoadedListener;
 
-  final Logger _logger = Logger();
-
   @override
   void initState() {
     super.initState();
@@ -48,17 +47,12 @@ class _HomePageState extends ConsumerState<HomePage> {
   Future<void> _loadAndPlayAnimation() async {
     if (!mounted) return;
 
-    try {
-      final animations = await _3DController.getAvailableAnimations();
-      _logger.d('사용 가능한 애니메이션: $animations');
+    final animations = await _3DController.getAvailableAnimations();
 
-      if (animations.isNotEmpty && mounted) {
-        _startAnimationWithInterval(animations[0]);
-      } else if (mounted) {
-        _startAnimationWithInterval(null);
-      }
-    } catch (e) {
-      _logger.e('애니메이션 재생 오류: $e');
+    if (animations.isNotEmpty && mounted) {
+      _startAnimationWithInterval(animations[0]);
+    } else if (mounted) {
+      _startAnimationWithInterval(null);
     }
   }
 
@@ -81,10 +75,8 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     if (animationName != null) {
       _3DController.playAnimation(animationName: animationName, loopCount: 1);
-      _logger.d('애니메이션 재생: $animationName');
     } else {
       _3DController.playAnimation(loopCount: 1);
-      _logger.d('기본 애니메이션 재생');
     }
   }
 
@@ -120,8 +112,10 @@ class _HomePageState extends ConsumerState<HomePage> {
               additionalActions: [
                 IconButton(
                   onPressed: () {
-                    // TODO: Implement gacha game feature
-                    ToastHelper.showInfo('준비 중인 기능입니다!');
+                    showDialog(
+                      context: context,
+                      builder: (context) => const GachaDialog(),
+                    );
                   },
                   icon: Image.asset(
                     'assets/images/casino_icon.png',
@@ -158,6 +152,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 controller: _3DController,
                 src: 'assets/zeroro/co2_zeroro_2.glb',
                 enableTouch: false,
+                activeGestureInterceptor: false,
                 onProgress: _handleProgress,
                 onLoad: _handleLoad,
                 onError: _handleError,
@@ -224,7 +219,6 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   /// 3D 모델 로딩 진행률 처리
   void _handleProgress(double progress) {
-    _logger.d('로딩 진행: $progress');
     if (mounted) {
       setState(() {
         _loadingProgress = progress;
@@ -234,7 +228,6 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   /// 3D 모델 로드 완료 처리
   void _handleLoad(String modelAddress) {
-    _logger.d('모델 로드 완료: $modelAddress');
     if (mounted) {
       setState(() {
         _isLoading = false;
@@ -245,7 +238,6 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   /// 3D 모델 로드 오류 처리
   void _handleError(String error) {
-    _logger.e('오류: $error');
     if (mounted) {
       setState(() {
         _isLoading = false;
