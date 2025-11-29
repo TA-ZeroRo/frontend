@@ -29,4 +29,18 @@ class MissionApi {
     final List<dynamic> data = response.data;
     return data.map((json) => MissionLogDto.fromJson(json)).toList();
   }
+
+  /// 미션 증빙 데이터 제출
+  /// POST /mission-logs/logs/{logId}/proof
+  Future<MissionLogDto> submitProof({
+    required int logId,
+    required Map<String, dynamic> proofData,
+  }) async {
+    final response = await _dio.post(
+      '/mission-logs/logs/$logId/proof',
+      data: proofData,
+    );
+
+    return MissionLogDto.fromJson(response.data);
+  }
 }

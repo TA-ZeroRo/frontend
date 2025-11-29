@@ -1,26 +1,34 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:frontend/core/utils/toast_helper.dart';
 import 'package:frontend/domain/model/mission/mission_with_template.dart';
+import 'package:frontend/presentation/screens/entry/state/auth_controller.dart';
 
+import '../../../../../../../core/di/injection.dart';
+import '../../../../../../../core/logger/logger.dart';
 import '../../../../../../../core/theme/app_color.dart';
+import '../../../../../../../data/data_source/mission/mission_api.dart';
 
-class ImageVerificationBottomSheet extends StatefulWidget {
+class ImageVerificationBottomSheet extends ConsumerStatefulWidget {
   final MissionWithTemplate mission;
 
   const ImageVerificationBottomSheet({super.key, required this.mission});
 
   @override
-  State<ImageVerificationBottomSheet> createState() =>
+  ConsumerState<ImageVerificationBottomSheet> createState() =>
       _ImageVerificationBottomSheetState();
 }
 
 class _ImageVerificationBottomSheetState
-    extends State<ImageVerificationBottomSheet> {
+    extends ConsumerState<ImageVerificationBottomSheet> {
   File? _selectedImage;
   final ImagePicker _imagePicker = ImagePicker();
+  final MissionApi _missionApi = getIt<MissionApi>();
+  bool _isSubmitting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -246,7 +254,7 @@ class _ImageVerificationBottomSheetState
   }
 
   Widget _buildSubmitButton() {
-    final bool isEnabled = _selectedImage != null;
+    final bool isEnabled = _selectedImage != null && !_isSubmitting;
 
     return SizedBox(
       width: double.infinity,
@@ -263,10 +271,19 @@ class _ImageVerificationBottomSheetState
           disabledBackgroundColor: Colors.grey[200],
           disabledForegroundColor: Colors.grey[400],
         ),
-        child: const Text(
-          '인증하기',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
+        child: _isSubmitting
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : const Text(
+                '인증하기',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
       ),
     );
   }
@@ -315,10 +332,49 @@ class _ImageVerificationBottomSheetState
     }
   }
 
-  void _handleSubmit() {
-    if (_selectedImage == null) return;
+  Future<void> _handleSubmit() async {
+    if (_selectedImage == null || _isSubmitting) return;
 
-    ToastHelper.showSuccess('이미지가 제출되었습니다');
-    Navigator.of(context).pop();
+    setState(() => _isSubmitting = true);
+
+    try {
+      // 1. Supabase Storage에 이미지 업로드
+      final supabase = Supabase.instance.client;
+      final fileName =
+          'mission-proofs/mission_${widget.mission.missionLog.id}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final bytes = await _selectedImage!.readAsBytes();
+
+      await supabase.storage.from('zeroro-post-bucket').uploadBinary(
+            fileName,
+            bytes,
+            fileOptions: const FileOptions(contentType: 'image/jpeg'),
+          );
+
+      final imageUrl =
+          supabase.storage.from('zeroro-post-bucket').getPublicUrl(fileName);
+
+      // 2. API 호출하여 증빙 데이터 제출
+      await _missionApi.submitProof(
+        logId: widget.mission.missionLog.id,
+        proofData: {'imageUrl': imageUrl},
+      );
+
+      if (!mounted) return;
+
+      // 3. 포인트 지급 후 사용자 정보 새로고침
+      await ref.read(authProvider.notifier).refreshCurrentUser();
+
+      if (!mounted) return;
+      ToastHelper.showSuccess('사진이 제출되었습니다! 포인트가 지급되었어요 🎉');
+      Navigator.of(context).pop(true);
+    } catch (e) {
+      CustomLogger.logger.e('미션 제출 실패', error: e);
+      if (!mounted) return;
+      ToastHelper.showError('제출에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
   }
 }
