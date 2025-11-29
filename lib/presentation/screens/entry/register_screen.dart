@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/di/injection.dart';
 import '../../../core/theme/app_color.dart';
 import '../../../core/theme/app_text_style.dart';
 import '../../../core/constants/regions.dart';
 import '../../../core/utils/toast_helper.dart';
+import '../../../data/data_source/storage_service.dart';
 import '../../routes/router_path.dart';
 import 'state/auth_controller.dart';
 import 'privacy_policy_modal.dart';
@@ -30,11 +33,26 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final authState = ref.read(authProvider);
 
     try {
+      String? imageUrl;
+
+      // 이미지가 선택된 경우 Supabase Storage에 업로드
+      if (_selectedImage != null) {
+        final userId = Supabase.instance.client.auth.currentSession?.user.id;
+        if (userId != null) {
+          final storageService = getIt<StorageService>();
+          imageUrl = await storageService.uploadProfileImage(
+            userId: userId,
+            imageFile: _selectedImage!,
+          );
+        }
+      }
+
       await ref
           .read(authProvider.notifier)
           .register(
             nickname: authState.registerNickname,
             region: _selectedLocation ?? authState.registerLocation,
+            userImg: imageUrl,
           );
 
       // 회원가입 성공 시 메인 화면으로 이동

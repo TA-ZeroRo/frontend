@@ -94,6 +94,7 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> register({
     required String nickname,
     required String region,
+    String? userImg,
   }) async {
     state = state.copyWith(isLoading: true, error: null);
 
@@ -107,6 +108,7 @@ class AuthNotifier extends Notifier<AuthState> {
         userId: userId,
         username: nickname,
         region: region,
+        userImg: userImg,
       );
       state = state.copyWith(currentUser: user, isLoading: false);
 
