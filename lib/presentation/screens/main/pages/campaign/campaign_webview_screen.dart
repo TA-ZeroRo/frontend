@@ -22,6 +22,8 @@ class _CampaignWebViewScreenState extends State<CampaignWebViewScreen> {
   late final WebViewController _controller;
   bool _isLoading = true;
   double _progress = 0.0;
+  String? _pendingCampaignUrl; // 로그인 전 원래 캠페인 URL 저장
+  bool _isLoginRedirect = false; // 로그인 리다이렉트 상태 추적
 
   @override
   void initState() {
@@ -38,6 +40,22 @@ class _CampaignWebViewScreenState extends State<CampaignWebViewScreen> {
             setState(() {
               _isLoading = true;
             });
+
+            // 로그인 페이지로 이동 감지
+            if (_isLoginPage(url) && _pendingCampaignUrl == null) {
+              _pendingCampaignUrl = widget.url; // 원래 캠페인 URL 저장
+              _isLoginRedirect = true;
+            }
+
+            // 로그인 후 메인 페이지로 리다이렉트 감지
+            if (_isMainPage(url) && _isLoginRedirect && _pendingCampaignUrl != null) {
+              // 저장된 캠페인 URL로 다시 이동
+              Future.delayed(const Duration(milliseconds: 500), () {
+                _controller.loadRequest(Uri.parse(_pendingCampaignUrl!));
+                _isLoginRedirect = false;
+                _pendingCampaignUrl = null;
+              });
+            }
           },
           onProgress: (int progress) {
             setState(() {
@@ -50,11 +68,37 @@ class _CampaignWebViewScreenState extends State<CampaignWebViewScreen> {
             });
           },
           onWebResourceError: (WebResourceError error) {
-            ToastHelper.showError('페이지 로드 중 오류가 발생했습니다');
+            // 로그인 리다이렉트 중에는 에러 무시
+            if (_isLoginRedirect) return;
+
+            // 중요한 에러만 표시 (메인 프레임 에러)
+            if (error.isForMainFrame ?? true) {
+              ToastHelper.showError('페이지 로드 중 오류가 발생했습니다');
+            }
           },
         ),
       )
       ..loadRequest(Uri.parse(widget.url));
+  }
+
+  /// 로그인 페이지 URL 패턴 감지
+  bool _isLoginPage(String url) {
+    return url.contains('로그인') ||
+           url.contains('login') ||
+           url.contains('member') ||
+           url.contains('auth');
+  }
+
+  /// 메인 페이지 URL 패턴 감지
+  bool _isMainPage(String url) {
+    // 1365 메인 페이지 패턴
+    return url.contains('1365.go.kr') &&
+           !url.contains('login') &&
+           !url.contains('member') &&
+           (url.endsWith('1365.go.kr') ||
+            url.endsWith('1365.go.kr/') ||
+            url.contains('main') ||
+            url.contains('index'));
   }
 
   @override
