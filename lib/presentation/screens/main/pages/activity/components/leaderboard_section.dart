@@ -108,11 +108,7 @@ class LeaderboardSection extends ConsumerWidget {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue[50]!, Colors.blue[100]!],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: Colors.blue[100],
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.blue[200]!, width: 1.5),
             ),
