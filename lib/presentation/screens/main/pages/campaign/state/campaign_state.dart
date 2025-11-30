@@ -188,6 +188,7 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
       id: campaign.id.toString(),
       title: campaign.title,
       imageUrl: campaign.imageUrl ?? '',
+      description: campaign.description ?? '',
       url: campaign.campaignUrl,
       startDate: DateTime.tryParse(campaign.startDate ?? '') ?? DateTime.now(),
       endDate:

@@ -47,19 +47,17 @@ class CampaignCard extends ConsumerWidget {
   }
 
   /// 배경 이미지
+  /// 배경 이미지
   Widget _buildBackgroundImage() {
+    if (campaign.imageUrl.isEmpty) {
+      return _buildFallbackView();
+    }
+
     return Image.network(
       campaign.imageUrl,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
-        return Container(
-          color: const Color(0xFF2A2A2A),
-          child: const Icon(
-            Icons.image_not_supported,
-            color: Color(0xFF666666),
-            size: 48,
-          ),
-        );
+        return _buildFallbackView();
       },
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
@@ -76,6 +74,44 @@ class CampaignCard extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+
+  /// 이미지 없을 때 대체 화면 (설명 텍스트 표시)
+  /// 이미지 없을 때 대체 화면 (설명 텍스트 표시)
+  Widget _buildFallbackView() {
+    return Container(
+      color: Colors.lightBlue[50],
+      padding: const EdgeInsets.fromLTRB(20, 60, 20, 80),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Icon(
+              Icons.article_outlined,
+              color: AppColors.textSubtle,
+              size: 32,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            campaign.description.isNotEmpty
+                ? campaign.description
+                : '이미지가 준비중입니다.',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+              height: 1.6,
+              fontWeight: FontWeight.w400,
+            ),
+            textAlign: TextAlign.start,
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 
