@@ -2,6 +2,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/theme/app_color.dart';
+import '../../../../../../core/utils/toast_helper.dart';
+import '../../../../../../presentation/screens/settings/state/settings_controller.dart';
 import '../../../../entry/state/auth_controller.dart';
 
 class GachaDialog extends ConsumerStatefulWidget {
@@ -22,9 +24,10 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
   bool _showResult = false;
   bool _isNewCharacter = false;
   bool _showCollection = false; // 성격 도감 표시 여부
+  String? _selectedInCollection; // 도감에서 선택된 캐릭터 (확정 전)
 
   // UI 테스트용 보유 성격 목록 (임시 데이터)
-  final Set<String> _collectedCharacters = {'A', 'C'};
+  final Set<String> _collectedCharacters = {'playful', 'passionate'};
 
   // 목표 달성 점수 (이 점수에 도달하면 뽑기 가능)
   final int _targetMilestone = 300;
@@ -32,28 +35,28 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
   // 여기서는 _targetMilestone으로 완전히 대체합니다.
   final List<Map<String, String>> _characterPool = [
     {
-      'id': 'A',
-      'name': '성격 A',
-      'image': 'assets/images/earth_zeroro.png', // 임시 이미지
+      'id': 'playful',
+      'name': '장난꾸러기 아이',
+      'image': 'assets/images/earth_zeroro.png',
     },
     {
-      'id': 'B',
-      'name': '성격 B',
-      'image': 'assets/images/cloud_zeroro.png', // 임시 이미지
+      'id': 'rational',
+      'name': '이성적인 연구원',
+      'image': 'assets/images/cloud_zeroro.png',
     },
     {
-      'id': 'C',
-      'name': '성격 C',
-      'image': 'assets/images/earth_zeroro_magic.png', // 존재하는 이미지로 교체
+      'id': 'passionate',
+      'name': '열정적인 코치',
+      'image': 'assets/images/earth_zeroro_magic.png',
     },
     {
-      'id': 'D',
-      'name': '성격 D',
-      'image': 'assets/images/cloud_zeroro_magic.png', // 존재하는 이미지로 교체
+      'id': 'noble',
+      'name': '품격있는 귀족',
+      'image': 'assets/images/cloud_zeroro_magic.png',
     },
     {
-      'id': 'E',
-      'name': '성격 E',
+      'id': 'kind',
+      'name': '자상한 선생님',
       'image': 'assets/images/earth_zeroro.png', // 임시 이미지
     },
   ];
@@ -210,8 +213,9 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color:
-                        _showCollection ? AppColors.primary : Colors.grey[100],
+                    color: _showCollection
+                        ? AppColors.primary
+                        : Colors.grey[100],
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -232,6 +236,7 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
                   if (_showCollection) {
                     setState(() {
                       _showCollection = false;
+                      _selectedInCollection = null; // 선택 초기화
                     });
                   } else {
                     Navigator.pop(context);
@@ -259,100 +264,239 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
   }
 
   Widget _buildCollectionView() {
-    return Container(
+    final currentEquipped = ref.watch(appSettingsProvider).selectedCharacter;
+
+    return Column(
       key: const ValueKey('collection_view'),
-      // height: 400, // 부모 SizedBox에서 크기 제어
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      // Scrollbar 추가로 스크롤 가능함을 시각적으로 명시
-      child: Scrollbar(
-        thumbVisibility: true,
-        child: GridView.builder(
-          padding: const EdgeInsets.only(right: 12, bottom: 12), // 스크롤바 공간 확보
-          itemCount: _characterPool.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 0.85,
+      children: [
+        Expanded(
+          child: Scrollbar(
+            thumbVisibility: true,
+            child: GridView.builder(
+              padding: const EdgeInsets.only(right: 12, bottom: 12),
+              itemCount: _characterPool.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 0.85,
+              ),
+              itemBuilder: (context, index) {
+                final char = _characterPool[index];
+                final isCollected = _collectedCharacters.contains(char['id']);
+                final isEquipped = char['id'] == currentEquipped;
+                final isSelected = char['id'] == _selectedInCollection;
+
+                return _buildCollectionItem(
+                  char,
+                  isCollected,
+                  isEquipped,
+                  isSelected,
+                );
+              },
+            ),
           ),
-          itemBuilder: (context, index) {
-            final char = _characterPool[index];
-            final isCollected = _collectedCharacters.contains(char['id']);
-            return _buildCollectionItem(char, isCollected);
-          },
         ),
-      ),
+        const SizedBox(height: 16),
+        _buildCollectionActions(),
+      ],
     );
   }
 
-  Widget _buildCollectionItem(Map<String, String> char, bool isCollected) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isCollected ? Colors.white : Colors.grey[100],
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isCollected ? AppColors.primary.withValues(alpha: 0.3) : Colors.transparent,
-          width: 2,
-        ),
-        boxShadow: isCollected
-            ? [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                )
-              ]
-            : null,
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isCollected ? Colors.white : Colors.grey[300],
-            ),
-            child: ClipOval(
-              child: isCollected
-                  ? Transform.translate(
-                      offset: ['C', 'D'].contains(char['id'])
-                          ? const Offset(-5, 0)
-                          : Offset.zero,
-                      child: Image.asset(
-                        char['image']!,
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  : Icon(
-                      Icons.lock_rounded,
-                      color: Colors.grey[400],
-                      size: 32,
-                    ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            char['name']!,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: isCollected ? AppColors.textPrimary : Colors.grey[400],
-            ),
-          ),
-          if (isCollected) ...[
-            const SizedBox(height: 4),
-            Text(
-              '보유중',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.primary,
-                fontWeight: FontWeight.w500,
+  Widget _buildCollectionActions() {
+    final hasSelection = _selectedInCollection != null;
+    final currentEquipped = ref.read(appSettingsProvider).selectedCharacter;
+    final isDifferent = _selectedInCollection != currentEquipped;
+
+    return Row(
+      children: [
+        Expanded(
+          child: TextButton(
+            onPressed: () {
+              setState(() {
+                _showCollection = false;
+                _selectedInCollection = null;
+              });
+            },
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
             ),
-          ],
-        ],
+            child: const Text(
+              '취소',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          flex: 2,
+          child: ElevatedButton(
+            onPressed: () {
+              if (hasSelection && isDifferent) {
+                ref
+                    .read(appSettingsProvider.notifier)
+                    .updateCharacter(_selectedInCollection!);
+              }
+
+              setState(() {
+                _showCollection = false;
+                _selectedInCollection = null;
+              });
+
+              ToastHelper.showSuccess('캐릭터 성격이 선택되었습니다.');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              '선택하기',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCollectionItem(
+    Map<String, String> char,
+    bool isCollected,
+    bool isEquipped,
+    bool isSelected,
+  ) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: isCollected
+            ? () {
+                setState(() {
+                  _selectedInCollection = char['id'];
+                });
+              }
+            : null,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isCollected ? Colors.white : Colors.grey[100],
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isSelected
+                  ? AppColors.primary
+                  : (isCollected
+                        ? AppColors.primary.withValues(alpha: 0.3)
+                        : Colors.transparent),
+              width: isSelected ? 3 : 2,
+            ),
+            boxShadow: isCollected
+                ? [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Stack(
+            children: [
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isCollected ? Colors.white : Colors.grey[300],
+                      ),
+                      child: ClipOval(
+                        child: isCollected
+                            ? Transform.translate(
+                                offset:
+                                    ['passionate', 'noble'].contains(char['id'])
+                                    ? const Offset(-5, 0)
+                                    : Offset.zero,
+                                child: Image.asset(
+                                  char['image']!,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : Icon(
+                                Icons.lock_rounded,
+                                color: Colors.grey[400],
+                                size: 32,
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      char['name']!,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isCollected
+                            ? AppColors.textPrimary
+                            : Colors.grey[400],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    if (isEquipped)
+                      const Text(
+                        '착용 중',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    else if (isCollected)
+                      Text(
+                        '터치하여 선택',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              if (isEquipped)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.primary,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 12,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -571,7 +715,7 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
                   ),
                   child: ClipOval(
                     child: Transform.translate(
-                      offset: ['C', 'D'].contains(character['id'])
+                      offset: ['passionate', 'noble'].contains(character['id'])
                           ? const Offset(-5, 0)
                           : Offset.zero,
                       child: Image.asset(
