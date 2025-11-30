@@ -56,7 +56,7 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
     },
     {
       'id': 'kind',
-      'name': '자상한 선생님',
+      'name': '친절한 선생님',
       'image': 'assets/images/earth_zeroro.png', // 임시 이미지
     },
   ];
@@ -148,7 +148,7 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
             _buildHeader(context),
             const SizedBox(height: 24),
             SizedBox(
-              height: 400,
+              height: _showResult ? null : 400,
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 child: _showCollection
