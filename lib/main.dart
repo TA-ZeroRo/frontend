@@ -4,7 +4,6 @@ import 'package:frontend/core/config/env_var.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:toastification/toastification.dart';
-
 import 'core/di/injection.dart';
 import 'presentation/routes/router.dart';
 
