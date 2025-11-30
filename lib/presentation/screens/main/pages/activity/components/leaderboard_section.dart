@@ -30,7 +30,7 @@ class LeaderboardSection extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildSectionHeader(context),
+          _buildSectionHeader(context, ref),
           const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
           _buildMyRankSection(myRankingAsync),
           const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
@@ -40,7 +40,7 @@ class LeaderboardSection extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context) {
+  Widget _buildSectionHeader(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 12),
       decoration: BoxDecoration(
@@ -52,22 +52,24 @@ class LeaderboardSection extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Transform.translate(
-            offset: const Offset(0, -2),
-            child: Image.asset(
-              'assets/images/trophy_icon.png',
-              width: 40,
-              height: 40,
-              fit: BoxFit.contain,
-            ),
-          ),
-          const SizedBox(width: 8),
           const Text(
             '리더보드',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
               color: Colors.black87,
+            ),
+          ),
+          const Spacer(),
+          SizedBox(
+            width: 24,
+            height: 24,
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              icon: const Icon(Icons.refresh, size: 20, color: Colors.grey),
+              onPressed: () async {
+                await ref.read(combinedRankingProvider.notifier).refresh();
+              },
             ),
           ),
         ],
@@ -187,35 +189,7 @@ class LeaderboardSection extends ConsumerWidget {
             ),
           );
         },
-        loading: () => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey[300]!, width: 1),
-          ),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[700]!),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                '내 순위 불러오는 중...',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[700],
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
+        loading: () => const MyRankSectionShimmer(),
         error: (error, stack) => Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
@@ -252,7 +226,10 @@ class LeaderboardSection extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: RankingView(rankings: rankings),
         ),
-        loading: () => const PlaygroundShimmer(),
+        loading: () => const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+          child: LeaderboardContentShimmer(),
+        ),
         error: (error, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
