@@ -10,11 +10,18 @@ import '../campaign/components/recruiting_filters.dart';
 import '../campaign/components/recruiting_card.dart';
 import '../campaign/models/recruiting_post.dart';
 
-class RecruitingPage extends ConsumerWidget {
+class RecruitingPage extends ConsumerStatefulWidget {
   const RecruitingPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RecruitingPage> createState() => _RecruitingPageState();
+}
+
+class _RecruitingPageState extends ConsumerState<RecruitingPage> {
+  bool _isFilterExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
     // 필터 상태 감지
     ref.listen(recruitingFilterProvider, (previous, next) {
       ref.refresh(recruitingListProvider);
@@ -33,8 +40,9 @@ class RecruitingPage extends ConsumerWidget {
         child: CustomScrollView(
           slivers: [
             _buildAppBar(),
-            _buildParticipationTabs(context, ref, recruitingFilter),
-            _buildRecruitingFilters(context, ref, recruitingFilter),
+            _buildTopSection(context, ref, recruitingFilter),
+            if (_isFilterExpanded)
+              _buildRecruitingFilters(context, ref, recruitingFilter),
             _buildRecruitingList(context, ref, recruitingListAsync),
           ],
         ),
@@ -46,49 +54,43 @@ class RecruitingPage extends ConsumerWidget {
   Widget _buildAppBar() =>
       const SliverToBoxAdapter(child: CustomAppBar(title: '리크루팅'));
 
-  /// 참여 상태 탭
-  Widget _buildParticipationTabs(
+  /// 상단 섹션 (탭 + 필터 토글)
+  Widget _buildTopSection(
     BuildContext context,
     WidgetRef ref,
     RecruitingFilter filter,
   ) {
     return SliverToBoxAdapter(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
+        color: AppColors.background,
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+        child: Column(
           children: [
-            Expanded(
-              child: _buildTabButton(
-                context: context,
-                ref: ref,
-                label: '전체',
-                status: ParticipationStatus.all,
-                isSelected: filter.participationStatus == ParticipationStatus.all,
-              ),
-            ),
-            Expanded(
-              child: _buildTabButton(
-                context: context,
-                ref: ref,
-                label: '참여중',
-                status: ParticipationStatus.participating,
-                isSelected:
-                    filter.participationStatus == ParticipationStatus.participating,
-              ),
-            ),
-            Expanded(
-              child: _buildTabButton(
-                context: context,
-                ref: ref,
-                label: '모집중',
-                status: ParticipationStatus.recruiting,
-                isSelected:
-                    filter.participationStatus == ParticipationStatus.recruiting,
-              ),
+            Row(
+              children: [
+                // 탭 버튼들
+                _buildTabButton(
+                  context: context,
+                  ref: ref,
+                  label: '전체',
+                  status: ParticipationStatus.all,
+                  isSelected:
+                      filter.participationStatus == ParticipationStatus.all,
+                ),
+                const SizedBox(width: 8),
+                _buildTabButton(
+                  context: context,
+                  ref: ref,
+                  label: '내 채팅방',
+                  status: ParticipationStatus.participating,
+                  isSelected:
+                      filter.participationStatus ==
+                      ParticipationStatus.participating,
+                ),
+                const Spacer(),
+                // 필터 토글 버튼
+                _buildFilterToggleButton(),
+              ],
             ),
           ],
         ),
@@ -96,7 +98,7 @@ class RecruitingPage extends ConsumerWidget {
     );
   }
 
-  /// 탭 버튼
+  /// 탭 버튼 (Clean Style)
   Widget _buildTabButton({
     required BuildContext context,
     required WidgetRef ref,
@@ -106,21 +108,96 @@ class RecruitingPage extends ConsumerWidget {
   }) {
     return GestureDetector(
       onTap: () {
-        ref.read(recruitingFilterProvider.notifier).setParticipationStatus(status);
+        ref
+            .read(recruitingFilterProvider.notifier)
+            .setParticipationStatus(status);
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
+          color: isSelected ? AppColors.textPrimary : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.textPrimary : const Color(0xFFCCCCCC),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isSelected ? 0.12 : 0.08),
+              blurRadius: isSelected ? 4 : 3,
+              offset: Offset(0, isSelected ? 2 : 1),
+            ),
+          ],
         ),
         child: Text(
           label,
-          textAlign: TextAlign.center,
           style: AppTextStyle.bodyMedium.copyWith(
             color: isSelected ? Colors.white : AppColors.textSecondary,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
           ),
+        ),
+      ),
+    );
+  }
+
+  /// 필터 토글 버튼
+  Widget _buildFilterToggleButton() {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _isFilterExpanded = !_isFilterExpanded;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: _isFilterExpanded
+              ? AppColors.primary.withValues(alpha: 0.12)
+              : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: _isFilterExpanded
+                ? AppColors.primary
+                : const Color(0xFFCCCCCC),
+            width: _isFilterExpanded ? 1.5 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: _isFilterExpanded
+                  ? AppColors.primary.withValues(alpha: 0.2)
+                  : Colors.black.withValues(alpha: 0.08),
+              blurRadius: _isFilterExpanded ? 4 : 3,
+              offset: Offset(0, _isFilterExpanded ? 2 : 1),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '상세필터',
+              style: AppTextStyle.bodySmall.copyWith(
+                color: _isFilterExpanded
+                    ? AppColors.primary
+                    : AppColors.textSecondary,
+                fontWeight: _isFilterExpanded
+                    ? FontWeight.w600
+                    : FontWeight.w500,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              _isFilterExpanded
+                  ? Icons.keyboard_arrow_up_rounded
+                  : Icons.keyboard_arrow_down_rounded,
+              size: 16,
+              color: _isFilterExpanded
+                  ? AppColors.primary
+                  : AppColors.textSecondary,
+            ),
+          ],
         ),
       ),
     );
@@ -133,8 +210,9 @@ class RecruitingPage extends ConsumerWidget {
     RecruitingFilter filter,
   ) {
     return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      child: Container(
+        color: AppColors.background,
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
         child: RecruitingFilters(
           selectedRegion: filter.region,
           selectedCity: filter.city,
@@ -213,8 +291,9 @@ class RecruitingPage extends ConsumerWidget {
                     context.pushNamed(
                       'recruiting-detail',
                       pathParameters: {'id': post.id},
-                      queryParameters:
-                          post.isParticipating ? {'tab': 'chat'} : {},
+                      queryParameters: post.isParticipating
+                          ? {'tab': 'chat'}
+                          : {},
                       extra: post,
                     );
                   },
@@ -253,11 +332,7 @@ class RecruitingPage extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.people_outline,
-              size: 80,
-              color: AppColors.textTertiary,
-            ),
+            Icon(Icons.people_outline, size: 80, color: AppColors.textTertiary),
             const SizedBox(height: 16),
             Text(
               message,
@@ -336,9 +411,8 @@ class RecruitingPage extends ConsumerWidget {
               showDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (_) => const Center(
-                  child: CircularProgressIndicator(),
-                ),
+                builder: (_) =>
+                    const Center(child: CircularProgressIndicator()),
               );
 
               try {
