@@ -184,74 +184,130 @@ class ActivityCardShimmer extends StatelessWidget {
   }
 }
 
-/// Complete page shimmer layout (leaderboard section with header)
-class PlaygroundShimmer extends StatelessWidget {
-  const PlaygroundShimmer({super.key});
+/// Shimmer for the "My Rank" section (Blue box style)
+class MyRankSectionShimmer extends StatelessWidget {
+  const MyRankSectionShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: Colors.blue[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue[100]!, width: 1.5),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Header (static, no shimmer)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(18),
-                topRight: Radius.circular(18),
+      child: Shimmer.fromColors(
+        baseColor: Colors.blue[100]!,
+        highlightColor: Colors.blue[50]!,
+        period: const Duration(milliseconds: 1500),
+        child: Row(
+          children: [
+            // Rank circle
+            Container(
+              width: 44,
+              height: 44,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
               ),
             ),
+            const SizedBox(width: 14),
+            // User info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 100,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    width: 60,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Score badge
+            Container(
+              width: 70,
+              height: 28,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Shimmer for the main leaderboard content (Podium + Rank List)
+class LeaderboardContentShimmer extends StatelessWidget {
+  const LeaderboardContentShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFFE0E0E0),
+      highlightColor: const Color(0xFFF5F5F5),
+      period: const Duration(milliseconds: 1500),
+      child: Column(
+        children: [
+          // Podium area
+          SizedBox(
+            height: 200,
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Transform.translate(
-                  offset: const Offset(0, -2),
-                  child: Image.asset(
-                    'assets/images/trophy_icon.png',
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.contain,
-                  ),
-                ),
+                _buildPodiumBar(height: 140, width: 80), // 2nd
                 const SizedBox(width: 8),
-                const Text(
-                  '리더보드',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
-                  ),
-                ),
-                const Spacer(),
-                Icon(
-                  Icons.expand_more_rounded,
-                  color: Colors.grey[700],
-                  size: 24,
-                ),
+                _buildPodiumBar(height: 180, width: 90), // 1st
+                const SizedBox(width: 8),
+                _buildPodiumBar(height: 120, width: 80), // 3rd
               ],
             ),
           ),
-          const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-          // MyRankTile shimmer only
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: MyRankTileShimmer(),
+          const SizedBox(height: 24),
+          // Rank list items
+          ...List.generate(
+            2,
+            (index) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Container(
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPodiumBar({required double height, required double width}) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
       ),
     );
   }
