@@ -121,6 +121,13 @@ class _FullChatOverlayState extends ConsumerState<FullChatOverlay> {
     );
   }
 
+  // 제로로 아바타를 상수로 캐싱
+  static const _zeroroAvatarWidget = CircleAvatar(
+    radius: 20,
+    backgroundColor: Colors.white,
+    backgroundImage: AssetImage('assets/images/smile_zeroro.png'),
+  );
+
   /// 채팅 메시지 영역
   Widget _buildChatArea(ChatState chatState) {
     // 메시지가 없고 로딩 중도 아니면 빈 상태 표시
@@ -143,26 +150,24 @@ class _FullChatOverlayState extends ConsumerState<FullChatOverlay> {
       );
     }
 
-    // 메시지 리스트
+    // 메시지 리스트 - addAutomaticKeepAlives로 스크롤 성능 최적화
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(17),
       itemCount: chatState.messages.length + (chatState.isLoading ? 1 : 0),
+      addAutomaticKeepAlives: false, // 메모리 최적화: 화면 밖 위젯 유지 안함
+      addRepaintBoundaries: true, // 리페인트 경계 추가로 성능 개선
       itemBuilder: (context, index) {
         // 로딩 인디케이터를 마지막에 표시
         if (index == chatState.messages.length) {
-          return Row(
+          return const Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 제로로 아바타
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: Colors.white,
-                child: Image.asset('assets/images/smile_zeroro.png'),
-              ),
-              const SizedBox(width: 10),
+              _zeroroAvatarWidget,
+              SizedBox(width: 10),
               // 타이핑 인디케이터
-              const TypingIndicator(),
+              TypingIndicator(),
             ],
           );
         }
