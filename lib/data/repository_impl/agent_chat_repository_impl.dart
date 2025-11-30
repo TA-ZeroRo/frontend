@@ -1,5 +1,4 @@
 import 'package:injectable/injectable.dart';
-
 import '../../core/logger/logger.dart';
 import '../../core/utils/character_preferences.dart';
 import '../../domain/repository/agent_chat_repository.dart';
