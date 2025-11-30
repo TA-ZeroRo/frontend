@@ -148,7 +148,7 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
             _buildHeader(context),
             const SizedBox(height: 24),
             SizedBox(
-              height: 400,
+              height: _showResult ? null : 400,
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 child: _showCollection
