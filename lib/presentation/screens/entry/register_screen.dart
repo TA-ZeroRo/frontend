@@ -550,9 +550,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   horizontal: 12,
                                   vertical: 14,
                                 ),
-                                suffixIcon: Icon(
-                                  Icons.arrow_drop_down,
-                                  color: AppColors.textSecondary,
+                                suffixIcon: GestureDetector(
+                                  onTap: () {
+                                    focusNode.requestFocus();
+                                    final text = controller.text;
+                                    controller.text = '';
+                                    controller.text = text;
+                                    controller.selection = TextSelection.collapsed(
+                                      offset: text.length,
+                                    );
+                                  },
+                                  child: Icon(
+                                    Icons.arrow_drop_down,
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
                               ),
                             );
@@ -683,11 +694,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   horizontal: 12,
                                   vertical: 14,
                                 ),
-                                suffixIcon: Icon(
-                                  Icons.arrow_drop_down,
-                                  color: _selectedProvince != null
-                                      ? AppColors.textSecondary
-                                      : AppColors.textTertiary,
+                                suffixIcon: GestureDetector(
+                                  onTap: _selectedProvince != null
+                                      ? () {
+                                          focusNode.requestFocus();
+                                          final text = controller.text;
+                                          controller.text = '';
+                                          controller.text = text;
+                                          controller.selection = TextSelection.collapsed(
+                                            offset: text.length,
+                                          );
+                                        }
+                                      : null,
+                                  child: Icon(
+                                    Icons.arrow_drop_down,
+                                    color: _selectedProvince != null
+                                        ? AppColors.textSecondary
+                                        : AppColors.textTertiary,
+                                  ),
                                 ),
                               ),
                             );
@@ -745,80 +769,75 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 title: '약관 동의',
               ),
               const SizedBox(height: 8),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _isConsentGiven = !_isConsentGiven;
-                  });
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.cardBackground,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColors.textTertiary.withValues(alpha: 0.2),
-                      width: 1,
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.cardBackground,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.textTertiary.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.cardShadow,
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.cardShadow,
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: Checkbox(
-                          value: _isConsentGiven,
-                          onChanged: (value) {
-                            setState(() {
-                              _isConsentGiven = value ?? false;
-                            });
-                          },
-                          activeColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          side: BorderSide(
-                            color: AppColors.textTertiary,
-                            width: 1.5,
+                  ],
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: _showPrivacyPolicy,
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: '(필수) ',
+                                style: AppTextStyle.bodyMedium.copyWith(
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              TextSpan(
+                                text: '개인정보 수집 및 이용 동의',
+                                style: AppTextStyle.bodyMedium.copyWith(
+                                  color: AppColors.textPrimary,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          '(필수) 개인정보 수집 및 이용 동의',
-                          style: AppTextStyle.bodyMedium.copyWith(
-                            color: AppColors.textPrimary,
-                          ),
+                    ),
+                    const SizedBox(width: 12),
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: Checkbox(
+                        value: _isConsentGiven,
+                        onChanged: (value) {
+                          setState(() {
+                            _isConsentGiven = value ?? false;
+                          });
+                        },
+                        activeColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        side: BorderSide(
+                          color: AppColors.textTertiary,
+                          width: 1.5,
                         ),
                       ),
-                      TextButton(
-                        onPressed: _showPrivacyPolicy,
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Text(
-                          '보기',
-                          style: AppTextStyle.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
 
