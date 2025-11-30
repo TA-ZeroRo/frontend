@@ -56,7 +56,7 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
     },
     {
       'id': 'kind',
-      'name': '자상한 선생님',
+      'name': '친절한 선생님',
       'image': 'assets/images/earth_zeroro.png', // 임시 이미지
     },
   ];
