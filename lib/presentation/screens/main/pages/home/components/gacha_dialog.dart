@@ -21,6 +21,10 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
   String? _resultCharacter;
   bool _showResult = false;
   bool _isNewCharacter = false;
+  bool _showCollection = false; // 성격 도감 표시 여부
+
+  // UI 테스트용 보유 성격 목록 (임시 데이터)
+  final Set<String> _collectedCharacters = {'A', 'C'};
 
   // 목표 달성 점수 (이 점수에 도달하면 뽑기 가능)
   final int _targetMilestone = 300;
@@ -46,6 +50,11 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
       'id': 'D',
       'name': '성격 D',
       'image': 'assets/images/cloud_zeroro_magic.png', // 존재하는 이미지로 교체
+    },
+    {
+      'id': 'E',
+      'name': '성격 E',
+      'image': 'assets/images/earth_zeroro.png', // 임시 이미지
     },
   ];
 
@@ -136,19 +145,35 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
             _buildHeader(context),
             const SizedBox(height: 24),
             SizedBox(
-              height: 220,
+              height: 400,
               child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                child: _showResult ? _buildResultView() : _buildGachaMachine(),
+                duration: const Duration(milliseconds: 300),
+                child: _showCollection
+                    ? _buildCollectionView()
+                    : Column(
+                        key: const ValueKey('gacha_view'),
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            height: 220,
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 400),
+                              child: _showResult
+                                  ? _buildResultView()
+                                  : _buildGachaMachine(),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          if (!_showResult) ...[
+                            _buildPointInfo(currentPoints),
+                            const SizedBox(height: 24),
+                            _buildDrawButton(currentPoints),
+                          ] else
+                            _buildResultActions(),
+                        ],
+                      ),
               ),
             ),
-            const SizedBox(height: 24),
-            if (!_showResult) ...[
-              _buildPointInfo(currentPoints),
-              const SizedBox(height: 24),
-              _buildDrawButton(currentPoints),
-            ] else
-              _buildResultActions(),
           ],
         ),
       ),
@@ -159,35 +184,176 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          '캐릭터 성격 뽑기',
-          style: TextStyle(
+        Text(
+          _showCollection ? '성격 도감' : '캐릭터 성격 뽑기',
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
             letterSpacing: -0.5,
           ),
         ),
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => Navigator.pop(context),
-            borderRadius: BorderRadius.circular(50),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.close,
-                color: AppColors.textSecondary,
-                size: 20,
+        Row(
+          children: [
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _showCollection = !_showCollection;
+                    if (_showCollection) {
+                      _showResult = false;
+                    }
+                  });
+                },
+                borderRadius: BorderRadius.circular(50),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color:
+                        _showCollection ? AppColors.primary : Colors.grey[100],
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.grid_view_rounded,
+                    color: _showCollection
+                        ? Colors.white
+                        : AppColors.textSecondary,
+                    size: 20,
+                  ),
+                ),
               ),
             ),
-          ),
+            const SizedBox(width: 8),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  if (_showCollection) {
+                    setState(() {
+                      _showCollection = false;
+                    });
+                  } else {
+                    Navigator.pop(context);
+                  }
+                },
+                borderRadius: BorderRadius.circular(50),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.close,
+                    color: AppColors.textSecondary,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
+    );
+  }
+
+  Widget _buildCollectionView() {
+    return Container(
+      key: const ValueKey('collection_view'),
+      // height: 400, // 부모 SizedBox에서 크기 제어
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      // Scrollbar 추가로 스크롤 가능함을 시각적으로 명시
+      child: Scrollbar(
+        thumbVisibility: true,
+        child: GridView.builder(
+          padding: const EdgeInsets.only(right: 12, bottom: 12), // 스크롤바 공간 확보
+          itemCount: _characterPool.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 0.85,
+          ),
+          itemBuilder: (context, index) {
+            final char = _characterPool[index];
+            final isCollected = _collectedCharacters.contains(char['id']);
+            return _buildCollectionItem(char, isCollected);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCollectionItem(Map<String, String> char, bool isCollected) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isCollected ? Colors.white : Colors.grey[100],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isCollected ? AppColors.primary.withValues(alpha: 0.3) : Colors.transparent,
+          width: 2,
+        ),
+        boxShadow: isCollected
+            ? [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                )
+              ]
+            : null,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isCollected ? Colors.white : Colors.grey[300],
+            ),
+            child: ClipOval(
+              child: isCollected
+                  ? Transform.translate(
+                      offset: ['C', 'D'].contains(char['id'])
+                          ? const Offset(-5, 0)
+                          : Offset.zero,
+                      child: Image.asset(
+                        char['image']!,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Icon(
+                      Icons.lock_rounded,
+                      color: Colors.grey[400],
+                      size: 32,
+                    ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            char['name']!,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: isCollected ? AppColors.textPrimary : Colors.grey[400],
+            ),
+          ),
+          if (isCollected) ...[
+            const SizedBox(height: 4),
+            Text(
+              '보유중',
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.primary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
