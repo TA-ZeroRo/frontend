@@ -9,6 +9,38 @@ class AiMessageRow extends StatelessWidget {
 
   const AiMessageRow({super.key, required this.message});
 
+<<<<<<< Updated upstream
+=======
+  // MarkdownStyleSheet를 상수로 캐싱하여 재사용
+  static final _markdownStyleSheet = MarkdownStyleSheet(
+    p: const TextStyle(
+      fontSize: 14,
+      color: Colors.black87,
+      height: 1.5,
+    ),
+    strong: const TextStyle(
+      fontWeight: FontWeight.bold,
+      color: Colors.black87,
+    ),
+    a: TextStyle(
+      color: AppColors.primary,
+      decoration: TextDecoration.underline,
+    ),
+    code: TextStyle(
+      backgroundColor: Colors.grey.shade200,
+      color: Colors.black87,
+      fontFamily: 'monospace',
+    ),
+  );
+
+  // 아바타 이미지를 상수로 캐싱
+  static const _zeroroAvatar = CircleAvatar(
+    radius: 20,
+    backgroundColor: Colors.white,
+    backgroundImage: AssetImage('assets/images/cloud_zeroro.png'),
+  );
+
+>>>>>>> Stashed changes
   @override
   Widget build(BuildContext context) {
     return Padding(

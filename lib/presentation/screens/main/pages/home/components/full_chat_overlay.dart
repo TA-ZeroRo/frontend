@@ -121,6 +121,16 @@ class _FullChatOverlayState extends ConsumerState<FullChatOverlay> {
     );
   }
 
+<<<<<<< Updated upstream
+=======
+  // 제로로 아바타를 상수로 캐싱
+  static const _zeroroAvatarWidget = CircleAvatar(
+    radius: 20,
+    backgroundColor: Colors.white,
+    backgroundImage: AssetImage('assets/images/cloud_zeroro.png'),
+  );
+
+>>>>>>> Stashed changes
   /// 채팅 메시지 영역
   Widget _buildChatArea(ChatState chatState) {
     // 메시지가 없고 로딩 중도 아니면 빈 상태 표시
