@@ -5,7 +5,7 @@ import 'package:frontend/core/utils/toast_helper.dart';
 import 'package:frontend/data/data_source/location/location_service.dart';
 import 'package:frontend/domain/model/mission/mission_with_template.dart';
 
-import '../../state/activity_state.dart';
+import '../../state/campaign_mission_state.dart';
 
 class LocationVerificationBottomSheet extends ConsumerStatefulWidget {
   final MissionWithTemplate mission;

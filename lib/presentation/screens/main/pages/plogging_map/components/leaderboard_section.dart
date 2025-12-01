@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../domain/model/leaderboard/leaderboard_entry.dart';
-import '../state/activity_state.dart';
+import '../state/leaderboard_state.dart';
 import 'ranking_view.dart';
 import 'shimmer_widgets.dart';
 

@@ -6,9 +6,9 @@ import '../../../../../../core/utils/character_notification_helper.dart';
 import '../../../../../../domain/model/mission/mission_template.dart';
 import '../../../../../../domain/model/mission/mission_with_template.dart';
 import '../../../../../../domain/model/mission/verification_type.dart';
-import '../state/activity_state.dart';
-import '../../campaign/campaign_mission_webview_screen.dart';
-import 'shimmer_widgets.dart';
+import '../state/campaign_mission_state.dart';
+import '../campaign_mission_webview_screen.dart';
+import '../../plogging_map/components/shimmer_widgets.dart';
 import 'verification_bottom_sheets/image_verification_bottom_sheet.dart';
 import 'verification_bottom_sheets/location_verification_bottom_sheet.dart';
 import 'verification_bottom_sheets/quiz_verification_bottom_sheet.dart';
@@ -818,9 +818,6 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
                 ),
               )
             else if (proofData['image'] != null)
-              // Assuming 'image' might be a local path or similar in some contexts,
-              // but for network images usually it's a URL.
-              // Just in case it's a different key.
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(

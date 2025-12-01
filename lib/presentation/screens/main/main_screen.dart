@@ -4,14 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_color.dart';
 import 'pages/campaign/campaign_page.dart';
 import 'pages/home/home_page.dart';
-import 'pages/activity/activity_page.dart';
+import 'pages/plogging_map/plogging_map_page.dart';
 import 'pages/profile/profile_page.dart';
 import 'pages/recruiting/recruiting_page.dart';
 import 'state/bottom_nav_controller.dart';
 import 'pages/home/state/chat_controller.dart';
 import 'pages/home/components/full_chat_overlay.dart';
-import 'pages/activity/state/activity_state.dart';
+import 'pages/plogging_map/state/leaderboard_state.dart';
 import 'pages/campaign/state/campaign_state.dart';
+import 'pages/campaign/state/campaign_mission_state.dart';
 import 'pages/campaign/state/recruiting_state.dart';
 import 'pages/profile/state/weekly_report_controller.dart';
 
@@ -32,7 +33,7 @@ class MainScreen extends ConsumerWidget {
 
     final Widget page = switch (nav) {
       BottomNav.home => const HomePage(),
-      BottomNav.activity => const ActivityPage(),
+      BottomNav.ploggingMap => const PloggingMapPage(),
       BottomNav.campaign => const CampaignPage(),
       BottomNav.recruiting => const RecruitingPage(),
       BottomNav.profile => const ProfilePage(),
@@ -114,12 +115,12 @@ void _refreshTabData(WidgetRef ref, BottomNav tab) {
     case BottomNav.home:
       // Home은 3D 모델/채팅이라 별도 refresh 불필요
       break;
-    case BottomNav.activity:
+    case BottomNav.ploggingMap:
       ref.read(combinedRankingProvider.notifier).refresh();
-      ref.read(campaignMissionProvider.notifier).refresh();
       break;
     case BottomNav.campaign:
       ref.read(campaignListProvider.notifier).refresh();
+      ref.read(campaignMissionProvider.notifier).refresh();
       break;
     case BottomNav.recruiting:
       ref.invalidate(recruitingListProvider);

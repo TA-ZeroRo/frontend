@@ -13,7 +13,7 @@ import '../../../../../core/utils/toast_helper.dart';
 import '../../../../../data/data_source/campaign/campaign_api.dart';
 import '../../../../../domain/model/campaign/campaign_webview_config.dart';
 import '../../../../../domain/model/mission/mission_with_template.dart';
-import '../activity/state/activity_state.dart';
+import 'state/campaign_mission_state.dart';
 
 /// 캠페인 미션 WebView 제출 화면
 class CampaignMissionWebViewScreen extends ConsumerStatefulWidget {
