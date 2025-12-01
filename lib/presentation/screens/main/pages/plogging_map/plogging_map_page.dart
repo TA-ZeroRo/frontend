@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/components/custom_app_bar.dart';
 
 import '../../../../../core/theme/app_color.dart';
-import 'components/leaderboard_section.dart';
 import 'components/photo_verification_sheet.dart';
 import 'components/plogging_fab.dart';
 import 'components/plogging_map_view.dart';
@@ -29,23 +28,8 @@ class PloggingMapPage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: CustomAppBar(
+      appBar: const CustomAppBar(
         title: '플로깅 맵',
-        additionalActions: [
-          IconButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => const Dialog(
-                  backgroundColor: Colors.transparent,
-                  insetPadding: EdgeInsets.symmetric(horizontal: 16),
-                  child: LeaderboardSection(),
-                ),
-              );
-            },
-            icon: const Icon(Icons.emoji_events_outlined),
-          ),
-        ],
       ),
       body: Stack(
         children: [
