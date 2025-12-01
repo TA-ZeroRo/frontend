@@ -18,6 +18,7 @@ import 'package:frontend/data/data_source/leaderboard/leaderboard_remote_data_so
 import 'package:frontend/data/data_source/location/location_service.dart'
     as _i912;
 import 'package:frontend/data/data_source/mission/mission_api.dart' as _i800;
+import 'package:frontend/data/data_source/plogging/plogging_api.dart' as _i249;
 import 'package:frontend/data/data_source/point/point_api.dart' as _i116;
 import 'package:frontend/data/data_source/recruiting/recruiting_api.dart'
     as _i324;
@@ -37,6 +38,8 @@ import 'package:frontend/data/repository_impl/leaderboard_repository_impl.dart'
     as _i856;
 import 'package:frontend/data/repository_impl/mission_repository_impl.dart'
     as _i1053;
+import 'package:frontend/data/repository_impl/plogging_repository_impl.dart'
+    as _i268;
 import 'package:frontend/data/repository_impl/point_repository_impl.dart'
     as _i278;
 import 'package:frontend/data/repository_impl/recruiting_repository_impl.dart'
@@ -52,6 +55,7 @@ import 'package:frontend/domain/repository/campaign_repository.dart' as _i737;
 import 'package:frontend/domain/repository/leaderboard_repository.dart'
     as _i362;
 import 'package:frontend/domain/repository/mission_repository.dart' as _i629;
+import 'package:frontend/domain/repository/plogging_repository.dart' as _i102;
 import 'package:frontend/domain/repository/point_repository.dart' as _i974;
 import 'package:frontend/domain/repository/recruiting_repository.dart' as _i138;
 import 'package:frontend/domain/repository/report_repository.dart' as _i589;
@@ -90,6 +94,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i876.VerificationApi>(
       () => _i876.VerificationApi(gh<_i361.Dio>()),
     );
+    gh.factory<_i249.PloggingApi>(() => _i249.PloggingApi(gh<_i361.Dio>()));
     gh.factory<_i138.RecruitingRepository>(
       () => _i491.RecruitingRepositoryImpl(
         gh<_i324.RecruitingApi>(),
@@ -107,6 +112,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i93.AgentChatRepository>(
       () => _i315.AgentChatRepositoryImpl(gh<_i65.AgentChatApi>()),
+    );
+    gh.factory<_i102.PloggingRepository>(
+      () => _i268.PloggingRepositoryImpl(gh<_i249.PloggingApi>()),
     );
     gh.factory<_i362.LeaderboardRepository>(
       () => _i856.LeaderboardRepositoryImpl(

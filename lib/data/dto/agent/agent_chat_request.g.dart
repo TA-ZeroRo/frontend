@@ -10,7 +10,8 @@ AgentChatRequest _$AgentChatRequestFromJson(Map<String, dynamic> json) =>
     AgentChatRequest(
       userId: json['user_id'] as String,
       message: json['message'] as String,
-      selectedCharacter: json['selected_character'] as String? ?? 'zeroro',
+      selectedCharacter:
+          json['selected_character'] as String? ?? 'earth_zeroro',
     );
 
 Map<String, dynamic> _$AgentChatRequestToJson(AgentChatRequest instance) =>
