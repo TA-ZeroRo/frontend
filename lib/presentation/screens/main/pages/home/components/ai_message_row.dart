@@ -9,8 +9,6 @@ class AiMessageRow extends StatelessWidget {
 
   const AiMessageRow({super.key, required this.message});
 
-<<<<<<< Updated upstream
-=======
   // MarkdownStyleSheet를 상수로 캐싱하여 재사용
   static final _markdownStyleSheet = MarkdownStyleSheet(
     p: const TextStyle(
@@ -37,10 +35,9 @@ class AiMessageRow extends StatelessWidget {
   static const _zeroroAvatar = CircleAvatar(
     radius: 20,
     backgroundColor: Colors.white,
-    backgroundImage: AssetImage('assets/images/cloud_zeroro.png'),
+    backgroundImage: AssetImage('assets/images/smile_zeroro.png'),
   );
 
->>>>>>> Stashed changes
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -48,11 +45,7 @@ class AiMessageRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: Colors.white,
-            child: Image.asset('assets/images/smile_zeroro.png'),
-          ),
+          _zeroroAvatar,
           const SizedBox(width: 10),
 
           // 메시지 버블
@@ -73,7 +66,11 @@ class AiMessageRow extends StatelessWidget {
                   ),
                 ],
               ),
-              child: MarkdownBody(data: message.text, selectable: true),
+              child: MarkdownBody(
+                data: message.text,
+                selectable: true,
+                styleSheet: _markdownStyleSheet,
+              ),
             ),
           ),
         ],
