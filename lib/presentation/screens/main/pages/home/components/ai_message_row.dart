@@ -35,7 +35,7 @@ class AiMessageRow extends StatelessWidget {
   static const _zeroroAvatar = CircleAvatar(
     radius: 20,
     backgroundColor: Colors.white,
-    backgroundImage: AssetImage('assets/images/smile_zeroro.png'),
+    backgroundImage: AssetImage('assets/images/cloud_zeroro.png'),
   );
 
   @override
