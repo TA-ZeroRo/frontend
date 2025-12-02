@@ -51,9 +51,10 @@ class CharacterNotificationHelper {
     Color bubbleColor = Colors.white,
     Color textColor = Colors.black87,
     Color? bubbleBorderColor,
-    double characterSize = 50.0,
+    double characterSize = 65.0,
     Duration duration = const Duration(seconds: 3),
     double borderRadius = 16.0,
+    Alignment? alignment,
   }) {
     // 기존 알림이 있으면 먼저 제거
     hide();
@@ -67,6 +68,7 @@ class CharacterNotificationHelper {
       characterSize: characterSize,
       duration: duration,
       borderRadius: borderRadius,
+      alignment: alignment,
     );
 
     // OverlayEntry 생성

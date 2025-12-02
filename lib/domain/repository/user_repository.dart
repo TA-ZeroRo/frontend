@@ -5,6 +5,7 @@ abstract class UserRepository {
     required String userId,
     required String username,
     required String region,
+    String? userImg,
   });
 
   Future<User> getUser(String userId);

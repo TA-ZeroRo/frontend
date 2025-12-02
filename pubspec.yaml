@@ -57,8 +57,15 @@ dependencies:
   flutter_3d_controller: ^2.3.0
   google_fonts: ^6.3.2
   webview_flutter: ^4.10.0
+  webview_flutter_android: ^4.10.1
+  file_picker: ^8.0.0
   flutter_markdown: ^0.7.4+1
   share_plus: ^12.0.1
+  dropdown_button2: ^2.3.9
+  # 플로깅 맵 관련
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.0
+  flutter_local_notifications: ^17.2.0
 
 dev_dependencies:
   flutter_test:

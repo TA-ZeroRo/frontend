@@ -9,6 +9,28 @@ class MessageBubble extends StatelessWidget {
 
   const MessageBubble({super.key, required this.message});
 
+  // MarkdownStyleSheet를 상수로 캐싱하여 재사용
+  static final _markdownStyleSheet = MarkdownStyleSheet(
+    p: const TextStyle(
+      fontSize: 14,
+      color: Colors.black87,
+      height: 1.5,
+    ),
+    strong: const TextStyle(
+      fontWeight: FontWeight.bold,
+      color: Colors.black87,
+    ),
+    a: TextStyle(
+      color: AppColors.primary,
+      decoration: TextDecoration.underline,
+    ),
+    code: TextStyle(
+      backgroundColor: Colors.grey.shade200,
+      color: Colors.black87,
+      fontFamily: 'monospace',
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     return Align(
@@ -36,6 +58,7 @@ class MessageBubble extends StatelessWidget {
         child: MarkdownBody(
           data: message.text,
           selectable: true,
+          styleSheet: _markdownStyleSheet,
         ),
       ),
     );

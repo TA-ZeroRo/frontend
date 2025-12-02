@@ -94,6 +94,7 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> register({
     required String nickname,
     required String region,
+    String? userImg,
   }) async {
     state = state.copyWith(isLoading: true, error: null);
 
@@ -107,6 +108,7 @@ class AuthNotifier extends Notifier<AuthState> {
         userId: userId,
         username: nickname,
         region: region,
+        userImg: userImg,
       );
       state = state.copyWith(currentUser: user, isLoading: false);
 
@@ -181,6 +183,21 @@ class AuthNotifier extends Notifier<AuthState> {
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
       rethrow;
+    }
+  }
+
+  /// 현재 사용자 정보 새로고침 (미션 완료 등 포인트 변경 시 사용)
+  Future<void> refreshCurrentUser() async {
+    try {
+      final userId = _supabase.auth.currentSession?.user.id;
+      if (userId == null) {
+        return;
+      }
+
+      final user = await _userRepository.getUser(userId);
+      state = state.copyWith(currentUser: user);
+    } catch (e) {
+      // 새로고침 실패 시 에러 무시 (기존 상태 유지)
     }
   }
 

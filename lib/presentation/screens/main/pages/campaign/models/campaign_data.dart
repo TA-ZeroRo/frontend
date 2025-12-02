@@ -9,6 +9,7 @@ class CampaignData {
   final DateTime endDate;
   final String region; // 지역(도)
   final String city; // 시
+  final String description; // 캠페인 설명
   final String category; // 카테고리
   final bool isParticipating; // 참가 여부
   final bool isAutoProcessable; // 자동 처리 가능 여부
@@ -17,6 +18,7 @@ class CampaignData {
     required this.id,
     required this.title,
     required this.imageUrl,
+    this.description = '캠페인 설명이 없습니다.',
     required this.url,
     required this.startDate,
     required this.endDate,
@@ -53,6 +55,7 @@ class CampaignData {
     String? id,
     String? title,
     String? imageUrl,
+    String? description,
     String? url,
     DateTime? startDate,
     DateTime? endDate,
@@ -66,6 +69,7 @@ class CampaignData {
       id: id ?? this.id,
       title: title ?? this.title,
       imageUrl: imageUrl ?? this.imageUrl,
+      description: description ?? this.description,
       url: url ?? this.url,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
@@ -110,13 +114,4 @@ const citiesByRegion = {
 };
 
 /// 카테고리 목록
-const categories = [
-  '전체',
-  '재활용',
-  '대중교통',
-  '에너지절약',
-  '제로웨이스트',
-  '자연보호',
-  '교육',
-  '기타',
-];
+const categories = ['전체', '재활용', '대중교통', '에너지절약', '제로웨이스트', '자연보호', '교육', '기타'];

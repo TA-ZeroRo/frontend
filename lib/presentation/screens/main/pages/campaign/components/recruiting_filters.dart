@@ -126,14 +126,23 @@ class _RecruitingFiltersState extends State<RecruitingFilters> {
                     decoration: BoxDecoration(
                       color: _isAnyFilterActive
                           ? AppColors.primary.withValues(alpha: 0.12)
-                          : Colors.white.withValues(alpha: 0.7),
+                          : Colors.white,
                       border: Border.all(
                         color: _isAnyFilterActive
                             ? AppColors.primary
-                            : AppColors.textTertiary.withValues(alpha: 0.25),
+                            : const Color(0xFFCCCCCC),
                         width: _isAnyFilterActive ? 1.5 : 1,
                       ),
                       borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _isAnyFilterActive
+                              ? AppColors.primary.withValues(alpha: 0.2)
+                              : Colors.black.withValues(alpha: 0.08),
+                          blurRadius: _isAnyFilterActive ? 4 : 3,
+                          offset: Offset(0, _isAnyFilterActive ? 2 : 1),
+                        ),
+                      ],
                     ),
                     child: Icon(
                       Icons.refresh,
@@ -364,10 +373,22 @@ class _RecruitingFiltersState extends State<RecruitingFilters> {
             color: enabled
                 ? (isSelected
                       ? AppColors.primary
-                      : AppColors.textTertiary.withValues(alpha: 0.3))
+                      : const Color(0xFFCCCCCC))
                 : AppColors.textTertiary.withValues(alpha: 0.2),
+            width: isSelected ? 1.5 : 1,
           ),
           borderRadius: BorderRadius.circular(18),
+          boxShadow: enabled
+              ? [
+                  BoxShadow(
+                    color: isSelected
+                        ? AppColors.primary.withValues(alpha: 0.25)
+                        : Colors.black.withValues(alpha: 0.06),
+                    blurRadius: isSelected ? 4 : 2,
+                    offset: Offset(0, isSelected ? 2 : 1),
+                  ),
+                ]
+              : null,
         ),
         child: Text(
           label,
@@ -413,14 +434,23 @@ class _FilterButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: isActive
               ? AppColors.primary.withValues(alpha: 0.12)
-              : Colors.white.withValues(alpha: 0.7),
+              : Colors.white,
           border: Border.all(
             color: isActive
                 ? AppColors.primary
-                : AppColors.textTertiary.withValues(alpha: 0.25),
+                : const Color(0xFFCCCCCC),
             width: isActive ? 1.5 : 1,
           ),
           borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: isActive
+                  ? AppColors.primary.withValues(alpha: 0.2)
+                  : Colors.black.withValues(alpha: 0.08),
+              blurRadius: isActive ? 4 : 3,
+              offset: Offset(0, isActive ? 2 : 1),
+            ),
+          ],
         ),
         child: Row(
           children: [

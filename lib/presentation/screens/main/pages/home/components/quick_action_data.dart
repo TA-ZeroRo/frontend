@@ -18,13 +18,18 @@ class QuickActionData {
   static const List<QuickActionItem> actions = [
     QuickActionItem(
       icon: Icons.campaign_outlined,
-      label: '캠페인 추천받기',
-      prompt: '우리 지역에서 참여할 수 있는 환경 캠페인을 추천해줘',
+      label: '우리 지역 캠페인',
+      prompt: '우리 지역에서 현재 진행 중인 캠페인을 알려줘',
     ),
     QuickActionItem(
       icon: Icons.newspaper_outlined,
-      label: '환경 뉴스 읽기',
+      label: '환경 뉴스',
       prompt: '최근 환경 관련 뉴스를 알려줘',
+    ),
+    QuickActionItem(
+      icon: Icons.lightbulb_outline,
+      label: '환경 용어',
+      prompt: '환경 관련 용어를 하나 골라서 쉽게 설명해줘',
     ),
   ];
 }

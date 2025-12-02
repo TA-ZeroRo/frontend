@@ -4,7 +4,6 @@ import 'package:frontend/core/config/env_var.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:toastification/toastification.dart';
-
 import 'core/di/injection.dart';
 import 'presentation/routes/router.dart';
 
@@ -36,9 +35,7 @@ class MainApp extends StatelessWidget {
           routerConfig: router,
           theme: ThemeData(
             // 기본 텍스트 테마에 Jua 폰트 적용
-            textTheme: GoogleFonts.juaTextTheme(
-              ThemeData.light().textTheme,
-            ),
+            textTheme: GoogleFonts.juaTextTheme(ThemeData.light().textTheme),
             // 주요 텍스트 테마에도 Jua 폰트 적용
             primaryTextTheme: GoogleFonts.juaTextTheme(
               ThemeData.light().primaryTextTheme,

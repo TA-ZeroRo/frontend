@@ -5,9 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../../../../core/constants/regions.dart';
+import '../../../../../../core/di/injection.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
 import '../../../../../../core/utils/toast_helper.dart';
+import '../../../../../../data/data_source/storage_service.dart';
 import '../../../../entry/state/auth_controller.dart';
 import 'profile_avatar.dart';
 import 'profile_action_buttons.dart';
@@ -257,14 +259,19 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
 
   /// 이미지 선택 바텀시트 표시
   void _showImagePicker() {
+    final hasExistingImage = (_selectedImage != null ||
+            ref.read(authProvider).currentUser?.userImg != null) &&
+        !_removeImage;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (BuildContext context) {
         return Container(
-          decoration: BoxDecoration(
-            color: AppColors.cardBackground,
-            borderRadius: const BorderRadius.only(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
               topLeft: Radius.circular(24),
               topRight: Radius.circular(24),
             ),
@@ -272,71 +279,117 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              const SizedBox(height: 12),
+              // Drag Handle
               Container(
-                padding: const EdgeInsets.all(16),
+                width: 40,
+                height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
-                  border: Border(
-                    bottom: BorderSide(
-                      color: AppColors.textTertiary.withValues(alpha: 0.2),
-                      width: 1,
-                    ),
-                  ),
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              ),
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(width: 48),
-                    Text(
-                      '프로필 사진 선택',
-                      style: AppTextStyle.titleLarge.copyWith(
-                        color: AppColors.onPrimary,
-                        fontWeight: FontWeight.w500,
+                    // 헤더
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt_outlined,
+                            color: AppColors.primary,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          '프로필 사진 선택',
+                          style: AppTextStyle.titleLarge.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    // 이미지 선택 카드
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildSelectionCard(
+                            icon: Icons.camera_alt_rounded,
+                            label: '카메라 촬영',
+                            onTap: () {
+                              Navigator.pop(context);
+                              _pickImageFromCamera();
+                            },
+                            color: const Color(0xFFE3F2FD),
+                            iconColor: const Color(0xFF2196F3),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildSelectionCard(
+                            icon: Icons.photo_library_rounded,
+                            label: '앨범에서 선택',
+                            onTap: () {
+                              Navigator.pop(context);
+                              _pickImageFromGallery();
+                            },
+                            color: const Color(0xFFE3F2FD),
+                            iconColor: const Color(0xFF2196F3),
+                          ),
+                        ),
+                      ],
+                    ),
+                    // 사진 제거 버튼 (기존 이미지가 있을 때만 표시)
+                    if (hasExistingImage) ...[
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            setState(() {
+                              _selectedImage = null;
+                              _removeImage = true;
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.delete_outline_rounded,
+                            color: AppColors.error,
+                          ),
+                          label: Text(
+                            '사진 제거',
+                            style: AppTextStyle.bodyLarge.copyWith(
+                              color: AppColors.error,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: AppColors.error),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close_rounded),
-                      color: AppColors.onPrimary,
-                    ),
+                    ],
+                    SizedBox(
+                        height: MediaQuery.of(context).padding.bottom + 24),
                   ],
                 ),
               ),
-              _buildImagePickerOption(
-                icon: Icons.camera_alt_rounded,
-                label: '카메라로 촬영',
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImageFromCamera();
-                },
-              ),
-              _buildImagePickerOption(
-                icon: Icons.photo_library_rounded,
-                label: '갤러리에서 선택',
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImageFromGallery();
-                },
-              ),
-              if ((_selectedImage != null || ref.read(authProvider).currentUser?.userImg != null) &&
-                  !_removeImage)
-                _buildImagePickerOption(
-                  icon: Icons.delete_outline_rounded,
-                  label: '사진 제거',
-                  onTap: () {
-                    Navigator.pop(context);
-                    setState(() {
-                      _selectedImage = null;
-                      _removeImage = true;
-                    });
-                  },
-                  isDestructive: true,
-                ),
-              const SizedBox(height: 16),
             ],
           ),
         );
@@ -344,29 +397,47 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
     );
   }
 
-  Widget _buildImagePickerOption({
+  Widget _buildSelectionCard({
     required IconData icon,
     required String label,
     required VoidCallback onTap,
-    bool isDestructive = false,
+    required Color color,
+    required Color iconColor,
   }) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        child: Row(
+        height: 120,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              color: isDestructive ? AppColors.error : AppColors.textPrimary,
-              size: 24,
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: iconColor.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(icon, color: iconColor, size: 28),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(height: 12),
             Text(
               label,
-              style: AppTextStyle.bodyLarge.copyWith(
-                color: isDestructive ? AppColors.error : AppColors.textPrimary,
-                fontWeight: FontWeight.w500,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: iconColor.withValues(alpha: 0.8),
               ),
             ),
           ],
@@ -457,10 +528,32 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
         _selectedCity!,
       );
 
-      // 프로필 업데이트 (이름과 지역만)
+      // 이미지 URL 처리
+      String? imageUrl = user.userImg;
+
+      if (_selectedImage != null) {
+        // 새 이미지가 선택된 경우 Storage에 업로드
+        final storageService = getIt<StorageService>();
+        final imageFile = File(_selectedImage!.path);
+        imageUrl = await storageService.updateProfileImage(
+          userId: user.id,
+          imageFile: imageFile,
+          oldImageUrl: user.userImg,
+        );
+      } else if (_removeImage) {
+        // 이미지 제거가 선택된 경우
+        if (user.userImg != null && user.userImg!.isNotEmpty) {
+          final storageService = getIt<StorageService>();
+          await storageService.deleteProfileImage(user.userImg!);
+        }
+        imageUrl = null;
+      }
+
+      // 프로필 업데이트 (이름, 지역, 이미지 포함)
       final updatedUser = user.copyWith(
         username: _nameController.text.trim(),
         region: regionText,
+        userImg: imageUrl,
       );
 
       await ref.read(authProvider.notifier).updateProfile(updatedUser);

@@ -47,19 +47,17 @@ class CampaignCard extends ConsumerWidget {
   }
 
   /// 배경 이미지
+  /// 배경 이미지
   Widget _buildBackgroundImage() {
+    if (campaign.imageUrl.isEmpty) {
+      return _buildFallbackView();
+    }
+
     return Image.network(
       campaign.imageUrl,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
-        return Container(
-          color: const Color(0xFF2A2A2A),
-          child: const Icon(
-            Icons.image_not_supported,
-            color: Color(0xFF666666),
-            size: 48,
-          ),
-        );
+        return _buildFallbackView();
       },
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
@@ -76,6 +74,44 @@ class CampaignCard extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+
+  /// 이미지 없을 때 대체 화면 (설명 텍스트 표시)
+  /// 이미지 없을 때 대체 화면 (설명 텍스트 표시)
+  Widget _buildFallbackView() {
+    return Container(
+      color: Colors.lightBlue[50],
+      padding: const EdgeInsets.fromLTRB(20, 60, 20, 80),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Icon(
+              Icons.article_outlined,
+              color: AppColors.textSubtle,
+              size: 32,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            campaign.description.isNotEmpty
+                ? campaign.description
+                : '이미지가 준비중입니다.',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+              height: 1.6,
+              fontWeight: FontWeight.w400,
+            ),
+            textAlign: TextAlign.start,
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 
@@ -130,18 +166,43 @@ class CampaignCard extends ConsumerWidget {
   /// 자동처리 텍스트
   Widget _buildAutoProcessText() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        '자동처리',
-        style: TextStyle(
-          color: Colors.white.withValues(alpha: 0.9),
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
+        gradient: const LinearGradient(
+          colors: [AppColors.buttonColor, AppColors.primary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.buttonColor.withValues(alpha: 0.4),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.bolt_rounded, color: Colors.white, size: 14),
+          const SizedBox(width: 4),
+          Text(
+            '자동처리',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              shadows: [
+                Shadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  offset: const Offset(0, 1),
+                  blurRadius: 2,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

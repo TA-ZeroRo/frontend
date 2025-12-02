@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/presentation/screens/main/pages/home/state/chat_state.dart';
 import '../state/chat_controller.dart';
 import 'message_bubble.dart';
 import 'typing_indicator.dart';
@@ -39,6 +40,39 @@ class _SimpleChatAreaState extends ConsumerState<SimpleChatArea> {
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatProvider);
 
+    // Use ref.listen to react to state changes
+    // This is called ONCE per state change, not on every build
+    ref.listen<ChatState>(chatProvider, (previous, next) {
+      // Detect new AI message arrived
+      if (previous != null && next.messages.length > previous.messages.length) {
+        final latestMessage = next.messages.last;
+        if (latestMessage.isAI && !next.isLoading) {
+          // New AI message completed - show and start hide timer
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                _isVisible = true;
+              });
+              _startHideTimer();
+            }
+          });
+        }
+      }
+
+      // Handle loading state changes
+      if (previous != null && next.isLoading && !previous.isLoading) {
+        // Started loading - show immediately
+        _hideTimer?.cancel();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              _isVisible = true;
+            });
+          }
+        });
+      }
+    });
+
     // 최신 AI 메시지 찾기
     final latestAIMessage = chatState.messages.isEmpty
         ? null
@@ -49,32 +83,6 @@ class _SimpleChatAreaState extends ConsumerState<SimpleChatArea> {
 
     // 메시지나 로딩 상태가 없으면 아무것도 표시하지 않음
     final hasContent = latestAIMessage != null || chatState.isLoading;
-
-    // 새로운 메시지가 왔을 때 표시하고 타이머 시작
-    if (hasContent && !chatState.isLoading && !_isVisible) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            _isVisible = true;
-          });
-          _startHideTimer();
-        }
-      });
-    }
-
-    // 로딩 중일 때는 항상 표시
-    if (chatState.isLoading) {
-      _hideTimer?.cancel();
-      if (!_isVisible) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            setState(() {
-              _isVisible = true;
-            });
-          }
-        });
-      }
-    }
 
     if (!hasContent || !_isVisible) {
       return const SizedBox.shrink();

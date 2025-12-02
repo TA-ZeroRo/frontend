@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
-import '../state/mock/chart_mock_data.dart';
+import '../../../../../../domain/model/point/point_trend.dart';
 import '../state/chart_controller.dart';
 
 class PointChartSection extends ConsumerStatefulWidget {
@@ -73,12 +73,30 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
 
   @override
   Widget build(BuildContext context) {
-    // Riverpod에서 차트 데이터 가져오기
-    final chartData = ref.watch(chartProvider);
+    // Riverpod에서 차트 데이터 가져오기 (AsyncValue)
+    final chartAsyncValue = ref.watch(chartProvider);
     final Color cardFillColor = AppColors.background;
     final Color badgeFillColor = AppColors.primary.withValues(alpha: 0.1);
     final Color badgeBorderColor = AppColors.primary.withValues(alpha: 0.3);
 
+    return chartAsyncValue.when(
+      data: (chartData) => _buildChart(
+        chartData,
+        cardFillColor,
+        badgeFillColor,
+        badgeBorderColor,
+      ),
+      loading: () => _buildLoading(cardFillColor),
+      error: (error, stack) => _buildError(cardFillColor, error.toString()),
+    );
+  }
+
+  Widget _buildChart(
+    List<PointTrendDataPoint> chartData,
+    Color cardFillColor,
+    Color badgeFillColor,
+    Color badgeBorderColor,
+  ) {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: cardFillColor,
@@ -143,7 +161,9 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
                     border: Border.all(color: badgeBorderColor, width: 1),
                   ),
                   child: Text(
-                    chartData.isNotEmpty ? '${chartData.last.score}점' : '0점',
+                    chartData.isNotEmpty
+                        ? '${chartData.last.totalPoints}점'
+                        : '0점',
                     style: AppTextStyle.bodySmall.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
@@ -243,12 +263,13 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
                         majorTickLines: const MajorTickLines(size: 0),
                         minorTickLines: const MinorTickLines(size: 0),
                       ),
-                      series: <LineSeries<ProfileChartData, DateTime>>[
-                        LineSeries<ProfileChartData, DateTime>(
+                      series: <LineSeries<PointTrendDataPoint, DateTime>>[
+                        LineSeries<PointTrendDataPoint, DateTime>(
                           dataSource: chartData,
-                          xValueMapper: (ProfileChartData data, _) => data.date,
-                          yValueMapper: (ProfileChartData data, _) =>
-                              data.score.toDouble(),
+                          xValueMapper: (PointTrendDataPoint data, _) =>
+                              data.date,
+                          yValueMapper: (PointTrendDataPoint data, _) =>
+                              data.totalPoints.toDouble(),
                           name: '포인트',
                           color: AppColors.primary,
                           width: 3,
@@ -271,6 +292,77 @@ class _PointChartSectionState extends ConsumerState<PointChartSection> {
                     ),
                   ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoading(Color cardFillColor) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: cardFillColor,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: const SizedBox(
+        height: 280,
+        child: Center(
+          child: CircularProgressIndicator(
+            color: AppColors.primary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildError(Color cardFillColor, String error) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: cardFillColor,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: SizedBox(
+        height: 280,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 48,
+                color: AppColors.textTertiary,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '데이터를 불러올 수 없습니다',
+                style: AppTextStyle.bodyLarge.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                error,
+                style: AppTextStyle.bodySmall.copyWith(
+                  color: AppColors.textTertiary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
