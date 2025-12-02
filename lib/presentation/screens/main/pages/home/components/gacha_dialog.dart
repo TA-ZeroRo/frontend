@@ -350,7 +350,7 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
                 _selectedInCollection = null;
               });
 
-              ToastHelper.showSuccess('캐릭터 성격이 선택되었습니다.');
+              ToastHelper.showSuccess('캐릭터 성격이 적용되었습니다.');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
@@ -362,7 +362,7 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
               elevation: 0,
             ),
             child: const Text(
-              '선택하기',
+              '적용하기',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
@@ -641,14 +641,17 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    canDraw
-                        ? '누적 $_targetMilestone점 달성 보상!'
-                        : '$_targetMilestone점 달성 시 오픈',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.white.withValues(alpha: 0.9),
-                      fontWeight: FontWeight.w500,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      canDraw
+                          ? '누적 $_targetMilestone점 달성 보상!'
+                          : '$_targetMilestone점 달성 시 오픈',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ],
@@ -764,7 +767,10 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
       children: [
         Expanded(
           child: TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              // 다시 뽑기: 애니메이션과 함께 뽑기 재시작
+              _startGacha();
+            },
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
@@ -772,7 +778,7 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
               ),
             ),
             child: const Text(
-              '닫기',
+              '다시 뽑기',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -786,6 +792,14 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
           flex: 2,
           child: ElevatedButton(
             onPressed: () {
+              // 적용하기: 선택된 캐릭터 적용 후 뽑기 화면(머신)으로 복귀
+              if (_resultCharacter != null) {
+                ref
+                    .read(appSettingsProvider.notifier)
+                    .updateCharacter(_resultCharacter!);
+                ToastHelper.showSuccess('캐릭터 성격이 적용되었습니다.');
+              }
+
               setState(() {
                 _showResult = false;
                 _resultCharacter = null;
@@ -802,7 +816,7 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
               elevation: 0,
             ),
             child: const Text(
-              '다시 뽑기',
+              '적용하기',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
