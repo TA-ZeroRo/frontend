@@ -125,7 +125,7 @@ class _FullChatOverlayState extends ConsumerState<FullChatOverlay> {
   static const _zeroroAvatarWidget = CircleAvatar(
     radius: 20,
     backgroundColor: Colors.white,
-    backgroundImage: AssetImage('assets/images/smile_zeroro.png'),
+    backgroundImage: AssetImage('assets/images/cloud_zeroro.png'),
   );
 
   /// 채팅 메시지 영역
@@ -136,7 +136,11 @@ class _FullChatOverlayState extends ConsumerState<FullChatOverlay> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.chat_bubble_outline, size: 64, color: Colors.black),
+            Image.asset(
+              'assets/images/cloud_zeroro.png',
+              width: 100,
+              height: 100,
+            ),
             const SizedBox(height: 17),
             Text(
               '제로로에게 궁금한 것을 물어보세요!',
