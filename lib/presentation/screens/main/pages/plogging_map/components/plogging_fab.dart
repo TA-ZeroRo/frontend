@@ -5,66 +5,25 @@ import '../../../../../../core/theme/app_color.dart';
 import '../state/plogging_session_state.dart';
 
 class PloggingFab extends ConsumerWidget {
-  final VoidCallback? onVerificationPressed;
-
-  const PloggingFab({
-    super.key,
-    this.onVerificationPressed,
-  });
+  const PloggingFab({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sessionState = ref.watch(ploggingSessionProvider);
     final notifier = ref.read(ploggingSessionProvider.notifier);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // 인증 버튼 (세션 진행 중일 때만)
-        if (sessionState.isSessionActive) ...[
-          FloatingActionButton(
-            heroTag: 'verify_fab',
-            onPressed: sessionState.canVerify ? onVerificationPressed : null,
-            backgroundColor: sessionState.canVerify
-                ? AppColors.primary
-                : Colors.grey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.camera_alt, size: 20),
-                if (!sessionState.canVerify)
-                  Text(
-                    '${_getMinutesUntilVerification(sessionState)}분',
-                    style: const TextStyle(fontSize: 10),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-        ],
-
-        // 시작/종료 버튼
-        FloatingActionButton.extended(
-          heroTag: 'session_fab',
-          onPressed: () => _handleSessionToggle(context, notifier, sessionState),
-          backgroundColor: sessionState.isSessionActive
-              ? Colors.red
-              : AppColors.primary,
-          icon: Icon(
-            sessionState.isSessionActive ? Icons.stop : Icons.play_arrow,
-          ),
-          label: Text(
-            sessionState.isSessionActive ? '종료' : '플로깅 시작',
-          ),
-        ),
-      ],
+    return FloatingActionButton.extended(
+      heroTag: 'session_fab',
+      onPressed: () => _handleSessionToggle(context, notifier, sessionState),
+      backgroundColor:
+          sessionState.isSessionActive ? Colors.red : AppColors.primary,
+      icon: Icon(
+        sessionState.isSessionActive ? Icons.stop : Icons.play_arrow,
+      ),
+      label: Text(
+        sessionState.isSessionActive ? '종료' : '플로깅 시작',
+      ),
     );
-  }
-
-  int _getMinutesUntilVerification(PloggingSessionState state) {
-    if (state.nextVerificationTime == null) return 0;
-    final diff = state.nextVerificationTime!.difference(DateTime.now());
-    return diff.inMinutes.clamp(0, 20);
   }
 
   void _handleSessionToggle(

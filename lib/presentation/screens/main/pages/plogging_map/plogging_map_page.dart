@@ -18,18 +18,21 @@ class PloggingMapPage extends ConsumerWidget {
 
     // 에러 메시지 표시
     ref.listen<PloggingSessionState>(ploggingSessionProvider, (prev, next) {
-      if (next.errorMessage != null && next.errorMessage != prev?.errorMessage) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.errorMessage!)),
-        );
+      if (next.errorMessage != null &&
+          next.errorMessage != prev?.errorMessage) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(next.errorMessage!)));
         ref.read(ploggingSessionProvider.notifier).clearError();
       }
     });
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      extendBodyBehindAppBar: true,
       appBar: const CustomAppBar(
         title: '플로깅 맵',
+        backgroundColor: Colors.transparent,
       ),
       body: Stack(
         children: [
@@ -38,19 +41,19 @@ class PloggingMapPage extends ConsumerWidget {
 
           // 세션 정보 (상단)
           if (sessionState.isSessionActive)
-            const Positioned(
-              top: 16,
+            Positioned(
+              top: 120,
               left: 0,
               right: 0,
-              child: PloggingSessionInfo(),
+              child: PloggingSessionInfo(
+                onVerificationPressed: () {
+                  showPhotoVerificationSheet(context);
+                },
+              ),
             ),
         ],
       ),
-      floatingActionButton: PloggingFab(
-        onVerificationPressed: () {
-          showPhotoVerificationSheet(context);
-        },
-      ),
+      floatingActionButton: const PloggingFab(),
     );
   }
 }

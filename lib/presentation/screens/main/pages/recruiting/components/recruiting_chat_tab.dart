@@ -7,6 +7,7 @@ import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
 import '../../../../../../core/di/injection.dart';
 import '../../../../../../domain/repository/recruiting_repository.dart';
+import '../../../../../../data/data_source/notification/chat_notification_handler.dart';
 import '../../campaign/models/recruiting_post.dart';
 import '../../../../../../domain/model/recruiting/chat_message.dart';
 import '../state/recruiting_chat_state.dart';
@@ -39,6 +40,14 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
   void initState() {
     super.initState();
     _loadMessages().then((_) => _subscribeToRealtime());
+
+    // 현재 활성 채팅방 ID 설정 (푸시 알림 억제용)
+    final chatRoomId = widget.post.chatRoomId;
+    if (chatRoomId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(activeChatRoomIdProvider.notifier).state = int.tryParse(chatRoomId);
+      });
+    }
   }
 
   /// 실시간 메시지 구독
@@ -110,6 +119,9 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
 
   @override
   void dispose() {
+    // 현재 활성 채팅방 ID 해제
+    ref.read(activeChatRoomIdProvider.notifier).state = null;
+
     _realtimeSubscription?.cancel();
     _repository.unsubscribeFromChatRoom();
     _scrollController.dispose();
