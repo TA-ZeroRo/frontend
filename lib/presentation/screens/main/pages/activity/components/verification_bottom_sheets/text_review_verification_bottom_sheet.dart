@@ -264,6 +264,7 @@ class _TextReviewVerificationBottomSheetState
       await ref.read(authProvider.notifier).refreshCurrentUser();
 
       ToastHelper.showSuccess('소감문이 제출되었습니다! 포인트가 지급되었어요 🎉');
+
       Navigator.of(context).pop(true); // true 반환하여 성공 알림
     } catch (e) {
       CustomLogger.logger.e('미션 제출 실패', error: e);

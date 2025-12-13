@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/utils/toast_helper.dart';
 import 'package:frontend/domain/model/mission/mission_with_template.dart';
 
 import '../../../../../../../core/theme/app_color.dart';
 
-class QuizVerificationBottomSheet extends StatefulWidget {
+class QuizVerificationBottomSheet extends ConsumerStatefulWidget {
   final MissionWithTemplate mission;
 
   const QuizVerificationBottomSheet({super.key, required this.mission});
 
   @override
-  State<QuizVerificationBottomSheet> createState() =>
+  ConsumerState<QuizVerificationBottomSheet> createState() =>
       _QuizVerificationBottomSheetState();
 }
 
 class _QuizVerificationBottomSheetState
-    extends State<QuizVerificationBottomSheet> {
+    extends ConsumerState<QuizVerificationBottomSheet> {
   bool _isSubmitting = false;
 
   @override
@@ -206,6 +207,7 @@ class _QuizVerificationBottomSheetState
     });
 
     ToastHelper.showSuccess('자동 제출이 완료되었습니다');
-    Navigator.of(context).pop();
+
+    Navigator.of(context).pop(true);
   }
 }

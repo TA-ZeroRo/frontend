@@ -416,6 +416,7 @@ class _ImageVerificationBottomSheetState
       }
 
       if (!mounted) return;
+
       Navigator.of(context).pop(true);
     } catch (e) {
       CustomLogger.logger.e('미션 제출 실패', error: e);
