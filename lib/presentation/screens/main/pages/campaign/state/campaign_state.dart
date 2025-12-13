@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/di/injection.dart';
 import '../../../../../../domain/model/campaign/campaign.dart';
+import '../../../../../../domain/model/campaign/campaign_source.dart';
 import '../../../../../../domain/repository/campaign_repository.dart';
 import '../../../../../../domain/repository/mission_repository.dart';
 import '../../../../entry/state/auth_controller.dart';
@@ -180,9 +181,8 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
 
   /// Campaign을 CampaignData로 변환
   CampaignData _campaignToCampaignData(Campaign campaign) {
-    // 임의로 일부 캠페인에 자동 처리 가능 설정 (ID 기반)
-    final campaignId = campaign.id;
-    final isAutoProcessable = campaignId % 3 == 0; // ID가 3의 배수인 경우 자동 처리 가능
+    // ZERORO 캠페인만 자동 처리 가능
+    final isAutoProcessable = campaign.campaignSource == CampaignSource.zeroro;
 
     return CampaignData(
       id: campaign.id.toString(),
@@ -201,6 +201,7 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
       category: campaign.category ?? '기타',
       isParticipating: _participatingCampaignIds.contains(campaign.id),
       isAutoProcessable: isAutoProcessable,
+      campaignSource: campaign.campaignSource,
     );
   }
 
@@ -289,3 +290,19 @@ final campaignListProvider =
     AsyncNotifierProvider<CampaignListNotifier, List<CampaignData>>(
       CampaignListNotifier.new,
     );
+
+/// ZERORO 캠페인만 필터링하는 Provider
+final zeroroCampaignListProvider = Provider<AsyncValue<List<CampaignData>>>((ref) {
+  final campaignsAsync = ref.watch(campaignListProvider);
+  return campaignsAsync.whenData(
+    (campaigns) => campaigns.where((c) => c.isZeroro).toList(),
+  );
+});
+
+/// External 캠페인만 필터링하는 Provider
+final externalCampaignListProvider = Provider<AsyncValue<List<CampaignData>>>((ref) {
+  final campaignsAsync = ref.watch(campaignListProvider);
+  return campaignsAsync.whenData(
+    (campaigns) => campaigns.where((c) => c.isExternal).toList(),
+  );
+});

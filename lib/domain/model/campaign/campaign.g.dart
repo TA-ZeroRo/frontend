@@ -20,6 +20,9 @@ _Campaign _$CampaignFromJson(Map<String, dynamic> json) => _Campaign(
   status: json['status'] as String,
   submissionType: json['submissionType'] as String?,
   updatedAt: DateTime.parse(json['updatedAt'] as String),
+  campaignSource:
+      $enumDecodeNullable(_$CampaignSourceEnumMap, json['campaignSource']) ??
+      CampaignSource.external,
   rpaSiteConfigId: (json['rpaSiteConfigId'] as num?)?.toInt(),
   rpaFormUrl: json['rpaFormUrl'] as String?,
   rpaFormConfig: json['rpaFormConfig'] as Map<String, dynamic>?,
@@ -43,10 +46,16 @@ Map<String, dynamic> _$CampaignToJson(_Campaign instance) => <String, dynamic>{
   'status': instance.status,
   'submissionType': instance.submissionType,
   'updatedAt': instance.updatedAt.toIso8601String(),
+  'campaignSource': _$CampaignSourceEnumMap[instance.campaignSource]!,
   'rpaSiteConfigId': instance.rpaSiteConfigId,
   'rpaFormUrl': instance.rpaFormUrl,
   'rpaFormConfig': instance.rpaFormConfig,
   'rpaFieldMapping': instance.rpaFieldMapping,
   'rpaFormSelectorStrategies': instance.rpaFormSelectorStrategies,
   'webviewConfig': instance.webviewConfig,
+};
+
+const _$CampaignSourceEnumMap = {
+  CampaignSource.zeroro: 'zeroro',
+  CampaignSource.external: 'external',
 };

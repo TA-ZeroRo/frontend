@@ -1,3 +1,5 @@
+import '../../../../../../../domain/model/campaign/campaign_source.dart';
+
 /// Campaign Presentation Model
 /// Presentation Layer에서 사용하는 캠페인 데이터 클래스
 class CampaignData {
@@ -13,6 +15,7 @@ class CampaignData {
   final String category; // 카테고리
   final bool isParticipating; // 참가 여부
   final bool isAutoProcessable; // 자동 처리 가능 여부
+  final CampaignSource campaignSource; // 캠페인 출처 (ZERORO/EXTERNAL)
 
   const CampaignData({
     required this.id,
@@ -27,6 +30,7 @@ class CampaignData {
     required this.category,
     this.isParticipating = false,
     this.isAutoProcessable = false,
+    this.campaignSource = CampaignSource.external,
   });
 
   /// 캠페인 기간 문자열 반환 (예: "2025.01.15 - 2025.02.15")
@@ -51,6 +55,12 @@ class CampaignData {
     return isOngoing && daysUntilEnd <= 7;
   }
 
+  /// ZERORO 캠페인 여부
+  bool get isZeroro => campaignSource == CampaignSource.zeroro;
+
+  /// 외부 캠페인 여부
+  bool get isExternal => campaignSource == CampaignSource.external;
+
   CampaignData copyWith({
     String? id,
     String? title,
@@ -64,6 +74,7 @@ class CampaignData {
     String? category,
     bool? isParticipating,
     bool? isAutoProcessable,
+    CampaignSource? campaignSource,
   }) {
     return CampaignData(
       id: id ?? this.id,
@@ -78,6 +89,7 @@ class CampaignData {
       category: category ?? this.category,
       isParticipating: isParticipating ?? this.isParticipating,
       isAutoProcessable: isAutoProcessable ?? this.isAutoProcessable,
+      campaignSource: campaignSource ?? this.campaignSource,
     );
   }
 }

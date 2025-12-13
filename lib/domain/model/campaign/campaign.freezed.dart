@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Campaign {
 
- int get id; String get title; String? get description; String get hostOrganizer; String get campaignUrl; String? get imageUrl; String? get startDate; String? get endDate; String? get region; String? get category; String get status; String? get submissionType; DateTime get updatedAt;// RPA WebView 관련 필드
+ int get id; String get title; String? get description; String get hostOrganizer; String get campaignUrl; String? get imageUrl; String? get startDate; String? get endDate; String? get region; String? get category; String get status; String? get submissionType; DateTime get updatedAt;/// 캠페인 출처 (ZERORO: 자체 캠페인, EXTERNAL: 외부 캠페인)
+ CampaignSource get campaignSource;// RPA WebView 관련 필드 (레거시)
  int? get rpaSiteConfigId; String? get rpaFormUrl; Map<String, dynamic>? get rpaFormConfig; Map<String, dynamic>? get rpaFieldMapping; Map<String, dynamic>? get rpaFormSelectorStrategies; Map<String, dynamic>? get webviewConfig;
 /// Create a copy of Campaign
 /// with the given fields replaced by the non-null parameter values.
@@ -29,16 +30,16 @@ $CampaignCopyWith<Campaign> get copyWith => _$CampaignCopyWithImpl<Campaign>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Campaign&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.hostOrganizer, hostOrganizer) || other.hostOrganizer == hostOrganizer)&&(identical(other.campaignUrl, campaignUrl) || other.campaignUrl == campaignUrl)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&(identical(other.region, region) || other.region == region)&&(identical(other.category, category) || other.category == category)&&(identical(other.status, status) || other.status == status)&&(identical(other.submissionType, submissionType) || other.submissionType == submissionType)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.rpaSiteConfigId, rpaSiteConfigId) || other.rpaSiteConfigId == rpaSiteConfigId)&&(identical(other.rpaFormUrl, rpaFormUrl) || other.rpaFormUrl == rpaFormUrl)&&const DeepCollectionEquality().equals(other.rpaFormConfig, rpaFormConfig)&&const DeepCollectionEquality().equals(other.rpaFieldMapping, rpaFieldMapping)&&const DeepCollectionEquality().equals(other.rpaFormSelectorStrategies, rpaFormSelectorStrategies)&&const DeepCollectionEquality().equals(other.webviewConfig, webviewConfig));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Campaign&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.hostOrganizer, hostOrganizer) || other.hostOrganizer == hostOrganizer)&&(identical(other.campaignUrl, campaignUrl) || other.campaignUrl == campaignUrl)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&(identical(other.region, region) || other.region == region)&&(identical(other.category, category) || other.category == category)&&(identical(other.status, status) || other.status == status)&&(identical(other.submissionType, submissionType) || other.submissionType == submissionType)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.campaignSource, campaignSource) || other.campaignSource == campaignSource)&&(identical(other.rpaSiteConfigId, rpaSiteConfigId) || other.rpaSiteConfigId == rpaSiteConfigId)&&(identical(other.rpaFormUrl, rpaFormUrl) || other.rpaFormUrl == rpaFormUrl)&&const DeepCollectionEquality().equals(other.rpaFormConfig, rpaFormConfig)&&const DeepCollectionEquality().equals(other.rpaFieldMapping, rpaFieldMapping)&&const DeepCollectionEquality().equals(other.rpaFormSelectorStrategies, rpaFormSelectorStrategies)&&const DeepCollectionEquality().equals(other.webviewConfig, webviewConfig));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,title,description,hostOrganizer,campaignUrl,imageUrl,startDate,endDate,region,category,status,submissionType,updatedAt,rpaSiteConfigId,rpaFormUrl,const DeepCollectionEquality().hash(rpaFormConfig),const DeepCollectionEquality().hash(rpaFieldMapping),const DeepCollectionEquality().hash(rpaFormSelectorStrategies),const DeepCollectionEquality().hash(webviewConfig)]);
+int get hashCode => Object.hashAll([runtimeType,id,title,description,hostOrganizer,campaignUrl,imageUrl,startDate,endDate,region,category,status,submissionType,updatedAt,campaignSource,rpaSiteConfigId,rpaFormUrl,const DeepCollectionEquality().hash(rpaFormConfig),const DeepCollectionEquality().hash(rpaFieldMapping),const DeepCollectionEquality().hash(rpaFormSelectorStrategies),const DeepCollectionEquality().hash(webviewConfig)]);
 
 @override
 String toString() {
-  return 'Campaign(id: $id, title: $title, description: $description, hostOrganizer: $hostOrganizer, campaignUrl: $campaignUrl, imageUrl: $imageUrl, startDate: $startDate, endDate: $endDate, region: $region, category: $category, status: $status, submissionType: $submissionType, updatedAt: $updatedAt, rpaSiteConfigId: $rpaSiteConfigId, rpaFormUrl: $rpaFormUrl, rpaFormConfig: $rpaFormConfig, rpaFieldMapping: $rpaFieldMapping, rpaFormSelectorStrategies: $rpaFormSelectorStrategies, webviewConfig: $webviewConfig)';
+  return 'Campaign(id: $id, title: $title, description: $description, hostOrganizer: $hostOrganizer, campaignUrl: $campaignUrl, imageUrl: $imageUrl, startDate: $startDate, endDate: $endDate, region: $region, category: $category, status: $status, submissionType: $submissionType, updatedAt: $updatedAt, campaignSource: $campaignSource, rpaSiteConfigId: $rpaSiteConfigId, rpaFormUrl: $rpaFormUrl, rpaFormConfig: $rpaFormConfig, rpaFieldMapping: $rpaFieldMapping, rpaFormSelectorStrategies: $rpaFormSelectorStrategies, webviewConfig: $webviewConfig)';
 }
 
 
@@ -49,7 +50,7 @@ abstract mixin class $CampaignCopyWith<$Res>  {
   factory $CampaignCopyWith(Campaign value, $Res Function(Campaign) _then) = _$CampaignCopyWithImpl;
 @useResult
 $Res call({
- int id, String title, String? description, String hostOrganizer, String campaignUrl, String? imageUrl, String? startDate, String? endDate, String? region, String? category, String status, String? submissionType, DateTime updatedAt, int? rpaSiteConfigId, String? rpaFormUrl, Map<String, dynamic>? rpaFormConfig, Map<String, dynamic>? rpaFieldMapping, Map<String, dynamic>? rpaFormSelectorStrategies, Map<String, dynamic>? webviewConfig
+ int id, String title, String? description, String hostOrganizer, String campaignUrl, String? imageUrl, String? startDate, String? endDate, String? region, String? category, String status, String? submissionType, DateTime updatedAt, CampaignSource campaignSource, int? rpaSiteConfigId, String? rpaFormUrl, Map<String, dynamic>? rpaFormConfig, Map<String, dynamic>? rpaFieldMapping, Map<String, dynamic>? rpaFormSelectorStrategies, Map<String, dynamic>? webviewConfig
 });
 
 
@@ -66,7 +67,7 @@ class _$CampaignCopyWithImpl<$Res>
 
 /// Create a copy of Campaign
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? hostOrganizer = null,Object? campaignUrl = null,Object? imageUrl = freezed,Object? startDate = freezed,Object? endDate = freezed,Object? region = freezed,Object? category = freezed,Object? status = null,Object? submissionType = freezed,Object? updatedAt = null,Object? rpaSiteConfigId = freezed,Object? rpaFormUrl = freezed,Object? rpaFormConfig = freezed,Object? rpaFieldMapping = freezed,Object? rpaFormSelectorStrategies = freezed,Object? webviewConfig = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? hostOrganizer = null,Object? campaignUrl = null,Object? imageUrl = freezed,Object? startDate = freezed,Object? endDate = freezed,Object? region = freezed,Object? category = freezed,Object? status = null,Object? submissionType = freezed,Object? updatedAt = null,Object? campaignSource = null,Object? rpaSiteConfigId = freezed,Object? rpaFormUrl = freezed,Object? rpaFormConfig = freezed,Object? rpaFieldMapping = freezed,Object? rpaFormSelectorStrategies = freezed,Object? webviewConfig = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -81,7 +82,8 @@ as String?,category: freezed == category ? _self.category : category // ignore: 
 as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,submissionType: freezed == submissionType ? _self.submissionType : submissionType // ignore: cast_nullable_to_non_nullable
 as String?,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,rpaSiteConfigId: freezed == rpaSiteConfigId ? _self.rpaSiteConfigId : rpaSiteConfigId // ignore: cast_nullable_to_non_nullable
+as DateTime,campaignSource: null == campaignSource ? _self.campaignSource : campaignSource // ignore: cast_nullable_to_non_nullable
+as CampaignSource,rpaSiteConfigId: freezed == rpaSiteConfigId ? _self.rpaSiteConfigId : rpaSiteConfigId // ignore: cast_nullable_to_non_nullable
 as int?,rpaFormUrl: freezed == rpaFormUrl ? _self.rpaFormUrl : rpaFormUrl // ignore: cast_nullable_to_non_nullable
 as String?,rpaFormConfig: freezed == rpaFormConfig ? _self.rpaFormConfig : rpaFormConfig // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>?,rpaFieldMapping: freezed == rpaFieldMapping ? _self.rpaFieldMapping : rpaFieldMapping // ignore: cast_nullable_to_non_nullable
@@ -172,10 +174,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String title,  String? description,  String hostOrganizer,  String campaignUrl,  String? imageUrl,  String? startDate,  String? endDate,  String? region,  String? category,  String status,  String? submissionType,  DateTime updatedAt,  int? rpaSiteConfigId,  String? rpaFormUrl,  Map<String, dynamic>? rpaFormConfig,  Map<String, dynamic>? rpaFieldMapping,  Map<String, dynamic>? rpaFormSelectorStrategies,  Map<String, dynamic>? webviewConfig)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String title,  String? description,  String hostOrganizer,  String campaignUrl,  String? imageUrl,  String? startDate,  String? endDate,  String? region,  String? category,  String status,  String? submissionType,  DateTime updatedAt,  CampaignSource campaignSource,  int? rpaSiteConfigId,  String? rpaFormUrl,  Map<String, dynamic>? rpaFormConfig,  Map<String, dynamic>? rpaFieldMapping,  Map<String, dynamic>? rpaFormSelectorStrategies,  Map<String, dynamic>? webviewConfig)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Campaign() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.hostOrganizer,_that.campaignUrl,_that.imageUrl,_that.startDate,_that.endDate,_that.region,_that.category,_that.status,_that.submissionType,_that.updatedAt,_that.rpaSiteConfigId,_that.rpaFormUrl,_that.rpaFormConfig,_that.rpaFieldMapping,_that.rpaFormSelectorStrategies,_that.webviewConfig);case _:
+return $default(_that.id,_that.title,_that.description,_that.hostOrganizer,_that.campaignUrl,_that.imageUrl,_that.startDate,_that.endDate,_that.region,_that.category,_that.status,_that.submissionType,_that.updatedAt,_that.campaignSource,_that.rpaSiteConfigId,_that.rpaFormUrl,_that.rpaFormConfig,_that.rpaFieldMapping,_that.rpaFormSelectorStrategies,_that.webviewConfig);case _:
   return orElse();
 
 }
@@ -193,10 +195,10 @@ return $default(_that.id,_that.title,_that.description,_that.hostOrganizer,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String title,  String? description,  String hostOrganizer,  String campaignUrl,  String? imageUrl,  String? startDate,  String? endDate,  String? region,  String? category,  String status,  String? submissionType,  DateTime updatedAt,  int? rpaSiteConfigId,  String? rpaFormUrl,  Map<String, dynamic>? rpaFormConfig,  Map<String, dynamic>? rpaFieldMapping,  Map<String, dynamic>? rpaFormSelectorStrategies,  Map<String, dynamic>? webviewConfig)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String title,  String? description,  String hostOrganizer,  String campaignUrl,  String? imageUrl,  String? startDate,  String? endDate,  String? region,  String? category,  String status,  String? submissionType,  DateTime updatedAt,  CampaignSource campaignSource,  int? rpaSiteConfigId,  String? rpaFormUrl,  Map<String, dynamic>? rpaFormConfig,  Map<String, dynamic>? rpaFieldMapping,  Map<String, dynamic>? rpaFormSelectorStrategies,  Map<String, dynamic>? webviewConfig)  $default,) {final _that = this;
 switch (_that) {
 case _Campaign():
-return $default(_that.id,_that.title,_that.description,_that.hostOrganizer,_that.campaignUrl,_that.imageUrl,_that.startDate,_that.endDate,_that.region,_that.category,_that.status,_that.submissionType,_that.updatedAt,_that.rpaSiteConfigId,_that.rpaFormUrl,_that.rpaFormConfig,_that.rpaFieldMapping,_that.rpaFormSelectorStrategies,_that.webviewConfig);case _:
+return $default(_that.id,_that.title,_that.description,_that.hostOrganizer,_that.campaignUrl,_that.imageUrl,_that.startDate,_that.endDate,_that.region,_that.category,_that.status,_that.submissionType,_that.updatedAt,_that.campaignSource,_that.rpaSiteConfigId,_that.rpaFormUrl,_that.rpaFormConfig,_that.rpaFieldMapping,_that.rpaFormSelectorStrategies,_that.webviewConfig);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -213,10 +215,10 @@ return $default(_that.id,_that.title,_that.description,_that.hostOrganizer,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String title,  String? description,  String hostOrganizer,  String campaignUrl,  String? imageUrl,  String? startDate,  String? endDate,  String? region,  String? category,  String status,  String? submissionType,  DateTime updatedAt,  int? rpaSiteConfigId,  String? rpaFormUrl,  Map<String, dynamic>? rpaFormConfig,  Map<String, dynamic>? rpaFieldMapping,  Map<String, dynamic>? rpaFormSelectorStrategies,  Map<String, dynamic>? webviewConfig)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String title,  String? description,  String hostOrganizer,  String campaignUrl,  String? imageUrl,  String? startDate,  String? endDate,  String? region,  String? category,  String status,  String? submissionType,  DateTime updatedAt,  CampaignSource campaignSource,  int? rpaSiteConfigId,  String? rpaFormUrl,  Map<String, dynamic>? rpaFormConfig,  Map<String, dynamic>? rpaFieldMapping,  Map<String, dynamic>? rpaFormSelectorStrategies,  Map<String, dynamic>? webviewConfig)?  $default,) {final _that = this;
 switch (_that) {
 case _Campaign() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.hostOrganizer,_that.campaignUrl,_that.imageUrl,_that.startDate,_that.endDate,_that.region,_that.category,_that.status,_that.submissionType,_that.updatedAt,_that.rpaSiteConfigId,_that.rpaFormUrl,_that.rpaFormConfig,_that.rpaFieldMapping,_that.rpaFormSelectorStrategies,_that.webviewConfig);case _:
+return $default(_that.id,_that.title,_that.description,_that.hostOrganizer,_that.campaignUrl,_that.imageUrl,_that.startDate,_that.endDate,_that.region,_that.category,_that.status,_that.submissionType,_that.updatedAt,_that.campaignSource,_that.rpaSiteConfigId,_that.rpaFormUrl,_that.rpaFormConfig,_that.rpaFieldMapping,_that.rpaFormSelectorStrategies,_that.webviewConfig);case _:
   return null;
 
 }
@@ -228,7 +230,7 @@ return $default(_that.id,_that.title,_that.description,_that.hostOrganizer,_that
 @JsonSerializable()
 
 class _Campaign implements Campaign {
-  const _Campaign({required this.id, required this.title, this.description, required this.hostOrganizer, required this.campaignUrl, this.imageUrl, this.startDate, this.endDate, this.region, this.category, required this.status, this.submissionType, required this.updatedAt, this.rpaSiteConfigId, this.rpaFormUrl, final  Map<String, dynamic>? rpaFormConfig, final  Map<String, dynamic>? rpaFieldMapping, final  Map<String, dynamic>? rpaFormSelectorStrategies, final  Map<String, dynamic>? webviewConfig}): _rpaFormConfig = rpaFormConfig,_rpaFieldMapping = rpaFieldMapping,_rpaFormSelectorStrategies = rpaFormSelectorStrategies,_webviewConfig = webviewConfig;
+  const _Campaign({required this.id, required this.title, this.description, required this.hostOrganizer, required this.campaignUrl, this.imageUrl, this.startDate, this.endDate, this.region, this.category, required this.status, this.submissionType, required this.updatedAt, this.campaignSource = CampaignSource.external, this.rpaSiteConfigId, this.rpaFormUrl, final  Map<String, dynamic>? rpaFormConfig, final  Map<String, dynamic>? rpaFieldMapping, final  Map<String, dynamic>? rpaFormSelectorStrategies, final  Map<String, dynamic>? webviewConfig}): _rpaFormConfig = rpaFormConfig,_rpaFieldMapping = rpaFieldMapping,_rpaFormSelectorStrategies = rpaFormSelectorStrategies,_webviewConfig = webviewConfig;
   factory _Campaign.fromJson(Map<String, dynamic> json) => _$CampaignFromJson(json);
 
 @override final  int id;
@@ -244,7 +246,9 @@ class _Campaign implements Campaign {
 @override final  String status;
 @override final  String? submissionType;
 @override final  DateTime updatedAt;
-// RPA WebView 관련 필드
+/// 캠페인 출처 (ZERORO: 자체 캠페인, EXTERNAL: 외부 캠페인)
+@override@JsonKey() final  CampaignSource campaignSource;
+// RPA WebView 관련 필드 (레거시)
 @override final  int? rpaSiteConfigId;
 @override final  String? rpaFormUrl;
  final  Map<String, dynamic>? _rpaFormConfig;
@@ -297,16 +301,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Campaign&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.hostOrganizer, hostOrganizer) || other.hostOrganizer == hostOrganizer)&&(identical(other.campaignUrl, campaignUrl) || other.campaignUrl == campaignUrl)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&(identical(other.region, region) || other.region == region)&&(identical(other.category, category) || other.category == category)&&(identical(other.status, status) || other.status == status)&&(identical(other.submissionType, submissionType) || other.submissionType == submissionType)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.rpaSiteConfigId, rpaSiteConfigId) || other.rpaSiteConfigId == rpaSiteConfigId)&&(identical(other.rpaFormUrl, rpaFormUrl) || other.rpaFormUrl == rpaFormUrl)&&const DeepCollectionEquality().equals(other._rpaFormConfig, _rpaFormConfig)&&const DeepCollectionEquality().equals(other._rpaFieldMapping, _rpaFieldMapping)&&const DeepCollectionEquality().equals(other._rpaFormSelectorStrategies, _rpaFormSelectorStrategies)&&const DeepCollectionEquality().equals(other._webviewConfig, _webviewConfig));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Campaign&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.hostOrganizer, hostOrganizer) || other.hostOrganizer == hostOrganizer)&&(identical(other.campaignUrl, campaignUrl) || other.campaignUrl == campaignUrl)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&(identical(other.region, region) || other.region == region)&&(identical(other.category, category) || other.category == category)&&(identical(other.status, status) || other.status == status)&&(identical(other.submissionType, submissionType) || other.submissionType == submissionType)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.campaignSource, campaignSource) || other.campaignSource == campaignSource)&&(identical(other.rpaSiteConfigId, rpaSiteConfigId) || other.rpaSiteConfigId == rpaSiteConfigId)&&(identical(other.rpaFormUrl, rpaFormUrl) || other.rpaFormUrl == rpaFormUrl)&&const DeepCollectionEquality().equals(other._rpaFormConfig, _rpaFormConfig)&&const DeepCollectionEquality().equals(other._rpaFieldMapping, _rpaFieldMapping)&&const DeepCollectionEquality().equals(other._rpaFormSelectorStrategies, _rpaFormSelectorStrategies)&&const DeepCollectionEquality().equals(other._webviewConfig, _webviewConfig));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,title,description,hostOrganizer,campaignUrl,imageUrl,startDate,endDate,region,category,status,submissionType,updatedAt,rpaSiteConfigId,rpaFormUrl,const DeepCollectionEquality().hash(_rpaFormConfig),const DeepCollectionEquality().hash(_rpaFieldMapping),const DeepCollectionEquality().hash(_rpaFormSelectorStrategies),const DeepCollectionEquality().hash(_webviewConfig)]);
+int get hashCode => Object.hashAll([runtimeType,id,title,description,hostOrganizer,campaignUrl,imageUrl,startDate,endDate,region,category,status,submissionType,updatedAt,campaignSource,rpaSiteConfigId,rpaFormUrl,const DeepCollectionEquality().hash(_rpaFormConfig),const DeepCollectionEquality().hash(_rpaFieldMapping),const DeepCollectionEquality().hash(_rpaFormSelectorStrategies),const DeepCollectionEquality().hash(_webviewConfig)]);
 
 @override
 String toString() {
-  return 'Campaign(id: $id, title: $title, description: $description, hostOrganizer: $hostOrganizer, campaignUrl: $campaignUrl, imageUrl: $imageUrl, startDate: $startDate, endDate: $endDate, region: $region, category: $category, status: $status, submissionType: $submissionType, updatedAt: $updatedAt, rpaSiteConfigId: $rpaSiteConfigId, rpaFormUrl: $rpaFormUrl, rpaFormConfig: $rpaFormConfig, rpaFieldMapping: $rpaFieldMapping, rpaFormSelectorStrategies: $rpaFormSelectorStrategies, webviewConfig: $webviewConfig)';
+  return 'Campaign(id: $id, title: $title, description: $description, hostOrganizer: $hostOrganizer, campaignUrl: $campaignUrl, imageUrl: $imageUrl, startDate: $startDate, endDate: $endDate, region: $region, category: $category, status: $status, submissionType: $submissionType, updatedAt: $updatedAt, campaignSource: $campaignSource, rpaSiteConfigId: $rpaSiteConfigId, rpaFormUrl: $rpaFormUrl, rpaFormConfig: $rpaFormConfig, rpaFieldMapping: $rpaFieldMapping, rpaFormSelectorStrategies: $rpaFormSelectorStrategies, webviewConfig: $webviewConfig)';
 }
 
 
@@ -317,7 +321,7 @@ abstract mixin class _$CampaignCopyWith<$Res> implements $CampaignCopyWith<$Res>
   factory _$CampaignCopyWith(_Campaign value, $Res Function(_Campaign) _then) = __$CampaignCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String title, String? description, String hostOrganizer, String campaignUrl, String? imageUrl, String? startDate, String? endDate, String? region, String? category, String status, String? submissionType, DateTime updatedAt, int? rpaSiteConfigId, String? rpaFormUrl, Map<String, dynamic>? rpaFormConfig, Map<String, dynamic>? rpaFieldMapping, Map<String, dynamic>? rpaFormSelectorStrategies, Map<String, dynamic>? webviewConfig
+ int id, String title, String? description, String hostOrganizer, String campaignUrl, String? imageUrl, String? startDate, String? endDate, String? region, String? category, String status, String? submissionType, DateTime updatedAt, CampaignSource campaignSource, int? rpaSiteConfigId, String? rpaFormUrl, Map<String, dynamic>? rpaFormConfig, Map<String, dynamic>? rpaFieldMapping, Map<String, dynamic>? rpaFormSelectorStrategies, Map<String, dynamic>? webviewConfig
 });
 
 
@@ -334,7 +338,7 @@ class __$CampaignCopyWithImpl<$Res>
 
 /// Create a copy of Campaign
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? hostOrganizer = null,Object? campaignUrl = null,Object? imageUrl = freezed,Object? startDate = freezed,Object? endDate = freezed,Object? region = freezed,Object? category = freezed,Object? status = null,Object? submissionType = freezed,Object? updatedAt = null,Object? rpaSiteConfigId = freezed,Object? rpaFormUrl = freezed,Object? rpaFormConfig = freezed,Object? rpaFieldMapping = freezed,Object? rpaFormSelectorStrategies = freezed,Object? webviewConfig = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? hostOrganizer = null,Object? campaignUrl = null,Object? imageUrl = freezed,Object? startDate = freezed,Object? endDate = freezed,Object? region = freezed,Object? category = freezed,Object? status = null,Object? submissionType = freezed,Object? updatedAt = null,Object? campaignSource = null,Object? rpaSiteConfigId = freezed,Object? rpaFormUrl = freezed,Object? rpaFormConfig = freezed,Object? rpaFieldMapping = freezed,Object? rpaFormSelectorStrategies = freezed,Object? webviewConfig = freezed,}) {
   return _then(_Campaign(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -349,7 +353,8 @@ as String?,category: freezed == category ? _self.category : category // ignore: 
 as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,submissionType: freezed == submissionType ? _self.submissionType : submissionType // ignore: cast_nullable_to_non_nullable
 as String?,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,rpaSiteConfigId: freezed == rpaSiteConfigId ? _self.rpaSiteConfigId : rpaSiteConfigId // ignore: cast_nullable_to_non_nullable
+as DateTime,campaignSource: null == campaignSource ? _self.campaignSource : campaignSource // ignore: cast_nullable_to_non_nullable
+as CampaignSource,rpaSiteConfigId: freezed == rpaSiteConfigId ? _self.rpaSiteConfigId : rpaSiteConfigId // ignore: cast_nullable_to_non_nullable
 as int?,rpaFormUrl: freezed == rpaFormUrl ? _self.rpaFormUrl : rpaFormUrl // ignore: cast_nullable_to_non_nullable
 as String?,rpaFormConfig: freezed == rpaFormConfig ? _self._rpaFormConfig : rpaFormConfig // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>?,rpaFieldMapping: freezed == rpaFieldMapping ? _self._rpaFieldMapping : rpaFieldMapping // ignore: cast_nullable_to_non_nullable

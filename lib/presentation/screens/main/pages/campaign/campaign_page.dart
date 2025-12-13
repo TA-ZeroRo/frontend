@@ -14,6 +14,8 @@ import 'components/campaign_card_shimmer.dart';
 import 'components/campaign_filters.dart';
 import 'components/recruiting_filters.dart';
 import 'components/recruiting_card.dart';
+import 'components/external_campaign_carousel.dart';
+import 'models/campaign_data.dart';
 import 'models/recruiting_post.dart';
 import 'recruiting_create_page.dart';
 
@@ -69,6 +71,10 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
     final recruitingListAsync = ref.watch(recruitingListProvider);
     final recruitingFilter = ref.watch(recruitingFilterProvider);
 
+    // ZERORO/External 캠페인 분리
+    final zeroroCampaignsAsync = ref.watch(zeroroCampaignListProvider);
+    final externalCampaignsAsync = ref.watch(externalCampaignListProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: RefreshIndicator(
@@ -90,8 +96,14 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                 _buildRecruitingFilters(recruitingFilter),
               _buildRecruitingList(recruitingListAsync),
             ] else ...[
+              // External 캠페인 캐러셀
+              _buildExternalCampaignCarousel(context, externalCampaignsAsync),
+              // ZERORO 캠페인 섹션 헤더
+              _buildZeroroSectionHeader(),
+              // 필터
               _buildFilters(context, campaignFilter),
-              _buildCampaignList(context, campaignListAsync),
+              // ZERORO 캠페인 리스트
+              _buildZeroroCampaignList(context, zeroroCampaignsAsync, campaignListAsync),
             ],
           ],
         ),
@@ -141,6 +153,87 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
             icon: const Icon(Icons.settings),
           ),
         ],
+      ),
+    );
+  }
+
+  /// External 캠페인 캐러셀
+  Widget _buildExternalCampaignCarousel(
+    BuildContext context,
+    AsyncValue<List<CampaignData>> externalCampaignsAsync,
+  ) {
+    return SliverToBoxAdapter(
+      child: externalCampaignsAsync.when(
+        data: (campaigns) {
+          if (campaigns.isEmpty) {
+            return const SizedBox.shrink();
+          }
+          return Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 20),
+            child: ExternalCampaignCarousel(
+              campaigns: campaigns,
+              onCampaignTap: (campaign) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CampaignWebViewScreen(
+                      url: campaign.url,
+                      title: campaign.title,
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+        loading: () => const SizedBox.shrink(),
+        error: (_, __) => const SizedBox.shrink(),
+      ),
+    );
+  }
+
+  /// ZERORO 캠페인 섹션 헤더
+  Widget _buildZeroroSectionHeader() {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.eco_rounded,
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'ZERORO',
+                    style: AppTextStyle.labelMedium.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '참여 가능한 캠페인',
+              style: AppTextStyle.bodyMedium.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -201,15 +294,21 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
     );
   }
 
-  /// 캠페인 목록
-  Widget _buildCampaignList(
+  /// ZERORO 캠페인 목록
+  Widget _buildZeroroCampaignList(
     BuildContext context,
+    AsyncValue<List<CampaignData>> zeroroCampaignsAsync,
     AsyncValue campaignListAsync,
   ) {
-    return campaignListAsync.when(
+    // 전체 캠페인 로딩 상태 확인
+    if (campaignListAsync.isLoading) {
+      return _buildLoadingState();
+    }
+
+    return zeroroCampaignsAsync.when(
       data: (campaigns) {
         if (campaigns.isEmpty) {
-          return _buildEmptyState('해당 조건의 캠페인이 없어요');
+          return _buildZeroroEmptyState();
         }
 
         final hasMore = ref.read(campaignListProvider.notifier).hasMore;
@@ -227,6 +326,8 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                     child: CampaignCard(
                       campaign: campaign,
                       onTap: () {
+                        // ZERORO 캠페인은 미션 페이지로 이동 (추후 구현)
+                        // 현재는 웹뷰로 이동
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -316,6 +417,47 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
       },
       loading: () => _buildLoadingState(),
       error: (error, stack) => _buildErrorState(),
+    );
+  }
+
+  /// ZERORO 캠페인 없을 때 빈 상태
+  Widget _buildZeroroEmptyState() {
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.eco_rounded,
+                size: 48,
+                color: AppColors.primary.withValues(alpha: 0.5),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              '참여 가능한 캠페인이 곧 추가됩니다!',
+              style: AppTextStyle.bodyLarge.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '외부 캠페인을 먼저 둘러보세요',
+              style: AppTextStyle.bodyMedium.copyWith(
+                color: AppColors.textTertiary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

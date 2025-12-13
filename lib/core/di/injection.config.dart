@@ -18,6 +18,8 @@ import 'package:frontend/data/data_source/leaderboard/leaderboard_remote_data_so
 import 'package:frontend/data/data_source/location/location_service.dart'
     as _i912;
 import 'package:frontend/data/data_source/mission/mission_api.dart' as _i800;
+import 'package:frontend/data/data_source/notification/fcm_service.dart'
+    as _i837;
 import 'package:frontend/data/data_source/plogging/plogging_api.dart' as _i249;
 import 'package:frontend/data/data_source/point/point_api.dart' as _i116;
 import 'package:frontend/data/data_source/recruiting/recruiting_api.dart'
@@ -85,6 +87,8 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i562.LeaderboardRemoteDataSource(gh<_i361.Dio>()),
     );
     gh.factory<_i800.MissionApi>(() => _i800.MissionApi(gh<_i361.Dio>()));
+    gh.factory<_i837.FcmService>(() => _i837.FcmService(gh<_i361.Dio>()));
+    gh.factory<_i249.PloggingApi>(() => _i249.PloggingApi(gh<_i361.Dio>()));
     gh.factory<_i116.PointApi>(() => _i116.PointApi(gh<_i361.Dio>()));
     gh.factory<_i324.RecruitingApi>(() => _i324.RecruitingApi(gh<_i361.Dio>()));
     gh.factory<_i889.ReportApi>(() => _i889.ReportApi(gh<_i361.Dio>()));
@@ -94,7 +98,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i876.VerificationApi>(
       () => _i876.VerificationApi(gh<_i361.Dio>()),
     );
-    gh.factory<_i249.PloggingApi>(() => _i249.PloggingApi(gh<_i361.Dio>()));
     gh.factory<_i138.RecruitingRepository>(
       () => _i491.RecruitingRepositoryImpl(
         gh<_i324.RecruitingApi>(),

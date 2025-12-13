@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../../../domain/model/campaign/campaign.dart';
+import '../../../domain/model/campaign/campaign_source.dart';
 
 part 'campaign_dto.g.dart';
 
@@ -25,6 +26,8 @@ class CampaignDto {
   final String? submissionType;
   @JsonKey(name: 'updated_at')
   final String updatedAt;
+  @JsonKey(name: 'campaign_source')
+  final String? campaignSource;
   @JsonKey(name: 'rpa_site_config_id')
   final int? rpaSiteConfigId;
   @JsonKey(name: 'rpa_form_url')
@@ -46,6 +49,7 @@ class CampaignDto {
     required this.status,
     this.submissionType,
     required this.updatedAt,
+    this.campaignSource,
     this.rpaSiteConfigId,
     this.rpaFormUrl,
     this.rpaFormConfig,
@@ -71,6 +75,7 @@ class CampaignDto {
       status: status,
       submissionType: submissionType,
       updatedAt: DateTime.parse(updatedAt),
+      campaignSource: CampaignSource.fromString(campaignSource),
     );
   }
 }

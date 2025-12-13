@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'campaign_source.dart';
+
 part 'campaign.freezed.dart';
 part 'campaign.g.dart';
 
@@ -19,7 +21,9 @@ abstract class Campaign with _$Campaign {
     required String status,
     String? submissionType,
     required DateTime updatedAt,
-    // RPA WebView 관련 필드
+    /// 캠페인 출처 (ZERORO: 자체 캠페인, EXTERNAL: 외부 캠페인)
+    @Default(CampaignSource.external) CampaignSource campaignSource,
+    // RPA WebView 관련 필드 (레거시)
     int? rpaSiteConfigId,
     String? rpaFormUrl,
     Map<String, dynamic>? rpaFormConfig,
