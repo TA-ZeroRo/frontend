@@ -1,16 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../dto/campaign/campaign_dto.dart';
 import '../../dto/campaign/campaign_participation_response_dto.dart';
-// ignore: unused_import
-import '../../../deprecated/webview/campaign_webview_config_dto.dart';
 
 @injectable
 class CampaignApi {
   final Dio _dio;
-  final SupabaseClient _supabase = Supabase.instance.client;
 
   CampaignApi(this._dio);
 
@@ -59,25 +55,5 @@ class CampaignApi {
     );
 
     return CampaignParticipationResponseDto.fromJson(response.data);
-  }
-
-  /// Get campaign webview config by campaign ID
-  /// Supabase direct query to campaign_webview_configs table
-  /// @deprecated WebView RPA is no longer used. Use in-app mission verification instead.
-  @Deprecated('WebView RPA is no longer used. Use in-app mission verification instead.')
-  Future<CampaignWebviewConfigDto?> getWebviewConfig({
-    required int campaignId,
-  }) async {
-    final response = await _supabase
-        .from('campaign_webview_configs')
-        .select()
-        .eq('campaign_id', campaignId)
-        .maybeSingle();
-
-    if (response == null) {
-      return null;
-    }
-
-    return CampaignWebviewConfigDto.fromJson(response);
   }
 }

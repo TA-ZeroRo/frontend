@@ -7,6 +7,7 @@ import '../../../../../../domain/model/mission/mission_template.dart';
 import '../../../../../../domain/model/mission/mission_with_template.dart';
 import '../../../../../../domain/model/mission/verification_type.dart';
 import '../state/campaign_mission_state.dart';
+import '../state/leaderboard_state.dart';
 import 'shimmer_widgets.dart';
 import 'verification_bottom_sheets/image_verification_bottom_sheet.dart';
 import 'verification_bottom_sheets/location_verification_bottom_sheet.dart';
@@ -419,16 +420,17 @@ class CampaignMissionSection extends ConsumerWidget {
 }
 
 /// 접기/펼치기가 가능한 미션 타일 (새로운 디자인)
-class _MissionTileWithExpand extends StatefulWidget {
+class _MissionTileWithExpand extends ConsumerStatefulWidget {
   const _MissionTileWithExpand({required this.mission});
 
   final MissionWithTemplate mission;
 
   @override
-  State<_MissionTileWithExpand> createState() => _MissionTileWithExpandState();
+  ConsumerState<_MissionTileWithExpand> createState() =>
+      _MissionTileWithExpandState();
 }
 
-class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
+class _MissionTileWithExpandState extends ConsumerState<_MissionTileWithExpand> {
   bool _isExpanded = false;
 
   @override
@@ -787,15 +789,16 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
     );
   }
 
-  void _showVerificationBottomSheet(
+  Future<void> _showVerificationBottomSheet(
     BuildContext context,
     MissionWithTemplate mission,
-  ) {
+  ) async {
     final verificationType = mission.missionTemplate.verificationType;
 
+    bool? result;
     switch (verificationType) {
       case VerificationType.image:
-        showModalBottomSheet(
+        result = await showModalBottomSheet<bool>(
           context: context,
           backgroundColor: Colors.transparent,
           isScrollControlled: true,
@@ -803,7 +806,7 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
         );
         break;
       case VerificationType.textReview:
-        showModalBottomSheet(
+        result = await showModalBottomSheet<bool>(
           context: context,
           backgroundColor: Colors.transparent,
           isScrollControlled: true,
@@ -812,7 +815,7 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
         );
         break;
       case VerificationType.quiz:
-        showModalBottomSheet(
+        result = await showModalBottomSheet<bool>(
           context: context,
           backgroundColor: Colors.transparent,
           isScrollControlled: true,
@@ -820,7 +823,7 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
         );
         break;
       case VerificationType.location:
-        showModalBottomSheet(
+        result = await showModalBottomSheet<bool>(
           context: context,
           backgroundColor: Colors.transparent,
           isScrollControlled: true,
@@ -828,6 +831,12 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
               LocationVerificationBottomSheet(mission: mission),
         );
         break;
+    }
+
+    // 미션 제출 성공 시 상태 갱신
+    if (result == true && context.mounted) {
+      ref.invalidate(campaignMissionProvider);
+      ref.read(leaderboardRefreshTriggerProvider.notifier).trigger();
     }
   }
 }
