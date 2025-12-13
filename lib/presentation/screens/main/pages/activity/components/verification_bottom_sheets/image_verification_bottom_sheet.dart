@@ -12,6 +12,7 @@ import '../../../../../../../core/di/injection.dart';
 import '../../../../../../../core/logger/logger.dart';
 import '../../../../../../../core/theme/app_color.dart';
 import '../../../../../../../data/data_source/mission/mission_api.dart';
+import '../../../../../../../data/data_source/verification/verification_api.dart';
 
 class ImageVerificationBottomSheet extends ConsumerStatefulWidget {
   final MissionWithTemplate mission;
@@ -28,7 +29,9 @@ class _ImageVerificationBottomSheetState
   File? _selectedImage;
   final ImagePicker _imagePicker = ImagePicker();
   final MissionApi _missionApi = getIt<MissionApi>();
+  final VerificationApi _verificationApi = getIt<VerificationApi>();
   bool _isSubmitting = false;
+  String _statusMessage = '';
 
   @override
   Widget build(BuildContext context) {
@@ -272,13 +275,28 @@ class _ImageVerificationBottomSheetState
           disabledForegroundColor: Colors.grey[400],
         ),
         child: _isSubmitting
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                  if (_statusMessage.isNotEmpty) ...[
+                    const SizedBox(width: 12),
+                    Text(
+                      _statusMessage,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ],
               )
             : const Text(
                 '인증하기',
@@ -335,7 +353,10 @@ class _ImageVerificationBottomSheetState
   Future<void> _handleSubmit() async {
     if (_selectedImage == null || _isSubmitting) return;
 
-    setState(() => _isSubmitting = true);
+    setState(() {
+      _isSubmitting = true;
+      _statusMessage = '이미지 업로드 중...';
+    });
 
     try {
       // 1. Supabase Storage에 이미지 업로드
@@ -353,19 +374,48 @@ class _ImageVerificationBottomSheetState
       final imageUrl =
           supabase.storage.from('zeroro-post-bucket').getPublicUrl(fileName);
 
-      // 2. API 호출하여 증빙 데이터 제출
-      await _missionApi.submitProof(
+      if (!mounted) return;
+      setState(() => _statusMessage = 'AI 검증 중...');
+
+      // 2. Gemini 검증 API 호출
+      // TODO: MissionTemplate에 카테고리 인덱스 추가 후 사용
+      final verificationResult = await _verificationApi.verifyImage(
+        imageFile: _selectedImage!,
+        mainCategoryIndex: 0, // 기본값 (추후 템플릿에서 가져오기)
+        subCategoryIndex: 0, // 기본값 (추후 템플릿에서 가져오기)
+      );
+
+      if (!mounted) return;
+      setState(() => _statusMessage = '제출 중...');
+
+      // 3. 검증 결과 포함하여 증빙 데이터 제출
+      // 모든 정상 제출은 PENDING_VERIFICATION → Console에서 최종 승인
+      final response = await _missionApi.submitProof(
         logId: widget.mission.missionLog.id,
-        proofData: {'imageUrl': imageUrl},
+        proofData: {
+          'imageUrl': imageUrl,
+          'verification_result': {
+            'is_valid': verificationResult.isValid,
+            'confidence': verificationResult.confidence,
+            'reason': verificationResult.reason,
+          },
+        },
       );
 
       if (!mounted) return;
 
-      // 3. 포인트 지급 후 사용자 정보 새로고침
-      await ref.read(authProvider.notifier).refreshCurrentUser();
+      // 4. 상태에 따른 메시지 표시
+      if (response.status == 'PENDING_VERIFICATION') {
+        ToastHelper.showSuccess('제출 완료! 관리자 검토 후 포인트가 지급됩니다.');
+      } else if (response.status == 'COMPLETED') {
+        // 기존 미션이 이미 완료 상태였던 경우
+        await ref.read(authProvider.notifier).refreshCurrentUser();
+        ToastHelper.showSuccess('인증 완료! 포인트가 지급되었어요 🎉');
+      } else {
+        ToastHelper.showError('제출 실패: ${verificationResult.reason}');
+      }
 
       if (!mounted) return;
-      ToastHelper.showSuccess('사진이 제출되었습니다! 포인트가 지급되었어요 🎉');
       Navigator.of(context).pop(true);
     } catch (e) {
       CustomLogger.logger.e('미션 제출 실패', error: e);
@@ -373,7 +423,10 @@ class _ImageVerificationBottomSheetState
       ToastHelper.showError('제출에 실패했습니다. 다시 시도해주세요.');
     } finally {
       if (mounted) {
-        setState(() => _isSubmitting = false);
+        setState(() {
+          _isSubmitting = false;
+          _statusMessage = '';
+        });
       }
     }
   }

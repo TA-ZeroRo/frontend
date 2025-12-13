@@ -7,7 +7,6 @@ import '../../../../../../domain/model/mission/mission_template.dart';
 import '../../../../../../domain/model/mission/mission_with_template.dart';
 import '../../../../../../domain/model/mission/verification_type.dart';
 import '../state/campaign_mission_state.dart';
-import '../../campaign/campaign_mission_webview_screen.dart';
 import 'shimmer_widgets.dart';
 import 'verification_bottom_sheets/image_verification_bottom_sheet.dart';
 import 'verification_bottom_sheets/location_verification_bottom_sheet.dart';
@@ -272,14 +271,6 @@ class CampaignMissionSection extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                if (campaign.submissionType != 'MANUAL')
-                  _buildCompleteButton(
-                    context,
-                    completedCount,
-                    totalCount,
-                    missions,
-                  ),
               ],
             ),
           ),
@@ -425,129 +416,6 @@ class CampaignMissionSection extends ConsumerWidget {
         return const Color(0xFF9E9E9E).withValues(alpha: 0.06); // 연한 회색 (기본)
     }
   }
-
-  /// WebView 화면 열기
-  void _openMissionWebView(
-    BuildContext context,
-    List<MissionWithTemplate> missions,
-  ) {
-    if (missions.isEmpty) {
-      ToastHelper.showError('미션 정보를 찾을 수 없습니다.');
-      return;
-    }
-
-    final campaignId = missions.first.campaign.id;
-
-    // WebView 화면으로 이동 (설정은 WebView 화면에서 로드)
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => CampaignMissionWebViewScreen(
-          missions: missions,
-          campaignId: campaignId,
-        ),
-      ),
-    );
-  }
-
-  /// 완료 버튼 위젯 생성
-  Widget _buildCompleteButton(
-    BuildContext context,
-    int completedCount,
-    int totalCount,
-    List<MissionWithTemplate> missions,
-  ) {
-    final isAllCompleted = completedCount == totalCount;
-
-    if (isAllCompleted) {
-      return _CompleteButton(
-        onPressed: () {
-          _openMissionWebView(context, missions);
-        },
-      );
-    } else {
-      return ElevatedButton(
-        onPressed: null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.grey[300],
-          disabledBackgroundColor: Colors.grey[300],
-          disabledForegroundColor: Colors.grey[600],
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          minimumSize: const Size(0, 36),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 0,
-        ),
-        child: Text(
-          '$completedCount/$totalCount 완료',
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-        ),
-      );
-    }
-  }
-}
-
-/// 깜빡이는 애니메이션이 적용된 완료 버튼
-class _CompleteButton extends StatefulWidget {
-  const _CompleteButton({required this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  State<_CompleteButton> createState() => _CompleteButtonState();
-}
-
-class _CompleteButtonState extends State<_CompleteButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1200),
-      vsync: this,
-    );
-    _animation = Tween<double>(
-      begin: 0.6,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-    _controller.repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _animation,
-      child: ElevatedButton(
-        onPressed: widget.onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF4CAF50),
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          minimumSize: const Size(0, 36),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 0,
-        ),
-        child: const Text(
-          '완료',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-      ),
-    );
-  }
 }
 
 /// 접기/펼치기가 가능한 미션 타일 (새로운 디자인)
@@ -568,7 +436,6 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
     final isCompleted = widget.mission.missionLog.status.value == 'COMPLETED';
     final mission = widget.mission.missionTemplate;
     final verificationType = mission.verificationType;
-    final isManual = widget.mission.campaign.submissionType == 'MANUAL';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -580,7 +447,7 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildCategoryBadge(verificationType),
-              if (!isManual) _buildPointBadge(mission.rewardPoints),
+              _buildPointBadge(mission.rewardPoints),
             ],
           ),
         ),
@@ -615,9 +482,9 @@ class _MissionTileWithExpandState extends State<_MissionTileWithExpand> {
         const SizedBox(height: 16),
 
         // 3. Footer: Action Button or Status
-        if (!isCompleted && !isManual)
+        if (!isCompleted)
           _buildActionFooter(context, mission)
-        else if (isCompleted)
+        else
           _buildCompletedFooter(),
 
         // 4. Collapsible Result Section (Only for completed)
