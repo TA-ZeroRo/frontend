@@ -3,14 +3,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../settings/state/settings_controller.dart';
 
-class CharacterSelectModal extends ConsumerWidget {
+class CharacterSelectModal extends ConsumerStatefulWidget {
   const CharacterSelectModal({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(appSettingsProvider);
-    final selectedCharacter = settings.selectedCharacter;
+  ConsumerState<CharacterSelectModal> createState() => _CharacterSelectModalState();
+}
 
+class _CharacterSelectModalState extends ConsumerState<CharacterSelectModal> {
+  late String _tempSelectedCharacter;
+
+  @override
+  void initState() {
+    super.initState();
+    // 현재 설정된 캐릭터를 임시 선택 상태로 초기화
+    _tempSelectedCharacter = ref.read(appSettingsProvider).selectedCharacter;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -87,11 +98,11 @@ class CharacterSelectModal extends ConsumerWidget {
                     id: 'earth',
                     name: '지구 제로로',
                     imagePath: 'assets/images/earth_zeroro.png',
-                    isSelected: selectedCharacter == 'earth',
+                    isSelected: _tempSelectedCharacter == 'earth',
                     onTap: () {
-                      ref
-                          .read(appSettingsProvider.notifier)
-                          .updateCharacter('earth');
+                      setState(() {
+                        _tempSelectedCharacter = 'earth';
+                      });
                     },
                   ),
                 ),
@@ -101,11 +112,11 @@ class CharacterSelectModal extends ConsumerWidget {
                     id: 'cloud',
                     name: '먼지 제로로',
                     imagePath: 'assets/images/cloud_zeroro.png',
-                    isSelected: selectedCharacter == 'cloud',
+                    isSelected: _tempSelectedCharacter == 'cloud',
                     onTap: () {
-                      ref
-                          .read(appSettingsProvider.notifier)
-                          .updateCharacter('cloud');
+                      setState(() {
+                        _tempSelectedCharacter = 'cloud';
+                      });
                     },
                   ),
                 ),
@@ -137,7 +148,17 @@ class CharacterSelectModal extends ConsumerWidget {
                 Expanded(
                   flex: 2,
                   child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () async {
+                      // 다이얼로그를 먼저 닫기
+                      Navigator.pop(context);
+                      // 다이얼로그가 완전히 사라진 후 상태 업데이트
+                      await Future.delayed(const Duration(milliseconds: 300));
+                      if (mounted) {
+                        ref
+                            .read(appSettingsProvider.notifier)
+                            .updateCharacter(_tempSelectedCharacter);
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,

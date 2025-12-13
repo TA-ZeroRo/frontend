@@ -6,6 +6,7 @@ import 'package:frontend/core/theme/app_color.dart';
 import 'package:logger/logger.dart';
 import '../../../../../core/components/custom_app_bar.dart';
 import '../../../../../core/utils/toast_helper.dart';
+import '../../../settings/state/settings_controller.dart';
 import 'components/character_select_modal.dart';
 import 'components/gacha_dialog.dart';
 import 'components/simple_chat_area.dart';
@@ -92,9 +93,24 @@ class _HomePageState extends ConsumerState<HomePage> {
     super.dispose();
   }
 
+  /// 선택된 캐릭터에 따른 3D 모델 경로 반환
+  String _getModelPath(String selectedCharacter) {
+    switch (selectedCharacter) {
+      case 'earth':
+        return 'assets/zeroro/planet_zeroro_2.glb';
+      case 'cloud':
+        return 'assets/zeroro/co2_zeroro_2.glb';
+      default:
+        return 'assets/zeroro/planet_zeroro_2.glb'; // 기본값: 지구 제로로
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatProvider);
+    final settings = ref.watch(appSettingsProvider);
+    final selectedCharacter = settings.selectedCharacter;
+    final modelPath = _getModelPath(selectedCharacter);
 
     // 에러 메시지 표시
     ref.listen<ChatState>(chatProvider, (previous, next) {
@@ -148,9 +164,10 @@ class _HomePageState extends ConsumerState<HomePage> {
             Padding(
               padding: const EdgeInsets.only(bottom: 80, left: 30, right: 30),
               child: Flutter3DViewer(
+                key: ValueKey(selectedCharacter), // 캐릭터 변경 시 위젯 재생성
                 progressBarColor: Colors.transparent,
                 controller: _3DController,
-                src: 'assets/zeroro/co2_zeroro_2.glb',
+                src: modelPath,
                 enableTouch: false,
                 activeGestureInterceptor: false,
                 onProgress: _handleProgress,
@@ -222,6 +239,10 @@ class _HomePageState extends ConsumerState<HomePage> {
     if (mounted) {
       setState(() {
         _loadingProgress = progress;
+        // 100% 도달 시 로딩 종료
+        if (progress >= 1.0) {
+          _isLoading = false;
+        }
       });
     }
   }
