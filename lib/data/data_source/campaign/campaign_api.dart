@@ -4,7 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../dto/campaign/campaign_dto.dart';
 import '../../dto/campaign/campaign_participation_response_dto.dart';
-import '../../dto/campaign/campaign_webview_config_dto.dart';
+// ignore: unused_import
+import '../../../deprecated/webview/campaign_webview_config_dto.dart';
 
 @injectable
 class CampaignApi {
@@ -62,6 +63,8 @@ class CampaignApi {
 
   /// Get campaign webview config by campaign ID
   /// Supabase direct query to campaign_webview_configs table
+  /// @deprecated WebView RPA is no longer used. Use in-app mission verification instead.
+  @Deprecated('WebView RPA is no longer used. Use in-app mission verification instead.')
   Future<CampaignWebviewConfigDto?> getWebviewConfig({
     required int campaignId,
   }) async {

@@ -148,16 +148,13 @@ class _CharacterSelectModalState extends ConsumerState<CharacterSelectModal> {
                 Expanded(
                   flex: 2,
                   child: ElevatedButton(
-                    onPressed: () async {
-                      // 다이얼로그를 먼저 닫기
+                    onPressed: () {
+                      // 상태 업데이트를 먼저 수행
+                      ref
+                          .read(appSettingsProvider.notifier)
+                          .updateCharacter(_tempSelectedCharacter);
+                      // 다이얼로그 닫기
                       Navigator.pop(context);
-                      // 다이얼로그가 완전히 사라진 후 상태 업데이트
-                      await Future.delayed(const Duration(milliseconds: 300));
-                      if (mounted) {
-                        ref
-                            .read(appSettingsProvider.notifier)
-                            .updateCharacter(_tempSelectedCharacter);
-                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,

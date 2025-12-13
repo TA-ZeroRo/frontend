@@ -115,7 +115,7 @@ class CampaignCard extends ConsumerWidget {
     );
   }
 
-  /// 상단 그라데이션 + 캠페인 제목 및 자동처리 텍스트
+  /// 상단 그라데이션 + 캠페인 제목
   Widget _buildTopGradient() {
     return Positioned(
       top: 0,
@@ -135,74 +135,53 @@ class CampaignCard extends ConsumerWidget {
             stops: const [0.0, 0.5, 1.0],
           ),
         ),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // 캠페인 제목 (남은 공간 차지)
-            Expanded(
-              child: Text(
-                campaign.title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  height: 1.3,
+            // ZERORO 배지
+            if (campaign.isZeroro)
+              Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.eco_rounded,
+                      size: 12,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 4),
+                    const Text(
+                      'ZERORO',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+            Text(
+              campaign.title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                height: 1.3,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            // 자동처리 텍스트 (고정 크기)
-            if (campaign.isAutoProcessable) ...[
-              const SizedBox(width: 8),
-              _buildAutoProcessText(),
-            ],
           ],
         ),
-      ),
-    );
-  }
-
-  /// 자동처리 텍스트
-  Widget _buildAutoProcessText() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.buttonColor, AppColors.primary],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.buttonColor.withValues(alpha: 0.4),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.bolt_rounded, color: Colors.white, size: 14),
-          const SizedBox(width: 4),
-          Text(
-            '자동처리',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              shadows: [
-                Shadow(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  offset: const Offset(0, 1),
-                  blurRadius: 2,
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -299,8 +278,9 @@ class CampaignCard extends ConsumerWidget {
 
             const SizedBox(width: 8),
 
-            // 참가 버튼 (팝업 메뉴)
-            if (onParticipate != null && onCruiting != null)
+            // ZERORO 캠페인만 참가 버튼 표시 (참가하기 + 리크루팅)
+            // EXTERNAL 캠페인은 웹뷰로만 연결되므로 참가 버튼 없음
+            if (campaign.isZeroro && onParticipate != null && onCruiting != null)
               ParticipationPopupMenu(
                 isParticipating: campaign.isParticipating,
                 onParticipate: onParticipate!,
