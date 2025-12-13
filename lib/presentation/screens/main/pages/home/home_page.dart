@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 import 'package:frontend/core/theme/app_color.dart';
-import 'package:logger/logger.dart';
 import '../../../../../core/components/custom_app_bar.dart';
 import '../../../../../core/utils/toast_helper.dart';
 import '../../../settings/state/settings_controller.dart';
@@ -164,7 +163,6 @@ class _HomePageState extends ConsumerState<HomePage> {
             Padding(
               padding: const EdgeInsets.only(bottom: 80, left: 30, right: 30),
               child: Flutter3DViewer(
-                key: ValueKey(selectedCharacter), // 캐릭터 변경 시 위젯 재생성
                 progressBarColor: Colors.transparent,
                 controller: _3DController,
                 src: modelPath,
