@@ -244,7 +244,9 @@ class CampaignCard extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Row(
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
                     children: [
                       // 지역 정보
                       Container(
@@ -257,7 +259,7 @@ class CampaignCard extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          '${campaign.region} ${campaign.city}',
+                          _getLocationText(),
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.9),
                             fontSize: 11,
@@ -265,7 +267,6 @@ class CampaignCard extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 6),
                       // 카테고리
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -309,6 +310,20 @@ class CampaignCard extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// 지역 텍스트 반환 ("전체" 제거)
+  String _getLocationText() {
+    final city = campaign.city.trim();
+    // "전체"를 제거
+    final cleanCity = city.replaceAll(RegExp(r'\s*전체\s*$'), '').trim();
+
+    // city가 비어있거나 "전체"만 있었던 경우 region만 반환
+    if (cleanCity.isEmpty) {
+      return campaign.region;
+    }
+
+    return '${campaign.region} $cleanCity';
   }
 }
 

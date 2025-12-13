@@ -279,8 +279,8 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                       onShare: () async {
                         try {
                           await Share.share(
-                            '${campaign.title}\n${campaign.url}',
-                            subject: campaign.title,
+                            '지구를 위해 저와 ${campaign.title}을(를) 함께 해요!\n\n${campaign.url}',
+                            subject: '지구를 위해 저와 ${campaign.title}을(를) 함께 해요!',
                           );
                         } catch (e) {
                           if (mounted) {
