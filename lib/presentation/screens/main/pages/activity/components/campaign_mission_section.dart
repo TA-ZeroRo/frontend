@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../core/utils/toast_helper.dart';
 import '../../../../../../core/utils/character_notification_helper.dart';
+import '../../../../../../domain/model/mission/mission_status.dart';
 import '../../../../../../domain/model/mission/mission_template.dart';
 import '../../../../../../domain/model/mission/mission_with_template.dart';
 import '../../../../../../domain/model/mission/verification_type.dart';
@@ -212,13 +213,6 @@ class CampaignMissionSection extends ConsumerWidget {
     if (missions.isEmpty) return const SizedBox.shrink();
 
     final campaign = missions.first.campaign;
-    final completedCount = missions
-        .where((m) => m.missionLog.status.value == 'COMPLETED')
-        .length;
-    final totalCount = missions.length;
-    final progressPercentage = totalCount > 0
-        ? completedCount / totalCount
-        : 0.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -270,49 +264,6 @@ class CampaignMissionSection extends ConsumerWidget {
                         ),
                       ),
                     ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Progress bar
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '진행률',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Text(
-                      '${(progressPercentage * 100).toInt()}%',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: _getProgressColor(progressPercentage),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: progressPercentage,
-                    minHeight: 8,
-                    backgroundColor: Colors.grey[100],
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      _getProgressColor(progressPercentage),
-                    ),
                   ),
                 ),
               ],
@@ -388,16 +339,6 @@ class CampaignMissionSection extends ConsumerWidget {
     }
   }
 
-  Color _getProgressColor(double percentage) {
-    if (percentage >= 0.67) {
-      return const Color(0xFF4CAF50); // Green
-    } else if (percentage >= 0.34) {
-      return const Color(0xFFFF9800); // Orange
-    } else {
-      return const Color(0xFFFF6B6B); // Red
-    }
-  }
-
   /// 캠페인 카테고리에 따른 헤더 배경색 반환
   Color _getCampaignHeaderColor(String category) {
     switch (category) {
@@ -435,7 +376,10 @@ class _MissionTileWithExpandState extends ConsumerState<_MissionTileWithExpand> 
 
   @override
   Widget build(BuildContext context) {
-    final isCompleted = widget.mission.missionLog.status.value == 'COMPLETED';
+    final missionStatus = widget.mission.missionLog.status;
+    final isCompleted = missionStatus == MissionStatus.completed;
+    final isPending = missionStatus == MissionStatus.pendingVerification;
+    final isFailed = missionStatus == MissionStatus.failed;
     final mission = widget.mission.missionTemplate;
     final verificationType = mission.verificationType;
 
@@ -483,14 +427,18 @@ class _MissionTileWithExpandState extends ConsumerState<_MissionTileWithExpand> 
 
         const SizedBox(height: 16),
 
-        // 3. Footer: Action Button or Status
-        if (!isCompleted)
-          _buildActionFooter(context, mission)
-        else
-          _buildCompletedFooter(),
-
-        // 4. Collapsible Result Section (Only for completed)
+        // 3. Footer: Action Button or Status (상태별 분기)
         if (isCompleted)
+          _buildCompletedFooter()
+        else if (isPending)
+          _buildPendingFooter()
+        else if (isFailed)
+          _buildFailedFooter(context, mission)
+        else
+          _buildActionFooter(context, mission),
+
+        // 4. Collapsible Result Section (Completed 또는 Pending 상태에서 토글)
+        if (isCompleted || isPending)
           AnimatedSize(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
@@ -640,6 +588,122 @@ class _MissionTileWithExpandState extends ConsumerState<_MissionTileWithExpand> 
                 ),
               ],
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Pending 상태 Footer - 승인 대기 중
+  Widget _buildPendingFooter() {
+    return Column(
+      children: [
+        const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
+        InkWell(
+          onTap: () {
+            setState(() {
+              _isExpanded = !_isExpanded;
+            });
+          },
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(16),
+          ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.schedule,
+                      size: 18,
+                      color: Color(0xFFFF9800), // 주황색
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      '승인 대기 중',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFFF9800),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text(
+                      _isExpanded ? '접기' : '제출 내용 보기',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[500],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      _isExpanded ? Icons.expand_less : Icons.expand_more,
+                      size: 18,
+                      color: Colors.grey[500],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Failed 상태 Footer - 인증 실패
+  Widget _buildFailedFooter(BuildContext context, MissionTemplate mission) {
+    return Column(
+      children: [
+        const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.cancel,
+                size: 18,
+                color: Color(0xFFE53935), // 빨간색
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                '인증 실패',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFFE53935),
+                ),
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed: () =>
+                    _showVerificationBottomSheet(context, widget.mission),
+                style: TextButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  backgroundColor: const Color(0xFFE53935).withValues(alpha: 0.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  '다시 인증하기',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFFE53935),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],

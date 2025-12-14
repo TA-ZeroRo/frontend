@@ -8,6 +8,9 @@ import '../../../../../../../core/di/injection.dart';
 import '../../../../../../../core/logger/logger.dart';
 import '../../../../../../../core/theme/app_color.dart';
 import '../../../../../../../data/data_source/mission/mission_api.dart';
+import '../../../../../../../data/data_source/verification/verification_api.dart';
+import '../../state/campaign_mission_state.dart';
+import '../../state/leaderboard_state.dart';
 
 class TextReviewVerificationBottomSheet extends ConsumerStatefulWidget {
   final MissionWithTemplate mission;
@@ -23,9 +26,11 @@ class _TextReviewVerificationBottomSheetState
     extends ConsumerState<TextReviewVerificationBottomSheet> {
   final TextEditingController _textController = TextEditingController();
   final MissionApi _missionApi = getIt<MissionApi>();
+  final VerificationApi _verificationApi = getIt<VerificationApi>();
   static const int _minCharacters = 50;
   int _currentLength = 0;
   bool _isSubmitting = false;
+  String _statusMessage = '';
 
   @override
   void initState() {
@@ -221,13 +226,28 @@ class _TextReviewVerificationBottomSheetState
           disabledForegroundColor: Colors.grey[400],
         ),
         child: _isSubmitting
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                  if (_statusMessage.isNotEmpty) ...[
+                    const SizedBox(width: 12),
+                    Text(
+                      _statusMessage,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ],
               )
             : const Text(
                 '인증하기',
@@ -247,25 +267,52 @@ class _TextReviewVerificationBottomSheetState
 
     setState(() {
       _isSubmitting = true;
+      _statusMessage = 'AI 검증 중...';
     });
 
     try {
-      // 백엔드 API 호출
-      await _missionApi.submitProof(
+      // 1. Gemini AI 텍스트 검증 API 호출
+      final verificationResult = await _verificationApi.verifyText(
+        text: _textController.text,
+        missionTitle: widget.mission.missionTemplate.title,
+        missionDescription: widget.mission.missionTemplate.description,
+      );
+
+      if (!mounted) return;
+      setState(() => _statusMessage = '제출 중...');
+
+      // 2. 검증 결과 포함하여 증빙 데이터 제출
+      final response = await _missionApi.submitProof(
         logId: widget.mission.missionLog.id,
         proofData: {
           'text': _textController.text,
+          'verification_result': {
+            'is_valid': verificationResult.isValid,
+            'confidence': verificationResult.confidence,
+            'reason': verificationResult.reason,
+          },
         },
       );
 
       if (!mounted) return;
 
-      // 포인트 지급 후 사용자 정보 새로고침
-      await ref.read(authProvider.notifier).refreshCurrentUser();
+      // 3. 상태에 따른 메시지 표시
+      if (response.status == 'PENDING_VERIFICATION') {
+        ToastHelper.showSuccess('제출 완료! 관리자 검토 후 포인트가 지급됩니다.');
+      } else if (response.status == 'COMPLETED') {
+        await ref.read(authProvider.notifier).refreshCurrentUser();
+        ToastHelper.showSuccess('소감문이 제출되었습니다! 포인트가 지급되었어요 🎉');
+      } else {
+        ToastHelper.showError('제출 실패: ${verificationResult.reason}');
+      }
 
-      ToastHelper.showSuccess('소감문이 제출되었습니다! 포인트가 지급되었어요 🎉');
+      if (!mounted) return;
 
-      Navigator.of(context).pop(true); // true 반환하여 성공 알림
+      // 미션 및 리더보드 상태 갱신
+      ref.invalidate(campaignMissionProvider);
+      ref.read(leaderboardRefreshTriggerProvider.notifier).trigger();
+
+      Navigator.of(context).pop(true);
     } catch (e) {
       CustomLogger.logger.e('미션 제출 실패', error: e);
       if (!mounted) return;
@@ -274,6 +321,7 @@ class _TextReviewVerificationBottomSheetState
       if (mounted) {
         setState(() {
           _isSubmitting = false;
+          _statusMessage = '';
         });
       }
     }

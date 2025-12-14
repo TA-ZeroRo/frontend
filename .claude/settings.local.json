@@ -28,5 +28,10 @@
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "supabase",
+    "microsoft-playwright-mcp"
+  ],
+  "enableAllProjectMcpServers": true
 }

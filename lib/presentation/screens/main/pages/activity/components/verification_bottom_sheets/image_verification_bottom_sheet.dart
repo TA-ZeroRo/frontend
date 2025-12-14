@@ -13,6 +13,8 @@ import '../../../../../../../core/logger/logger.dart';
 import '../../../../../../../core/theme/app_color.dart';
 import '../../../../../../../data/data_source/mission/mission_api.dart';
 import '../../../../../../../data/data_source/verification/verification_api.dart';
+import '../../state/campaign_mission_state.dart';
+import '../../state/leaderboard_state.dart';
 
 class ImageVerificationBottomSheet extends ConsumerStatefulWidget {
   final MissionWithTemplate mission;
@@ -416,6 +418,10 @@ class _ImageVerificationBottomSheetState
       }
 
       if (!mounted) return;
+
+      // 미션 및 리더보드 상태 갱신
+      ref.invalidate(campaignMissionProvider);
+      ref.read(leaderboardRefreshTriggerProvider.notifier).trigger();
 
       Navigator.of(context).pop(true);
     } catch (e) {
