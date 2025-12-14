@@ -281,8 +281,16 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
 
     // 실제 API 호출
     try {
-      // 참가만 API 호출 (참가 취소는 추후 구현)
-      if (!wasParticipating) {
+      if (wasParticipating) {
+        // 참가 취소 API 호출
+        await _missionRepository.cancelCampaignParticipation(
+          campaignId: id,
+          userId: userId,
+        );
+        // 활동하기 페이지 데이터 리프레쉬 트리거
+        ref.read(activityRefreshTriggerProvider.notifier).trigger();
+      } else {
+        // 참가 API 호출
         await _missionRepository.participateInCampaign(
           campaignId: id,
           userId: userId,
