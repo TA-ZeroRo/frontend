@@ -49,5 +49,5 @@ final GoRouter router = GoRouter(
       },
     ),
   ],
-  initialLocation: RoutePath.splash,
+  initialLocation: RoutePath.register,
 );
