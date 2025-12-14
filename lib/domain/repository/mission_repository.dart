@@ -19,4 +19,15 @@ abstract class MissionRepository {
     required int campaignId,
     required String userId,
   });
+
+  /// 캠페인 참가 취소
+  ///
+  /// [campaignId] 취소할 캠페인 ID
+  /// [userId] 사용자 ID
+  ///
+  /// Returns 캠페인 참가 취소 성공 여부
+  Future<bool> cancelCampaignParticipation({
+    required int campaignId,
+    required String userId,
+  });
 }

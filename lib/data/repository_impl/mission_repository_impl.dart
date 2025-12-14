@@ -66,4 +66,42 @@ class MissionRepositoryImpl implements MissionRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<bool> cancelCampaignParticipation({
+    required int campaignId,
+    required String userId,
+  }) async {
+    try {
+      final result = await _campaignApi.cancelCampaignParticipation(
+        campaignId: campaignId,
+        userId: userId,
+      );
+
+      final success = result['success'] as bool? ?? false;
+
+      if (!success) {
+        final errorMessage = result['error'] as String? ?? '캠페인 참가 취소에 실패했습니다';
+        CustomLogger.logger.w(
+          'cancelCampaignParticipation - 캠페인 참가 취소 실패 응답 '
+          '(campaignId: $campaignId, userId: $userId, error: $errorMessage)',
+        );
+        throw Exception(errorMessage);
+      }
+
+      final deletedCount = result['deleted_count'] as int? ?? 0;
+      CustomLogger.logger.i(
+        'cancelCampaignParticipation - 캠페인 참가 취소 성공 '
+        '(campaignId: $campaignId, userId: $userId, deletedCount: $deletedCount)',
+      );
+      return success;
+    } catch (e) {
+      CustomLogger.logger.e(
+        'cancelCampaignParticipation - 캠페인 참가 취소 실패 '
+        '(campaignId: $campaignId, userId: $userId)',
+        error: e,
+      );
+      rethrow;
+    }
+  }
 }

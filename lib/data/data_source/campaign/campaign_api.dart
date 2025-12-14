@@ -56,4 +56,18 @@ class CampaignApi {
 
     return CampaignParticipationResponseDto.fromJson(response.data);
   }
+
+  /// Cancel campaign participation
+  /// DELETE /campaign-agent/campaigns/{campaignId}
+  Future<Map<String, dynamic>> cancelCampaignParticipation({
+    required int campaignId,
+    required String userId,
+  }) async {
+    final response = await _dio.delete(
+      '/campaign-agent/campaigns/$campaignId',
+      data: {'user_id': userId},
+    );
+
+    return response.data as Map<String, dynamic>;
+  }
 }
