@@ -26,7 +26,7 @@ void main() async {
     url: EnvConfig.supabaseUrl,
     anonKey: EnvConfig.supabaseAnonKey,
   );
-
+ 
   // Dependency Injection 초기화
   configureDependencies();
 
