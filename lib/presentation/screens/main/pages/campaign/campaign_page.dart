@@ -186,7 +186,10 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
             ),
           );
         },
-        loading: () => const SizedBox.shrink(),
+        loading: () => Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 20),
+          child: const ExternalCampaignCarouselShimmer(),
+        ),
         error: (_, __) => const SizedBox.shrink(),
       ),
     );
