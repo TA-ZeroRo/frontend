@@ -83,13 +83,15 @@ class PloggingApi {
   }
 
   /// 사진 인증 제출
-  /// POST /plogging/sessions/{session_id}/verify
+  /// POST /plogging/sessions/{session_id}/verify?user_id={user_id}
   Future<PhotoVerificationResponseDto> submitVerification({
     required int sessionId,
+    required String userId,
     required PhotoVerificationRequestDto request,
   }) async {
     final response = await _dio.post(
       '/plogging/sessions/$sessionId/verify',
+      queryParameters: {'user_id': userId},
       data: request.toJson(),
     );
     return PhotoVerificationResponseDto.fromJson(response.data);

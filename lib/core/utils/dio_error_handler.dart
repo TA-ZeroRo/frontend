@@ -19,7 +19,8 @@ class DioErrorHandler {
         final responseData = error.response?.data;
 
         if (responseData is Map<String, dynamic>) {
-          message = responseData['message'] ?? message;
+          // FastAPI uses 'detail', others may use 'message'
+          message = responseData['detail'] ?? responseData['message'] ?? message;
         } else if (responseData is String) {
           message = responseData;
         }

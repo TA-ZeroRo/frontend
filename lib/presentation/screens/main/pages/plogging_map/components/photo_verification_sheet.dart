@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../domain/model/plogging/photo_verification.dart';
@@ -260,9 +261,20 @@ class _PhotoVerificationSheetState
     });
 
     try {
-      // TODO: 이미지를 서버에 업로드하고 URL 받기
-      // 현재는 임시로 로컬 경로 사용
-      final imageUrl = _selectedImage!.path;
+      // Supabase Storage에 이미지 업로드
+      final supabase = Supabase.instance.client;
+      final fileName =
+          'plogging_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final imageBytes = await File(_selectedImage!.path).readAsBytes();
+
+      await supabase.storage.from('zeroro-post-bucket').uploadBinary(
+            fileName,
+            imageBytes,
+            fileOptions: const FileOptions(contentType: 'image/jpeg'),
+          );
+
+      final imageUrl =
+          supabase.storage.from('zeroro-post-bucket').getPublicUrl(fileName);
 
       final result = await ref
           .read(ploggingSessionProvider.notifier)
