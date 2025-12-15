@@ -113,7 +113,27 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
   Future<List<CampaignData>> build() async {
     _repository = getIt<CampaignRepository>();
     _missionRepository = getIt<MissionRepository>();
+
+    // 사용자가 참여 중인 캠페인 ID 목록 초기화
+    await _loadParticipatingCampaignIds();
+
     return _loadCampaigns(resetOffset: true);
+  }
+
+  /// 사용자가 참여 중인 캠페인 ID 목록 로드
+  Future<void> _loadParticipatingCampaignIds() async {
+    final userId = ref.read(authProvider).currentUser?.id;
+    if (userId == null) return;
+
+    try {
+      final missionLogs = await _missionRepository.getUserMissionLogs(userId);
+      _participatingCampaignIds.clear();
+      for (final mission in missionLogs) {
+        _participatingCampaignIds.add(mission.campaign.id);
+      }
+    } catch (e) {
+      // 실패해도 캠페인 목록 로드는 계속 진행
+    }
   }
 
   /// 캠페인 목록 로드
@@ -209,6 +229,8 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
   Future<void> refresh() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
+      // 참여 상태도 새로고침
+      await _loadParticipatingCampaignIds();
       return _loadCampaigns(resetOffset: true);
     });
   }
@@ -259,8 +281,16 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
 
     // 실제 API 호출
     try {
-      // 참가만 API 호출 (참가 취소는 추후 구현)
-      if (!wasParticipating) {
+      if (wasParticipating) {
+        // 참가 취소 API 호출
+        await _missionRepository.cancelCampaignParticipation(
+          campaignId: id,
+          userId: userId,
+        );
+        // 활동하기 페이지 데이터 리프레쉬 트리거
+        ref.read(activityRefreshTriggerProvider.notifier).trigger();
+      } else {
+        // 참가 API 호출
         await _missionRepository.participateInCampaign(
           campaignId: id,
           userId: userId,

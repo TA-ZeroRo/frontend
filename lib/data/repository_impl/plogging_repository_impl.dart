@@ -119,6 +119,7 @@ class PloggingRepositoryImpl implements PloggingRepository {
   @override
   Future<PhotoVerificationResponse> submitVerification({
     required int sessionId,
+    required String userId,
     required String imageUrl,
     required double latitude,
     required double longitude,
@@ -131,6 +132,7 @@ class PloggingRepositoryImpl implements PloggingRepository {
       );
       final result = await _ploggingApi.submitVerification(
         sessionId: sessionId,
+        userId: userId,
         request: request,
       );
       CustomLogger.logger.i(

@@ -79,7 +79,7 @@ class LoginScreen extends ConsumerWidget {
 
             // 부제목
             const Text(
-              '친환경 라이프스타일을 시작해보세요',
+              '함께하는 캠페인, 모이면 시작되는 변화',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
               textAlign: TextAlign.center,
             ),

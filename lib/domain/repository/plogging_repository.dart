@@ -31,6 +31,7 @@ abstract class PloggingRepository {
   /// 사진 인증 제출
   Future<PhotoVerificationResponse> submitVerification({
     required int sessionId,
+    required String userId,
     required String imageUrl,
     required double latitude,
     required double longitude,

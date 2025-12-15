@@ -132,23 +132,6 @@ class _ExternalCampaignCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.open_in_new_rounded,
-                          size: 12,
-                          color: Colors.white.withValues(alpha: 0.8),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '바로가기',
-                          style: AppTextStyle.labelSmall.copyWith(
-                            color: Colors.white.withValues(alpha: 0.8),
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),

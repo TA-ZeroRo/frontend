@@ -46,7 +46,7 @@ class PloggingSessionState {
     return DateTime.now().difference(currentSession!.startedAt).inMinutes;
   }
 
-  /// 인증 가능 여부 (20분마다)
+  /// 인증 가능 여부 (15초마다)
   bool get canVerify {
     if (nextVerificationTime == null) return true;
     return DateTime.now().isAfter(nextVerificationTime!);
@@ -87,8 +87,8 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
   bool _lastCanVerify = false; // 인증 상태 변경 감지용
   String? _lastNotificationBody; // 알림 중복 업데이트 방지
 
-  /// 인증 간격 (20분)
-  static const verificationIntervalMinutes = 20;
+  /// 인증 간격 (15초)
+  static const verificationIntervalSeconds = 15;
 
   @override
   PloggingSessionState build() {
@@ -159,7 +159,7 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
         isTracking: true,
         totalDistanceMeters: 0,
         nextVerificationTime: DateTime.now().add(
-          const Duration(minutes: verificationIntervalMinutes),
+          const Duration(seconds: verificationIntervalSeconds),
         ),
       );
 
@@ -357,14 +357,20 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
   Future<PhotoVerificationResponse?> submitVerification({
     required String imageUrl,
   }) async {
+    final userId = ref.read(authProvider).currentUser?.id;
     if (state.currentSession == null || state.currentPosition == null) {
       state = state.copyWith(errorMessage: '세션 또는 위치 정보가 없습니다');
+      return null;
+    }
+    if (userId == null) {
+      state = state.copyWith(errorMessage: '로그인이 필요합니다');
       return null;
     }
 
     try {
       final result = await _repository.submitVerification(
         sessionId: state.currentSession!.id,
+        userId: userId,
         imageUrl: imageUrl,
         latitude: state.currentPosition!.latitude,
         longitude: state.currentPosition!.longitude,
@@ -373,7 +379,7 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
       state = state.copyWith(
         verifications: [...state.verifications, result],
         nextVerificationTime: DateTime.now().add(
-          const Duration(minutes: verificationIntervalMinutes),
+          const Duration(seconds: verificationIntervalSeconds),
         ),
       );
 
