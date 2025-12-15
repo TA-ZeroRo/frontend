@@ -62,6 +62,8 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
 
   /// 실시간 메시지 수신 처리
   void _onNewRealtimeMessage(ChatMessage message) {
+    if (!mounted) return;
+
     // 중복 방지 (내가 보낸 메시지는 이미 낙관적 업데이트로 추가됨)
     final isDuplicate = _messages.any((m) => m.message.id == message.id);
     final isMyMessage = message.userId == _currentUserId;
@@ -76,7 +78,9 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
           ),
         ];
       });
-      Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) _scrollToBottom();
+      });
     }
   }
 
@@ -85,6 +89,7 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
     final userId = _currentUserId;
 
     if (chatRoomId == null || userId == null) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
@@ -96,6 +101,7 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
         roomId: int.parse(chatRoomId),
         userId: userId,
       );
+      if (!mounted) return;
       setState(() {
         // ChatMessage를 ChatMessageWithStatus로 변환
         _messages = messages
@@ -107,9 +113,10 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
         _isLoading = false;
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToBottom();
+        if (mounted) _scrollToBottom();
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -118,10 +125,14 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
   }
 
   @override
-  void dispose() {
-    // 현재 활성 채팅방 ID 해제
+  void deactivate() {
+    // 활성 채팅방 ID 해제 - dispose() 전에 ref가 유효한 시점에서 처리
     ref.read(activeChatRoomIdProvider.notifier).state = null;
+    super.deactivate();
+  }
 
+  @override
+  void dispose() {
     _realtimeSubscription?.cancel();
     _repository.unsubscribeFromChatRoom();
     _scrollController.dispose();
@@ -172,7 +183,9 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
     });
 
     // 즉시 스크롤
-    Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) _scrollToBottom();
+    });
 
     try {
       // 2. API로 메시지 전송
@@ -183,6 +196,7 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
       );
 
       // 3. 낙관적 메시지를 실제 메시지로 교체
+      if (!mounted) return;
       setState(() {
         _messages = _messages.map((m) {
           if (m.localId == localId) {
@@ -197,6 +211,7 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
       });
     } catch (e) {
       // 4. 실패 시 상태 업데이트
+      if (!mounted) return;
       setState(() {
         _messages = _messages.map((m) {
           if (m.localId == localId) {
@@ -237,6 +252,7 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
         message: failedMessage.message.message,
       );
 
+      if (!mounted) return;
       setState(() {
         _messages = _messages.map((m) {
           if (m.localId == localId || m.message.id == localId) {
@@ -250,6 +266,7 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
         _isSending = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _messages = _messages.map((m) {
           if (m.localId == localId || m.message.id == localId) {
