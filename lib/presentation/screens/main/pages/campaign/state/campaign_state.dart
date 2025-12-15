@@ -5,7 +5,7 @@ import '../../../../../../domain/model/campaign/campaign_source.dart';
 import '../../../../../../domain/repository/campaign_repository.dart';
 import '../../../../../../domain/repository/mission_repository.dart';
 import '../../../../entry/state/auth_controller.dart';
-import '../../plogging_map/state/leaderboard_state.dart';
+import '../../activity/state/leaderboard_state.dart';
 import '../models/campaign_data.dart';
 
 /// 캠페인 필터 상태

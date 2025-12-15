@@ -60,6 +60,6 @@ class MainApp extends StatelessWidget {
           // builder: (context, child) => FcmInitializer(child: child ?? const SizedBox()),
         ),
       ),
-    );
+    );  
   }
 }
