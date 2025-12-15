@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "697368174316",
+    "project_id": "zeroro-ff0f3",
+    "storage_bucket": "zeroro-ff0f3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:697368174316:android:2908801e98e6207531cfc9",
+        "android_client_info": {
+          "package_name": "com.zeroro.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDanISuFfR_hqxFLkX7ozPHHFTwiPz2_eE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

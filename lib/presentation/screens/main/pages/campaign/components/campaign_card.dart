@@ -47,19 +47,17 @@ class CampaignCard extends ConsumerWidget {
   }
 
   /// 배경 이미지
+  /// 배경 이미지
   Widget _buildBackgroundImage() {
+    if (campaign.imageUrl.isEmpty) {
+      return _buildFallbackView();
+    }
+
     return Image.network(
       campaign.imageUrl,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
-        return Container(
-          color: const Color(0xFF2A2A2A),
-          child: const Icon(
-            Icons.image_not_supported,
-            color: Color(0xFF666666),
-            size: 48,
-          ),
-        );
+        return _buildFallbackView();
       },
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
@@ -79,7 +77,45 @@ class CampaignCard extends ConsumerWidget {
     );
   }
 
-  /// 상단 그라데이션 + 캠페인 제목 및 자동처리 텍스트
+  /// 이미지 없을 때 대체 화면 (설명 텍스트 표시)
+  /// 이미지 없을 때 대체 화면 (설명 텍스트 표시)
+  Widget _buildFallbackView() {
+    return Container(
+      color: Colors.lightBlue[50],
+      padding: const EdgeInsets.fromLTRB(20, 60, 20, 80),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Icon(
+              Icons.article_outlined,
+              color: AppColors.textSubtle,
+              size: 32,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            campaign.description.isNotEmpty
+                ? campaign.description
+                : '이미지가 준비중입니다.',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+              height: 1.6,
+              fontWeight: FontWeight.w400,
+            ),
+            textAlign: TextAlign.start,
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 상단 그라데이션 + 캠페인 제목
   Widget _buildTopGradient() {
     return Positioned(
       top: 0,
@@ -99,48 +135,52 @@ class CampaignCard extends ConsumerWidget {
             stops: const [0.0, 0.5, 1.0],
           ),
         ),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // 캠페인 제목 (남은 공간 차지)
-            Expanded(
-              child: Text(
-                campaign.title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  height: 1.3,
+            // ZERORO 배지
+            if (campaign.isZeroro)
+              Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.eco_rounded,
+                      size: 12,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 4),
+                    const Text(
+                      'ZERORO',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+            Text(
+              campaign.title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                height: 1.3,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            // 자동처리 텍스트 (고정 크기)
-            if (campaign.isAutoProcessable) ...[
-              const SizedBox(width: 8),
-              _buildAutoProcessText(),
-            ],
           ],
-        ),
-      ),
-    );
-  }
-
-  /// 자동처리 텍스트
-  Widget _buildAutoProcessText() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        '자동처리',
-        style: TextStyle(
-          color: Colors.white.withValues(alpha: 0.9),
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
         ),
       ),
     );
@@ -183,7 +223,9 @@ class CampaignCard extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Row(
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
                     children: [
                       // 지역 정보
                       Container(
@@ -196,7 +238,7 @@ class CampaignCard extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          '${campaign.region} ${campaign.city}',
+                          _getLocationText(),
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.9),
                             fontSize: 11,
@@ -204,7 +246,6 @@ class CampaignCard extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 6),
                       // 카테고리
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -237,8 +278,9 @@ class CampaignCard extends ConsumerWidget {
 
             const SizedBox(width: 8),
 
-            // 참가 버튼 (팝업 메뉴)
-            if (onParticipate != null && onCruiting != null)
+            // ZERORO 캠페인만 참가 버튼 표시 (참가하기 + 리크루팅)
+            // EXTERNAL 캠페인은 웹뷰로만 연결되므로 참가 버튼 없음
+            if (campaign.isZeroro && onParticipate != null && onCruiting != null)
               ParticipationPopupMenu(
                 isParticipating: campaign.isParticipating,
                 onParticipate: onParticipate!,
@@ -248,6 +290,20 @@ class CampaignCard extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// 지역 텍스트 반환 ("전체" 제거)
+  String _getLocationText() {
+    final city = campaign.city.trim();
+    // "전체"를 제거
+    final cleanCity = city.replaceAll(RegExp(r'\s*전체\s*$'), '').trim();
+
+    // city가 비어있거나 "전체"만 있었던 경우 region만 반환
+    if (cleanCity.isEmpty) {
+      return campaign.region;
+    }
+
+    return '${campaign.region} $cleanCity';
   }
 }
 

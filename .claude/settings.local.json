@@ -24,9 +24,15 @@
       "Bash(xargs ls:*)",
       "Bash(git pull:*)",
       "Bash(git add:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "supabase",
+    "microsoft-playwright-mcp"
+  ]
 }

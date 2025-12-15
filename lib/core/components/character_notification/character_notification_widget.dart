@@ -36,9 +36,13 @@ class _CharacterNotificationWidgetState
       vsync: this,
     );
 
-    // 슬라이드 애니메이션 (우측에서 진입)
+    // 슬라이드 애니메이션
+    final beginOffset = widget.notification.alignment != null
+        ? const Offset(0, 0.2) // 중앙 배치 시 아래에서 살짝 위로
+        : const Offset(1.5, 0); // 기본: 우측에서 좌측으로
+
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(1.5, 0), // 우측 밖에서 시작
+      begin: beginOffset,
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _controller,
@@ -80,19 +84,30 @@ class _CharacterNotificationWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final content = SlideTransition(
+      position: _slideAnimation,
+      child: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Material(
+          color: Colors.transparent,
+          child: _buildNotificationContent(),
+        ),
+      ),
+    );
+
+    if (widget.notification.alignment != null) {
+      return Positioned.fill(
+        child: Align(
+          alignment: widget.notification.alignment!,
+          child: content,
+        ),
+      );
+    }
+
     return Positioned(
       top: 60, // 상단 여백
       right: 16, // 우측 여백
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: Material(
-            color: Colors.transparent,
-            child: _buildNotificationContent(),
-          ),
-        ),
-      ),
+      child: content,
     );
   }
 
@@ -104,7 +119,7 @@ class _CharacterNotificationWidgetState
       children: [
         // 말풍선
         _buildMessageBubble(),
-        const SizedBox(width: 8),
+        const SizedBox(width: 10),
         // 캐릭터 아바타
         _buildCharacterAvatar(),
       ],
@@ -115,9 +130,9 @@ class _CharacterNotificationWidgetState
   Widget _buildMessageBubble() {
     return Container(
       constraints: const BoxConstraints(
-        maxWidth: 200, // 최대 너비 제한
+        maxWidth: 240, // 최대 너비 제한 증가
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14), // 패딩 증가
       decoration: BoxDecoration(
         color: widget.notification.bubbleColor,
         borderRadius: BorderRadius.circular(widget.notification.borderRadius),
@@ -129,9 +144,9 @@ class _CharacterNotificationWidgetState
             : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.15), // 그림자 진하게
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -139,8 +154,8 @@ class _CharacterNotificationWidgetState
         widget.notification.message,
         style: TextStyle(
           color: widget.notification.textColor,
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
+          fontSize: 16, // 폰트 크기 증가
+          fontWeight: FontWeight.w600, // 폰트 굵기 증가
         ),
       ),
     );
@@ -153,18 +168,25 @@ class _CharacterNotificationWidgetState
       height: widget.notification.characterSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: CircleAvatar(
-        radius: widget.notification.characterSize / 2,
-        backgroundImage: AssetImage(widget.notification.characterImage),
-        backgroundColor: Colors.white,
+      child: ClipOval(
+        child: Transform.scale(
+          scale: 1.3,
+          child: Image.asset(
+            widget.notification.characterImage,
+            fit: BoxFit.cover,
+            width: widget.notification.characterSize,
+            height: widget.notification.characterSize,
+          ),
+        ),
       ),
     );
   }

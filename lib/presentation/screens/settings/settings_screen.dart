@@ -7,6 +7,7 @@ import '../../../core/utils/toast_helper.dart';
 import '../../routes/router_path.dart';
 import '../entry/state/auth_controller.dart';
 import 'state/settings_controller.dart';
+import '../../../core/utils/character_notification_helper.dart';
 
 /// 설정 화면 섹션 컴포넌트
 class SettingsSection extends StatelessWidget {
@@ -142,150 +143,546 @@ class SettingsScreen extends ConsumerWidget {
   void _showLogoutConfirmDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
+      barrierDismissible: true,
       builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          icon: const Icon(
-            Icons.logout_rounded,
-            color: AppColors.error,
-            size: 48,
-          ),
-          title: Text(
-            '로그아웃',
-            style: AppTextStyle.titleLarge.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          content: Text('정말로 로그아웃 하시겠습니까?', style: AppTextStyle.bodyLarge),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(
-                '취소',
-                style: AppTextStyle.bodyLarge.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.of(dialogContext).pop();
+        // 다이얼로그가 빌드된 후 캐릭터 알림 표시
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (dialogContext.mounted) {
+            CharacterNotificationHelper.show(
+              dialogContext,
+              message: '정말 로그아웃 하실거에요..?',
+              characterImage: 'assets/images/earth_zeroro_sad.png',
+              bubbleColor: Colors.white,
+              duration: const Duration(minutes: 5),
+              alignment: const Alignment(0, -0.42),
+            );
+          }
+        });
 
-                try {
-                  await ref.read(authProvider.notifier).logout();
-
-                  if (context.mounted) {
-                    context.go(RoutePath.login);
-                    ToastHelper.showSuccess('로그아웃되었습니다.');
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ToastHelper.showError('로그아웃 실패: ${e.toString()}');
-                  }
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.error,
-                foregroundColor: AppColors.onPrimary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text('로그아웃', style: AppTextStyle.bodyLarge),
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
             ),
-          ],
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 아이콘
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.logout_rounded,
+                    color: AppColors.error,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // 제목
+                Text(
+                  '로그아웃',
+                  style: AppTextStyle.titleLarge.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // 설명
+                Text(
+                  '정말로 로그아웃 하시겠습니까?',
+                  style: AppTextStyle.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                // 버튼 영역
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.of(dialogContext).pop(),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              color: AppColors.textSubtle.withValues(alpha: 0.5),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            '취소',
+                            style: AppTextStyle.bodyMedium.copyWith(
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            Navigator.of(dialogContext).pop();
+
+                            try {
+                              await ref.read(authProvider.notifier).logout();
+
+                              if (context.mounted) {
+                                context.go(RoutePath.login);
+                                ToastHelper.showSuccess('로그아웃되었습니다.');
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ToastHelper.showError('로그아웃 실패: ${e.toString()}');
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.error,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            '로그아웃',
+                            style: AppTextStyle.bodyMedium.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         );
       },
-    );
+    ).then((_) {
+      CharacterNotificationHelper.hide();
+    });
   }
 
   /// 계정 삭제 확인 다이얼로그
   void _showDeleteAccountConfirmDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
+      barrierDismissible: true,
       builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          icon: const Icon(
-            Icons.warning_rounded,
-            color: AppColors.error,
-            size: 48,
-          ),
-          title: Text(
-            '계정 삭제',
-            style: AppTextStyle.titleLarge.copyWith(
-              fontWeight: FontWeight.w500,
-              color: AppColors.error,
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '계정을 삭제하면 다음 내용이 영구적으로 삭제됩니다:',
-                style: AppTextStyle.bodyLarge,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                '• 모든 개인 정보\n• 저장된 데이터\n• 앱 사용 기록',
-                style: AppTextStyle.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                '이 작업은 되돌릴 수 없습니다.',
-                style: AppTextStyle.bodyLarge.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.error,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(
-                '취소',
-                style: AppTextStyle.bodyLarge.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.of(dialogContext).pop();
+        // 다이얼로그가 빌드된 후 캐릭터 알림 표시
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (dialogContext.mounted) {
+            CharacterNotificationHelper.show(
+              dialogContext,
+              message: '떠나지마요 ㅠㅠ',
+              characterImage: 'assets/images/earth_zeroro_sad.png',
+              bubbleColor: Colors.white,
+              duration: const Duration(minutes: 5),
+              alignment: const Alignment(0, -0.55),
+            );
+          }
+        });
 
-                try {
-                  await ref.read(authProvider.notifier).deleteAccount();
-
-                  if (context.mounted) {
-                    context.go(RoutePath.login);
-                    ToastHelper.showInfo('계정이 삭제되었습니다.');
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ToastHelper.showError('계정 삭제 실패: ${e.toString()}');
-                  }
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.error,
-                foregroundColor: AppColors.onPrimary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text('삭제', style: AppTextStyle.bodyLarge),
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
             ),
-          ],
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 경고 아이콘
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.warning_rounded,
+                    color: AppColors.error,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // 제목
+                Text(
+                  '정말 탈퇴하시겠어요?',
+                  style: AppTextStyle.titleLarge.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // 경고 박스
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.error.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '삭제되는 정보',
+                        style: AppTextStyle.bodySmall.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.error,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildDeleteInfoRow(Icons.person_outline, '모든 개인 정보'),
+                      const SizedBox(height: 4),
+                      _buildDeleteInfoRow(Icons.folder_outlined, '저장된 데이터'),
+                      const SizedBox(height: 4),
+                      _buildDeleteInfoRow(Icons.history, '앱 사용 기록'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // 경고 메시지
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 14,
+                      color: AppColors.textTertiary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '이 작업은 되돌릴 수 없어요',
+                      style: AppTextStyle.bodySmall.copyWith(
+                        color: AppColors.textTertiary,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                // 버튼 영역
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.of(dialogContext).pop(),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              color: AppColors.textSubtle.withValues(alpha: 0.5),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            '취소',
+                            style: AppTextStyle.bodyMedium.copyWith(
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            Navigator.of(dialogContext).pop();
+
+                            try {
+                              await ref.read(authProvider.notifier).deleteAccount();
+
+                              if (context.mounted) {
+                                context.go(RoutePath.login);
+                                ToastHelper.showInfo('계정이 삭제되었습니다.');
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ToastHelper.showError('계정 삭제 실패: ${e.toString()}');
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.error,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            '탈퇴하기',
+                            style: AppTextStyle.bodyMedium.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         );
       },
+    ).then((_) {
+      CharacterNotificationHelper.hide();
+    });
+  }
+
+  /// 삭제 정보 행 위젯
+  Widget _buildDeleteInfoRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: AppColors.textSecondary),
+        const SizedBox(width: 8),
+        Text(
+          text,
+          style: AppTextStyle.bodySmall.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 버전 정보 다이얼로그
+  void _showVersionInfoDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 앱 로고
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.primaryGradient,
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.eco,
+                    size: 40,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // 앱 이름
+                Text(
+                  'ZeroRo',
+                  style: AppTextStyle.titleLarge.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                // 버전
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    'v1.0.0-beta',
+                    style: AppTextStyle.bodySmall.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // 앱 설명
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        '지속가능한 라이프스타일을 위한 앱',
+                        style: AppTextStyle.bodySmall.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      _buildInfoItem(Icons.people_outline, '개발', 'ZeroRo Team'),
+                      const SizedBox(height: 8),
+                      _buildInfoItem(Icons.calendar_today_outlined, '출시', '2025년'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // 버튼 영역
+                Row(
+                  children: [
+                    // 자세한 정보 버튼
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.of(dialogContext).pop();
+                            showLicensePage(
+                              context: context,
+                              applicationName: 'ZeroRo',
+                              applicationVersion: 'v1.0.0-beta',
+                              applicationIcon: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    gradient: AppColors.primaryGradient,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.eco,
+                                    size: 28,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              color: AppColors.textSubtle.withValues(alpha: 0.5),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            '자세히',
+                            style: AppTextStyle.bodyMedium.copyWith(
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // 확인 버튼
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.of(dialogContext).pop(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            '확인',
+                            style: AppTextStyle.bodyMedium.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// 정보 아이템 위젯
+  Widget _buildInfoItem(IconData icon, String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, size: 16, color: AppColors.textTertiary),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: AppTextStyle.bodySmall.copyWith(
+            color: AppColors.textTertiary,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          value,
+          style: AppTextStyle.bodySmall.copyWith(
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
     );
   }
 
@@ -384,23 +781,7 @@ class SettingsScreen extends ConsumerWidget {
                   subtitle: 'ZeroRo v1.0.0-beta',
                   icon: Icons.info_outline_rounded,
                   iconColor: AppColors.textSecondary,
-                  onTap: () {
-                    showAboutDialog(
-                      context: context,
-                      applicationName: 'ZeroRo',
-                      applicationVersion: 'v1.0.0-beta',
-                      applicationIcon: const Icon(
-                        Icons.eco,
-                        size: 48,
-                        color: AppColors.primary,
-                      ),
-                      children: const [
-                        Text(
-                          '제로로는 지속가능한 라이프스타일을 위한 앱입니다.\n\n개발자: ZeroRo Team\n출시일: 2025년',
-                        ),
-                      ],
-                    );
-                  },
+                  onTap: () => _showVersionInfoDialog(context),
                 ),
                 const SizedBox(height: 12),
                 SettingsActionTile(
@@ -410,7 +791,7 @@ class SettingsScreen extends ConsumerWidget {
                   iconColor: AppColors.primary,
                   onTap: () {
                     ToastHelper.showInfo(
-                      '홈 화면 - 사진 인증 - 카테고리 - 건의하기에서 피드백 기능을 사용할 수 있어요!',
+                      '피드백 페이지를 준비 중입니다. 잠시만 기다려 주세요!',
                     );
                   },
                 ),

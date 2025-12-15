@@ -8,10 +8,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     required this.title,
     this.backgroundColor = AppColors.background,
+    this.additionalActions,
   });
 
   final String title;
   final Color backgroundColor;
+  final List<Widget>? additionalActions;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +31,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       scrolledUnderElevation: 0,
       surfaceTintColor: Colors.transparent,
       actions: [
+        if (additionalActions != null) ...additionalActions!,
         IconButton(
           onPressed: () {
             context.push('/settings');

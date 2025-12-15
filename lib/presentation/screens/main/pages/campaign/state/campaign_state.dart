@@ -1,10 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/di/injection.dart';
 import '../../../../../../domain/model/campaign/campaign.dart';
+import '../../../../../../domain/model/campaign/campaign_source.dart';
 import '../../../../../../domain/repository/campaign_repository.dart';
 import '../../../../../../domain/repository/mission_repository.dart';
 import '../../../../entry/state/auth_controller.dart';
-import '../../activity/state/activity_state.dart';
+import '../../plogging_map/state/leaderboard_state.dart';
 import '../models/campaign_data.dart';
 
 /// 캠페인 필터 상태
@@ -112,7 +113,27 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
   Future<List<CampaignData>> build() async {
     _repository = getIt<CampaignRepository>();
     _missionRepository = getIt<MissionRepository>();
+
+    // 사용자가 참여 중인 캠페인 ID 목록 초기화
+    await _loadParticipatingCampaignIds();
+
     return _loadCampaigns(resetOffset: true);
+  }
+
+  /// 사용자가 참여 중인 캠페인 ID 목록 로드
+  Future<void> _loadParticipatingCampaignIds() async {
+    final userId = ref.read(authProvider).currentUser?.id;
+    if (userId == null) return;
+
+    try {
+      final missionLogs = await _missionRepository.getUserMissionLogs(userId);
+      _participatingCampaignIds.clear();
+      for (final mission in missionLogs) {
+        _participatingCampaignIds.add(mission.campaign.id);
+      }
+    } catch (e) {
+      // 실패해도 캠페인 목록 로드는 계속 진행
+    }
   }
 
   /// 캠페인 목록 로드
@@ -180,14 +201,14 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
 
   /// Campaign을 CampaignData로 변환
   CampaignData _campaignToCampaignData(Campaign campaign) {
-    // 임의로 일부 캠페인에 자동 처리 가능 설정 (ID 기반)
-    final campaignId = campaign.id;
-    final isAutoProcessable = campaignId % 3 == 0; // ID가 3의 배수인 경우 자동 처리 가능
+    // ZERORO 캠페인만 자동 처리 가능
+    final isAutoProcessable = campaign.campaignSource == CampaignSource.zeroro;
 
     return CampaignData(
       id: campaign.id.toString(),
       title: campaign.title,
       imageUrl: campaign.imageUrl ?? '',
+      description: campaign.description ?? '',
       url: campaign.campaignUrl,
       startDate: DateTime.tryParse(campaign.startDate ?? '') ?? DateTime.now(),
       endDate:
@@ -200,6 +221,7 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
       category: campaign.category ?? '기타',
       isParticipating: _participatingCampaignIds.contains(campaign.id),
       isAutoProcessable: isAutoProcessable,
+      campaignSource: campaign.campaignSource,
     );
   }
 
@@ -207,6 +229,8 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
   Future<void> refresh() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
+      // 참여 상태도 새로고침
+      await _loadParticipatingCampaignIds();
       return _loadCampaigns(resetOffset: true);
     });
   }
@@ -257,8 +281,16 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
 
     // 실제 API 호출
     try {
-      // 참가만 API 호출 (참가 취소는 추후 구현)
-      if (!wasParticipating) {
+      if (wasParticipating) {
+        // 참가 취소 API 호출
+        await _missionRepository.cancelCampaignParticipation(
+          campaignId: id,
+          userId: userId,
+        );
+        // 활동하기 페이지 데이터 리프레쉬 트리거
+        ref.read(activityRefreshTriggerProvider.notifier).trigger();
+      } else {
+        // 참가 API 호출
         await _missionRepository.participateInCampaign(
           campaignId: id,
           userId: userId,
@@ -288,3 +320,19 @@ final campaignListProvider =
     AsyncNotifierProvider<CampaignListNotifier, List<CampaignData>>(
       CampaignListNotifier.new,
     );
+
+/// ZERORO 캠페인만 필터링하는 Provider
+final zeroroCampaignListProvider = Provider<AsyncValue<List<CampaignData>>>((ref) {
+  final campaignsAsync = ref.watch(campaignListProvider);
+  return campaignsAsync.whenData(
+    (campaigns) => campaigns.where((c) => c.isZeroro).toList(),
+  );
+});
+
+/// External 캠페인만 필터링하는 Provider
+final externalCampaignListProvider = Provider<AsyncValue<List<CampaignData>>>((ref) {
+  final campaignsAsync = ref.watch(campaignListProvider);
+  return campaignsAsync.whenData(
+    (campaigns) => campaigns.where((c) => c.isExternal).toList(),
+  );
+});

@@ -1,3 +1,5 @@
+import '../../../../../../../domain/model/campaign/campaign_source.dart';
+
 /// Campaign Presentation Model
 /// Presentation Layer에서 사용하는 캠페인 데이터 클래스
 class CampaignData {
@@ -9,14 +11,17 @@ class CampaignData {
   final DateTime endDate;
   final String region; // 지역(도)
   final String city; // 시
+  final String description; // 캠페인 설명
   final String category; // 카테고리
   final bool isParticipating; // 참가 여부
   final bool isAutoProcessable; // 자동 처리 가능 여부
+  final CampaignSource campaignSource; // 캠페인 출처 (ZERORO/EXTERNAL)
 
   const CampaignData({
     required this.id,
     required this.title,
     required this.imageUrl,
+    this.description = '캠페인 설명이 없습니다.',
     required this.url,
     required this.startDate,
     required this.endDate,
@@ -25,6 +30,7 @@ class CampaignData {
     required this.category,
     this.isParticipating = false,
     this.isAutoProcessable = false,
+    this.campaignSource = CampaignSource.external,
   });
 
   /// 캠페인 기간 문자열 반환 (예: "2025.01.15 - 2025.02.15")
@@ -49,10 +55,17 @@ class CampaignData {
     return isOngoing && daysUntilEnd <= 7;
   }
 
+  /// ZERORO 캠페인 여부
+  bool get isZeroro => campaignSource == CampaignSource.zeroro;
+
+  /// 외부 캠페인 여부
+  bool get isExternal => campaignSource == CampaignSource.external;
+
   CampaignData copyWith({
     String? id,
     String? title,
     String? imageUrl,
+    String? description,
     String? url,
     DateTime? startDate,
     DateTime? endDate,
@@ -61,11 +74,13 @@ class CampaignData {
     String? category,
     bool? isParticipating,
     bool? isAutoProcessable,
+    CampaignSource? campaignSource,
   }) {
     return CampaignData(
       id: id ?? this.id,
       title: title ?? this.title,
       imageUrl: imageUrl ?? this.imageUrl,
+      description: description ?? this.description,
       url: url ?? this.url,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
@@ -74,6 +89,7 @@ class CampaignData {
       category: category ?? this.category,
       isParticipating: isParticipating ?? this.isParticipating,
       isAutoProcessable: isAutoProcessable ?? this.isAutoProcessable,
+      campaignSource: campaignSource ?? this.campaignSource,
     );
   }
 }
@@ -110,13 +126,4 @@ const citiesByRegion = {
 };
 
 /// 카테고리 목록
-const categories = [
-  '전체',
-  '재활용',
-  '대중교통',
-  '에너지절약',
-  '제로웨이스트',
-  '자연보호',
-  '교육',
-  '기타',
-];
+const categories = ['전체', '재활용', '대중교통', '에너지절약', '제로웨이스트', '자연보호', '교육', '기타'];
