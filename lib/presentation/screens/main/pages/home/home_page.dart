@@ -95,9 +95,9 @@ class _HomePageState extends ConsumerState<HomePage> {
   /// 선택된 캐릭터에 따른 3D 모델 경로 반환
   String _getModelPath(String selectedCharacter) {
     switch (selectedCharacter) {
-      case 'earth':
+      case 'earth_zeroro':
         return 'assets/zeroro/planet_zeroro_2.glb';
-      case 'cloud':
+      case 'dust_zeroro':
         return 'assets/zeroro/co2_zeroro_2.glb';
       default:
         return 'assets/zeroro/planet_zeroro_2.glb'; // 기본값: 지구 제로로
