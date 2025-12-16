@@ -211,4 +211,15 @@ class RecruitingRepositoryImpl implements RecruitingRepository {
       targetUserId: targetUserId,
     );
   }
+
+  @override
+  Future<void> leaveRecruiting({
+    required int postId,
+    required String userId,
+  }) async {
+    await _recruitingApi.leaveRecruiting(
+      postId: postId,
+      userId: userId,
+    );
+  }
 }

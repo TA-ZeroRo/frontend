@@ -16,4 +16,6 @@ class RoutePath {
   static const String verifyQuiz = '/verify-quiz';
 
   static const String settings = '/settings';
+
+  static const String feedback = '/feedback';
 }

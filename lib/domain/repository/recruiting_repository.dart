@@ -91,6 +91,12 @@ abstract class RecruitingRepository {
     required String hostUserId,
     required String targetUserId,
   });
+
+  /// 리크루팅 나가기
+  Future<void> leaveRecruiting({
+    required int postId,
+    required String userId,
+  });
 }
 
 /// 채팅방 참여자 모델

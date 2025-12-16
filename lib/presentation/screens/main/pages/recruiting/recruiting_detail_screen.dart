@@ -84,6 +84,9 @@ class _RecruitingDetailScreenState
                     _refreshPost();
                     ref.invalidate(recruitingListProvider);
                   },
+                  onLeaveSuccess: () {
+                    ref.invalidate(recruitingListProvider);
+                  },
                 ),
                 RecruitingChatTab(post: _currentPost),
                 RecruitingMembersTab(
@@ -168,7 +171,7 @@ class _RecruitingDetailScreenState
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w200,
                     ),
                   ),
                 ),
@@ -179,7 +182,7 @@ class _RecruitingDetailScreenState
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w200,
                     shadows: [
                       Shadow(
                         offset: Offset(0, 1),

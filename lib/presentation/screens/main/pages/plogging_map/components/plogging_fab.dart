@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../core/theme/app_color.dart';
+import '../../../../../../core/utils/character_notification_helper.dart';
 import '../state/plogging_session_state.dart';
 
 class PloggingFab extends ConsumerWidget {
@@ -35,37 +36,70 @@ class PloggingFab extends ConsumerWidget {
       // 종료 확인 다이얼로그
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('플로깅 종료'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('경과 시간: ${state.elapsedMinutes}분'),
-              Text('이동 거리: ${(state.totalDistanceMeters / 1000).toStringAsFixed(2)}km'),
-              Text('인증 횟수: ${state.verifications.length}회'),
-              const SizedBox(height: 8),
-              const Text('플로깅을 종료하시겠습니까?'),
+        builder: (dialogContext) {
+          // 다이얼로그가 빌드된 후 캐릭터 알림 표시
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (dialogContext.mounted) {
+              CharacterNotificationHelper.show(
+                dialogContext,
+                message: '벌써 끝내려고요..?',
+                characterImage: 'assets/images/cloud_zeroro_sad.png',
+                duration: const Duration(minutes: 5),
+                alignment: const Alignment(0, -0.45),
+              );
+            }
+          });
+
+          return AlertDialog(
+            title: const Text('플로깅 종료'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('경과 시간: ${state.elapsedMinutes}분'),
+                Text('이동 거리: ${(state.totalDistanceMeters / 1000).toStringAsFixed(2)}km'),
+                Text('인증 횟수: ${state.verifications.length}회'),
+                const SizedBox(height: 8),
+                const Text('플로깅을 종료하시겠습니까?'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('취소'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                  notifier.endSession();
+                  // 플로깅 완료 알림
+                  CharacterNotificationHelper.show(
+                    context,
+                    message: '수고했어요!\n오늘도 지구를 지켰어요~',
+                    characterImage: 'assets/images/earth_zeroro_magic.png',
+                    alignment: const Alignment(0.85, -0.4),
+                  );
+                },
+                child: const Text('종료'),
+              ),
             ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('취소'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                notifier.endSession();
-              },
-              child: const Text('종료'),
-            ),
-          ],
-        ),
-      );
+          );
+        },
+      ).then((_) {
+        CharacterNotificationHelper.hide();
+      });
     } else {
       // 시작
       notifier.startSession();
+      // 플로깅 시작 알림 (타임 카드와 동시에 표시되도록 프레임 렌더링 후 표시)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        CharacterNotificationHelper.show(
+          context,
+          message: '플로깅 시작! 화이팅~',
+          characterImage: 'assets/images/earth_zeroro_smile.png',
+          alignment: const Alignment(0.85, 0.15),
+        );
+      });
     }
   }
 }

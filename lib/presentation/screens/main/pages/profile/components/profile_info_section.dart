@@ -8,6 +8,7 @@ import '../../../../../../core/constants/regions.dart';
 import '../../../../../../core/di/injection.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/theme/app_text_style.dart';
+import '../../../../../../core/utils/character_notification_helper.dart';
 import '../../../../../../core/utils/toast_helper.dart';
 import '../../../../../../data/data_source/storage_service.dart';
 import '../../../../entry/state/auth_controller.dart';
@@ -565,7 +566,13 @@ class _ProfileInfoSectionState extends ConsumerState<ProfileInfoSection> {
           _removeImage = false;
         });
         widget.onEditModeChanged?.call();
-        ToastHelper.showSuccess('프로필이 수정되었습니다');
+        // 프로필 수정 성공 캐릭터 알림
+        CharacterNotificationHelper.show(
+          context,
+          message: '프로필이 업데이트됐어요!',
+          characterImage: 'assets/images/earth_zeroro_smile.png',
+          alignment: const Alignment(0.85, -0.4),
+        );
       }
     } catch (e) {
       if (mounted) {

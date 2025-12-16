@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../../../core/theme/app_color.dart';
+import '../../../../../../core/utils/character_notification_helper.dart';
 import '../../../../../../domain/model/plogging/photo_verification.dart';
 import '../state/plogging_session_state.dart';
 
@@ -306,54 +307,81 @@ class _PhotoVerificationSheetState
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isVerified ? Icons.check_circle : Icons.cancel,
-              color: isVerified ? Colors.green : Colors.red,
-              size: 64,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              isVerified ? '인증 성공!' : '인증 실패',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+      builder: (dialogContext) {
+        // 다이얼로그가 빌드된 후 캐릭터 알림 표시
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (dialogContext.mounted) {
+            if (isVerified) {
+              CharacterNotificationHelper.show(
+                dialogContext,
+                message: '멋져요! 인증 완료~',
+                characterImage: 'assets/images/earth_zeroro_sunglasses.png',
+                duration: const Duration(minutes: 5),
+                alignment: const Alignment(0, -0.45),
+              );
+            } else {
+              CharacterNotificationHelper.show(
+                dialogContext,
+                message: '앗, 다시 시도해볼까요?',
+                characterImage: 'assets/images/cloud_zeroro_sad.png',
+                duration: const Duration(minutes: 5),
+                alignment: const Alignment(0, -0.45),
+              );
+            }
+          }
+        });
+
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isVerified ? Icons.check_circle : Icons.cancel,
+                color: isVerified ? Colors.green : Colors.red,
+                size: 64,
               ),
-            ),
-            const SizedBox(height: 8),
-            if (isVerified)
+              const SizedBox(height: 16),
               Text(
-                '+${result.pointsEarned}P 획득!',
+                isVerified ? '인증 성공!' : '인증 실패',
                 style: const TextStyle(
-                  fontSize: 16,
-                  color: AppColors.primary,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
-              )
-            else if (result.aiResult != null)
-              Text(
-                result.aiResult!.reason,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                ),
               ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('확인'),
+              const SizedBox(height: 8),
+              if (isVerified)
+                Text(
+                  '+${result.pointsEarned}P 획득!',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              else if (result.aiResult != null)
+                Text(
+                  result.aiResult!.reason,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                  ),
+                ),
+            ],
           ),
-        ],
-      ),
-    );
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('확인'),
+            ),
+          ],
+        );
+      },
+    ).then((_) {
+      CharacterNotificationHelper.hide();
+    });
   }
 }
 
