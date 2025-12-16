@@ -8,6 +8,7 @@ import '../../../core/di/injection.dart';
 import '../../../core/theme/app_color.dart';
 import '../../../core/theme/app_text_style.dart';
 import '../../../core/constants/regions.dart';
+import '../../../core/utils/character_notification_helper.dart';
 import '../../../core/utils/toast_helper.dart';
 import '../../../data/data_source/storage_service.dart';
 import '../../routes/router_path.dart';
@@ -58,6 +59,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       // 회원가입 성공 시 메인 화면으로 이동
       if (context.mounted) {
         context.go(RoutePath.main);
+        // 회원가입 완료 캐릭터 알림
+        CharacterNotificationHelper.show(
+          context,
+          message: '환영해요!\n함께 지구를 지켜요~',
+          characterImage: 'assets/images/earth_zeroro_magic.png',
+          alignment: const Alignment(0.85, -0.4),
+        );
       }
     } catch (e) {
       if (!context.mounted) return;
