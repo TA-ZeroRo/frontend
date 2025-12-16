@@ -47,21 +47,9 @@ class _InitialPhotoSheetState extends ConsumerState<InitialPhotoSheet> {
           // 제목
           const Text(
             '플로깅 준비 사진',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          Text(
-            '본인과 쓰레기를 담을 봉투/바구니가\n함께 나오도록 촬영해주세요',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 24),
-
           // 이미지 선택 영역
           GestureDetector(
             onTap: _selectImage,
@@ -71,10 +59,7 @@ class _InitialPhotoSheetState extends ConsumerState<InitialPhotoSheet> {
               decoration: BoxDecoration(
                 color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Colors.grey[300]!,
-                  width: 2,
-                ),
+                border: Border.all(color: Colors.grey[300]!, width: 2),
               ),
               child: _selectedImage != null
                   ? ClipRRect(
@@ -119,14 +104,14 @@ class _InitialPhotoSheetState extends ConsumerState<InitialPhotoSheet> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.info_outline, size: 18, color: Colors.grey[700]),
+                    Icon(Icons.info_outline, size: 18, color: Colors.redAccent),
                     const SizedBox(width: 8),
                     Text(
-                      '이런 사진을 찍어주세요',
+                      '반드시 나와야 하는 요소',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
+                        color: Colors.redAccent,
                       ),
                     ),
                   ],
@@ -134,14 +119,14 @@ class _InitialPhotoSheetState extends ConsumerState<InitialPhotoSheet> {
                 const SizedBox(height: 12),
                 _buildGuideItem(
                   icon: Icons.person,
-                  title: '본인이 나오게',
-                  example: '얼굴 또는 상반신',
+                  title: '본인',
+                  example: '얼굴 또는 전신',
                 ),
                 const SizedBox(height: 8),
                 _buildGuideItem(
                   icon: Icons.shopping_bag_outlined,
-                  title: '빈 봉투/바구니',
-                  example: '쓰레기를 담을 용기',
+                  title: '빈 봉투/바구니 등',
+                  example: '쓰레기를 담을 도구',
                 ),
               ],
             ),
@@ -152,8 +137,9 @@ class _InitialPhotoSheetState extends ConsumerState<InitialPhotoSheet> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed:
-                  _selectedImage != null && !_isSubmitting ? _submitAndStart : null,
+              onPressed: _selectedImage != null && !_isSubmitting
+                  ? _submitAndStart
+                  : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -215,10 +201,7 @@ class _InitialPhotoSheetState extends ConsumerState<InitialPhotoSheet> {
               ),
               Text(
                 example,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[500],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
               ),
             ],
           ),
@@ -284,14 +267,17 @@ class _InitialPhotoSheetState extends ConsumerState<InitialPhotoSheet> {
           'plogging_initial_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final imageBytes = await File(_selectedImage!.path).readAsBytes();
 
-      await supabase.storage.from('zeroro-post-bucket').uploadBinary(
+      await supabase.storage
+          .from('zeroro-post-bucket')
+          .uploadBinary(
             fileName,
             imageBytes,
             fileOptions: const FileOptions(contentType: 'image/jpeg'),
           );
 
-      final imageUrl =
-          supabase.storage.from('zeroro-post-bucket').getPublicUrl(fileName);
+      final imageUrl = supabase.storage
+          .from('zeroro-post-bucket')
+          .getPublicUrl(fileName);
 
       // 2. 세션 시작 (초기 사진 URL 포함)
       await ref
@@ -305,9 +291,9 @@ class _InitialPhotoSheetState extends ConsumerState<InitialPhotoSheet> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('플로깅 시작 실패: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('플로깅 시작 실패: $e')));
       }
     } finally {
       if (mounted) {
@@ -320,7 +306,10 @@ class _InitialPhotoSheetState extends ConsumerState<InitialPhotoSheet> {
 }
 
 /// 초기 사진 촬영 시트 표시 함수
-void showInitialPhotoSheet(BuildContext context, {required VoidCallback onPhotoSubmitted}) {
+void showInitialPhotoSheet(
+  BuildContext context, {
+  required VoidCallback onPhotoSubmitted,
+}) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,

@@ -104,11 +104,13 @@ class _PloggingSessionInfoState extends ConsumerState<PloggingSessionInfo> {
         // 정보 행 (거리, 인증, 포인트)
         _buildStatsRow(sessionState),
 
-        // 다음 인증까지 남은 시간
-        if (sessionState.nextVerificationTime != null) ...[
+        // 다음 인증까지 남은 시간 (플로깅 타임 기준)
+        ...[
           const SizedBox(height: 20),
           _NextVerificationIndicator(
-            nextTime: sessionState.nextVerificationTime!,
+            remainingSeconds: (sessionState.nextVerificationAtSeconds -
+                    sessionState.elapsedDuration.inSeconds)
+                .clamp(0, 999),
             canVerify: sessionState.canVerify,
             onPressed: widget.onVerificationPressed,
           ),
@@ -351,12 +353,12 @@ class _InfoItem extends StatelessWidget {
 }
 
 class _NextVerificationIndicator extends StatelessWidget {
-  final DateTime nextTime;
+  final int remainingSeconds; // 남은 플로깅 타임 (초)
   final bool canVerify;
   final VoidCallback? onPressed;
 
   const _NextVerificationIndicator({
-    required this.nextTime,
+    required this.remainingSeconds,
     required this.canVerify,
     this.onPressed,
   });
@@ -404,9 +406,9 @@ class _NextVerificationIndicator extends StatelessWidget {
       );
     }
 
-    final remaining = nextTime.difference(DateTime.now());
-    final minutes = remaining.inMinutes;
-    final seconds = remaining.inSeconds % 60;
+    // 이미 계산된 remainingSeconds 사용 (플로깅 타임 기준)
+    final minutes = remainingSeconds ~/ 60;
+    final seconds = remainingSeconds % 60;
 
     return Container(
       width: double.infinity,

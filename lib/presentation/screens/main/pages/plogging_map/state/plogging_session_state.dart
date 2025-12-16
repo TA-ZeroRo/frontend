@@ -20,7 +20,7 @@ class PloggingSessionState {
   final List<GpsPoint> routePoints;
   final List<PhotoVerificationResponse> verifications;
   final bool isTracking;
-  final DateTime? nextVerificationTime;
+  final int nextVerificationAtSeconds; // 다음 인증 가능한 플로깅 타임 (초)
   final Position? currentPosition;
   final String? errorMessage;
   final double totalDistanceMeters; // 누적 거리 (O(1) 접근)
@@ -28,13 +28,14 @@ class PloggingSessionState {
   final Duration pausedDuration; // 누적 일시정지 시간
   final Duration elapsedDuration; // 계산된 경과 시간 (타이머에서 업데이트)
   final String? initialPhotoUrl; // 초기 사진 URL
+  final bool isEndingSession; // 종료 요청 진행 중 (이중 요청 방지)
 
   const PloggingSessionState({
     this.currentSession,
     this.routePoints = const [],
     this.verifications = const [],
     this.isTracking = false,
-    this.nextVerificationTime,
+    this.nextVerificationAtSeconds = 15, // 첫 인증은 15초 후
     this.currentPosition,
     this.errorMessage,
     this.totalDistanceMeters = 0,
@@ -42,6 +43,7 @@ class PloggingSessionState {
     this.pausedDuration = Duration.zero,
     this.elapsedDuration = Duration.zero,
     this.initialPhotoUrl,
+    this.isEndingSession = false,
   });
 
   /// 현재 일시정지 상태인지 (인증 대기 중)
@@ -57,10 +59,10 @@ class PloggingSessionState {
     return DateTime.now().difference(currentSession!.startedAt).inMinutes;
   }
 
-  /// 인증 가능 여부 (15초마다)
+  /// 인증 가능 여부 (플로깅 타임 기준 15초마다)
   bool get canVerify {
-    if (nextVerificationTime == null) return true;
-    return DateTime.now().isAfter(nextVerificationTime!);
+    final currentSeconds = elapsedDuration.inSeconds;
+    return currentSeconds >= nextVerificationAtSeconds;
   }
 
   PloggingSessionState copyWith({
@@ -68,7 +70,7 @@ class PloggingSessionState {
     List<GpsPoint>? routePoints,
     List<PhotoVerificationResponse>? verifications,
     bool? isTracking,
-    DateTime? nextVerificationTime,
+    int? nextVerificationAtSeconds,
     Position? currentPosition,
     String? errorMessage,
     double? totalDistanceMeters,
@@ -76,6 +78,7 @@ class PloggingSessionState {
     Duration? pausedDuration,
     Duration? elapsedDuration,
     String? initialPhotoUrl,
+    bool? isEndingSession,
     bool clearSession = false,
     bool clearError = false,
     bool clearPausedAt = false,
@@ -86,7 +89,7 @@ class PloggingSessionState {
       routePoints: routePoints ?? this.routePoints,
       verifications: verifications ?? this.verifications,
       isTracking: isTracking ?? this.isTracking,
-      nextVerificationTime: nextVerificationTime ?? this.nextVerificationTime,
+      nextVerificationAtSeconds: nextVerificationAtSeconds ?? this.nextVerificationAtSeconds,
       currentPosition: currentPosition ?? this.currentPosition,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       totalDistanceMeters: totalDistanceMeters ?? this.totalDistanceMeters,
@@ -94,6 +97,7 @@ class PloggingSessionState {
       pausedDuration: pausedDuration ?? this.pausedDuration,
       elapsedDuration: elapsedDuration ?? this.elapsedDuration,
       initialPhotoUrl: clearInitialPhoto ? null : (initialPhotoUrl ?? this.initialPhotoUrl),
+      isEndingSession: isEndingSession ?? this.isEndingSession,
     );
   }
 }
@@ -104,7 +108,6 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
   late final PloggingNotificationService _notificationService;
   StreamSubscription<Position>? _positionSubscription;
   Timer? _sessionTimer; // 통합 타이머 (알림 + 인증 체크)
-  int _sessionTickCount = 0;
   bool _lastCanVerify = false; // 인증 상태 변경 감지용
   String? _lastNotificationBody; // 알림 중복 업데이트 방지
 
@@ -183,9 +186,7 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
         isTracking: true,
         totalDistanceMeters: 0,
         initialPhotoUrl: initialPhotoUrl,
-        nextVerificationTime: DateTime.now().add(
-          const Duration(seconds: verificationIntervalSeconds),
-        ),
+        nextVerificationAtSeconds: verificationIntervalSeconds, // 15초
       );
 
       // GPS 트래킹 시작 (비동기, 논블로킹)
@@ -204,6 +205,9 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
   /// 플로깅 세션 종료
   Future<void> endSession() async {
     if (state.currentSession == null) return;
+    if (state.isEndingSession) return; // 이중 요청 방지
+
+    state = state.copyWith(isEndingSession: true);
 
     try {
       await _repository.endSession(
@@ -217,13 +221,16 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
       // 알림 종료
       await _notificationService.stopNotification();
 
-      // 모든 상태 초기화
+      // 모든 상태 초기화 (isEndingSession도 false로 리셋됨)
       state = const PloggingSessionState();
 
       // 지도 데이터 리프레시 트리거
       ref.read(ploggingMapRefreshTriggerProvider.notifier).trigger();
     } catch (e) {
-      state = state.copyWith(errorMessage: '세션 종료 실패: $e');
+      state = state.copyWith(
+        errorMessage: '세션 종료 실패: $e',
+        isEndingSession: false, // 에러 시 플래그 해제
+      );
     }
   }
 
@@ -284,29 +291,23 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
     _positionSubscription = null;
     _sessionTimer?.cancel();
     _sessionTimer = null;
-    _sessionTickCount = 0;
   }
 
   /// 통합 세션 타이머 시작 (알림 업데이트 + 인증 상태 체크 + 경과 시간)
   void _startSessionTimer() {
-    _sessionTickCount = 0;
     _lastCanVerify = state.canVerify;
 
     _sessionTimer = Timer.periodic(
       const Duration(seconds: 1),
       (_) {
-        _sessionTickCount++;
-
         // 경과 시간 업데이트 (매초) - UI 리빌드 트리거
         _updateElapsedTime();
 
         // 알림 업데이트 (매초)
         _updateNotification();
 
-        // 인증 상태 체크 (인증 인터벌에 맞춰 15초마다)
-        if (_sessionTickCount % verificationIntervalSeconds == 0) {
-          _checkVerificationStatus();
-        }
+        // 인증 상태 체크 (매초 - 플로깅 타임 기준)
+        _checkVerificationStatus();
       },
     );
   }
@@ -340,6 +341,9 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
       if (canVerifyNow && state.pausedAt == null) {
         // 인증 가능해짐 → 일시정지 시작
         state = state.copyWith(pausedAt: DateTime.now());
+
+        // 진동 + 소리 알림
+        _notificationService.showVerificationAlert();
       } else {
         // 인증 상태가 변경되었을 때만 상태 업데이트
         state = state.copyWith();
@@ -366,8 +370,8 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
   Future<void> _updateNotification() async {
     if (state.currentSession == null) return;
 
-    // UTC로 통일하여 시간대 차이 방지
-    final elapsed = DateTime.now().toUtc().difference(state.currentSession!.startedAt.toUtc());
+    // 단일 소스 사용: state.elapsedDuration (이미 일시정지 제외됨)
+    final elapsed = state.elapsedDuration;
     final hours = elapsed.inHours;
     final minutes = elapsed.inMinutes % 60;
     final seconds = elapsed.inSeconds % 60;
@@ -434,11 +438,11 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
         additionalPausedDuration = DateTime.now().difference(state.pausedAt!);
       }
 
+      // 현재 플로깅 타임 + 15초 = 다음 인증 시점
+      final currentPloggingSeconds = state.elapsedDuration.inSeconds;
       state = state.copyWith(
         verifications: [...state.verifications, result],
-        nextVerificationTime: DateTime.now().add(
-          const Duration(seconds: verificationIntervalSeconds),
-        ),
+        nextVerificationAtSeconds: currentPloggingSeconds + verificationIntervalSeconds,
         clearPausedAt: true, // 일시정지 해제
         pausedDuration: state.pausedDuration + additionalPausedDuration,
       );

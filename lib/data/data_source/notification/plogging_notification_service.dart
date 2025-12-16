@@ -15,10 +15,17 @@ typedef NotificationActionCallback = void Function(PloggingNotificationAction ac
 
 /// 플로깅 Foreground Notification 서비스
 class PloggingNotificationService {
+  // Foreground 알림 (ongoing)
   static const int _notificationId = 1001;
   static const String _channelId = 'plogging_channel';
   static const String _channelName = '플로깅';
   static const String _channelDescription = '플로깅 진행 상태를 표시합니다';
+
+  // 인증 알림 (진동 + 소리)
+  static const int _alertNotificationId = 1002;
+  static const String _alertChannelId = 'plogging_alert_channel_v2';
+  static const String _alertChannelName = '플로깅 인증 알림';
+  static const String _alertChannelDescription = '사진 인증이 가능할 때 알려드립니다';
 
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
@@ -52,6 +59,7 @@ class PloggingNotificationService {
     // Android 알림 채널 생성
     if (Platform.isAndroid) {
       await _createAndroidChannel();
+      await _createAlertChannel();
     }
 
     _isInitialized = true;
@@ -66,6 +74,23 @@ class PloggingNotificationService {
       importance: Importance.defaultImportance,
       playSound: false,
       enableVibration: false,
+    );
+
+    await _notifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+  }
+
+  /// Android 인증 알림 채널 생성 (진동 + 소리)
+  Future<void> _createAlertChannel() async {
+    const channel = AndroidNotificationChannel(
+      _alertChannelId,
+      _alertChannelName,
+      description: _alertChannelDescription,
+      importance: Importance.high,
+      playSound: true,
+      enableVibration: true,
     );
 
     await _notifications
@@ -178,6 +203,40 @@ class PloggingNotificationService {
   /// 알림 종료
   Future<void> stopNotification() async {
     await _notifications.cancel(_notificationId);
+    await _notifications.cancel(_alertNotificationId);
+  }
+
+  /// 인증 가능 알림 (진동 + 소리)
+  Future<void> showVerificationAlert() async {
+    final androidDetails = AndroidNotificationDetails(
+      _alertChannelId,
+      _alertChannelName,
+      channelDescription: _alertChannelDescription,
+      importance: Importance.high,
+      priority: Priority.high,
+      playSound: true,
+      enableVibration: true,
+      autoCancel: true,
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    final details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    await _notifications.show(
+      _alertNotificationId,
+      '사진 인증 시간!',
+      '플로깅 인증 사진을 찍어주세요',
+      details,
+      payload: 'verify',
+    );
   }
 
   /// 알림 권한 요청 (Android 13+)
