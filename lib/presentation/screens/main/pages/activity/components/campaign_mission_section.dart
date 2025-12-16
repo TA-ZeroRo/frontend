@@ -84,59 +84,34 @@ class CampaignMissionSection extends ConsumerWidget {
   ) {
     // Map을 List로 변환
     final campaigns = campaignMap.entries.toList();
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildSectionHeader(),
-          const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                for (int i = 0; i < campaigns.length; i++) ...[
-                  _buildCampaignCard(
-                    context,
-                    ref,
-                    campaigns[i].value, // List<MissionWithTemplate>
-                  ),
-                  if (i < campaigns.length - 1) const SizedBox(height: 16),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildSectionHeader(),
+        Column(
+          children: [
+            for (int i = 0; i < campaigns.length; i++) ...[
+              _buildCampaignCard(
+                context,
+                ref,
+                campaigns[i].value, // List<MissionWithTemplate>
+              ),
+              if (i < campaigns.length - 1) const SizedBox(height: 16),
+            ],
+          ],
+        ),
+      ],
     );
   }
 
   Widget _buildSectionHeader() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(18),
-          topRight: Radius.circular(18),
-        ),
-      ),
-      child: const Text(
+    return const Padding(
+      padding: EdgeInsets.only(bottom: 12, left: 4),
+      child: Text(
         '캠페인 미션',
         style: TextStyle(
           fontSize: 18,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.bold,
           color: Colors.black87,
         ),
       ),
@@ -144,94 +119,74 @@ class CampaignMissionSection extends ConsumerWidget {
   }
 
   Widget _buildEmptyState() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildSectionHeader(),
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: const Color(0xFFE0E0E0), width: 1.2),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildSectionHeader(),
-          const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-          Padding(
-            padding: const EdgeInsets.all(48),
-            child: Column(
-              children: [
-                Icon(Icons.eco, size: 48, color: Colors.grey[400]),
-                const SizedBox(height: 12),
-                Text(
-                  '참여 중인 캠페인이 없어요',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[700],
-                    fontWeight: FontWeight.w500,
-                  ),
+          child: Column(
+            children: [
+              Icon(Icons.eco, size: 48, color: Colors.grey[400]),
+              const SizedBox(height: 12),
+              Text(
+                '참여 중인 캠페인이 없어요',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[700],
+                  fontWeight: FontWeight.w500,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '새로운 캠페인에 참여해보세요',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '새로운 캠페인에 참여해보세요',
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildErrorState(Object error) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildSectionHeader(),
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: const Color(0xFFE0E0E0), width: 1.2),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildSectionHeader(),
-          const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-          Padding(
-            padding: const EdgeInsets.all(48),
-            child: Column(
-              children: [
-                Icon(Icons.error_outline, size: 48, color: Colors.red[400]),
-                const SizedBox(height: 12),
-                Text(
-                  '데이터를 불러올 수 없습니다',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[700],
-                    fontWeight: FontWeight.w500,
-                  ),
+          child: Column(
+            children: [
+              Icon(Icons.error_outline, size: 48, color: Colors.red[400]),
+              const SizedBox(height: 12),
+              Text(
+                '데이터를 불러올 수 없습니다',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[700],
+                  fontWeight: FontWeight.w500,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '나중에 다시 시도해주세요',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '나중에 다시 시도해주세요',
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

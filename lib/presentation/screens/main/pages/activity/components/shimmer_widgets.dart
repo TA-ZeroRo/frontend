@@ -421,50 +421,31 @@ class CampaignMissionSectionShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 실제 UI와 동일한 구조: 외부 카드 안에 헤더 + 내부 캠페인 카드
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // 섹션 헤더 (카드 안에 위치)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(18),
-                topRight: Radius.circular(18),
-              ),
-            ),
-            child: const Text(
-              '캠페인 미션',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: Colors.black87,
-              ),
+    // 실제 UI와 동일한 구조: 헤더 + 캠페인 카드 리스트 (외부 카드 제거)
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // 섹션 헤더
+        const Padding(
+          padding: EdgeInsets.only(bottom: 12, left: 4),
+          child: Text(
+            '캠페인 미션',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
             ),
           ),
-          const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-          // 내부 캠페인 카드 shimmer
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: _buildCampaignCardShimmer(),
-          ),
-        ],
-      ),
+        ),
+        // 내부 캠페인 카드 shimmer
+        Column(
+          children: [
+            _buildCampaignCardShimmer(),
+            const SizedBox(height: 16),
+            _buildCampaignCardShimmer(),
+          ],
+        ),
+      ],
     );
   }
 

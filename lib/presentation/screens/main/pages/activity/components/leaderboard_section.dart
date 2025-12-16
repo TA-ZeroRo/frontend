@@ -14,47 +14,44 @@ class LeaderboardSection extends ConsumerWidget {
     final rankingAsync = ref.watch(rankingProvider);
     final myRankingAsync = ref.watch(myRankingProvider);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildSectionHeader(context),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xFFE0E0E0), width: 1.2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildSectionHeader(context),
-          const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-          _buildMyRankSection(myRankingAsync),
-          const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-          _buildExpandedContent(rankingAsync),
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildMyRankSection(myRankingAsync),
+              const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+              _buildExpandedContent(rankingAsync),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildSectionHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(18),
-          topRight: Radius.circular(18),
-        ),
-      ),
-      child: const Text(
+    return const Padding(
+      padding: EdgeInsets.only(bottom: 12, left: 4),
+      child: Text(
         '리더보드',
         style: TextStyle(
           fontSize: 18,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.bold,
           color: Colors.black87,
         ),
       ),
