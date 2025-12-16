@@ -7,7 +7,7 @@ import '../../../../../../domain/model/plogging/photo_verification.dart';
 import '../state/plogging_session_state.dart';
 
 /// 플로깅 세션 정보 위젯
-/// - StreamProvider를 사용하여 1초마다 시간 업데이트 (내부 Timer 제거)
+/// - state.elapsedDuration을 사용하여 1초마다 시간 업데이트 (단일 타이머)
 class PloggingSessionInfo extends ConsumerStatefulWidget {
   final VoidCallback? onVerificationPressed;
 
@@ -24,18 +24,13 @@ class _PloggingSessionInfoState extends ConsumerState<PloggingSessionInfo> {
   @override
   Widget build(BuildContext context) {
     final sessionState = ref.watch(ploggingSessionProvider);
-    final elapsedAsync = ref.watch(ploggingElapsedTimeProvider);
 
     if (!sessionState.isSessionActive) {
       return const SizedBox.shrink();
     }
 
-    // StreamProvider에서 경과 시간 가져오기
-    final elapsed = elapsedAsync.when(
-      data: (duration) => duration,
-      loading: () => Duration.zero,
-      error: (_, __) => Duration.zero,
-    );
+    // state에서 직접 경과 시간 가져오기 (단일 타이머에서 업데이트)
+    final elapsed = sessionState.elapsedDuration;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),

@@ -421,11 +421,48 @@ class CampaignMissionSectionShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // 섹션 헤더 (static, 실제 UI와 동일)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
+            children: [
+              Transform.translate(
+                offset: const Offset(0, -2),
+                child: Image.asset(
+                  'assets/images/file_icon.png',
+                  width: 28,
+                  height: 28,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                '캠페인 미션',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        // 캠페인 카드 shimmer
+        _buildCampaignCardShimmer(),
+      ],
+    );
+  }
+
+  Widget _buildCampaignCardShimmer() {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1.2),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -434,141 +471,107 @@ class CampaignMissionSectionShimmer extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Header (static, no shimmer)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(18),
-                topRight: Radius.circular(18),
-              ),
-            ),
-            child: Row(
-              children: [
-                Transform.translate(
-                  offset: const Offset(0, -2),
-                  child: Image.asset(
-                    'assets/images/file_icon.png',
-                    width: 36,
-                    height: 36,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  '캠페인 미션',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-          // Campaign cards shimmer
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                _buildCampaignCardShimmer(),
-                const SizedBox(height: 20),
-                Divider(height: 1, thickness: 1, color: Colors.grey[200]),
-                const SizedBox(height: 20),
-                _buildCampaignCardShimmer(),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCampaignCardShimmer() {
-    return Shimmer.fromColors(
-      baseColor: const Color(0xFFE0E0E0),
-      highlightColor: const Color(0xFFF5F5F5),
-      period: const Duration(milliseconds: 1500),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Campaign header shimmer
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-            child: Row(
-              children: [
-                ShimmerBox(
-                  width: 24,
-                  height: 24,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ShimmerBox(
-                    width: 120,
-                    height: 17,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                ShimmerBox(
-                  width: 60,
-                  height: 14,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ],
-            ),
-          ),
-          // Progress bar shimmer
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: ShimmerBox(
-              width: double.infinity,
-              height: 6,
-              borderRadius: BorderRadius.circular(3),
-            ),
-          ),
-          const SizedBox(height: 8),
-          // Mission tiles shimmer (3 items)
-          ...List.generate(
-            3,
-            (index) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
+      child: Shimmer.fromColors(
+        baseColor: const Color(0xFFE0E0E0),
+        highlightColor: const Color(0xFFF5F5F5),
+        period: const Duration(milliseconds: 1500),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 캠페인 헤더
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ShimmerBox(
-                    width: 24,
-                    height: 24,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ShimmerBox(
-                      width: double.infinity,
-                      height: 16,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
+                  // 카테고리 배지
                   ShimmerBox(
                     width: 50,
+                    height: 22,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  const SizedBox(height: 8),
+                  // 캠페인 타이틀
+                  ShimmerBox(
+                    width: 180,
                     height: 24,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+            const Divider(height: 1, thickness: 1, color: Color(0xFFF5F5F5)),
+            // 미션 리스트
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  _buildMissionTileShimmer(),
+                  const Divider(
+                    height: 32,
+                    thickness: 1,
+                    color: Color(0xFFF5F5F5),
+                  ),
+                  _buildMissionTileShimmer(),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildMissionTileShimmer() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Header: 카테고리 배지 + 포인트 배지
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 12, 0, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ShimmerBox(
+                width: 70,
+                height: 22,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              ShimmerBox(
+                width: 55,
+                height: 22,
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ],
+          ),
+        ),
+        // Body: 타이틀
+        ShimmerBox(
+          width: 200,
+          height: 16,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        const SizedBox(height: 8),
+        // Body: 설명 (2줄)
+        ShimmerBox(
+          width: double.infinity,
+          height: 14,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        const SizedBox(height: 4),
+        ShimmerBox(
+          width: 250,
+          height: 14,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        const SizedBox(height: 16),
+        // Footer: 액션 버튼
+        ShimmerBox(
+          width: double.infinity,
+          height: 45,
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ],
     );
   }
 }

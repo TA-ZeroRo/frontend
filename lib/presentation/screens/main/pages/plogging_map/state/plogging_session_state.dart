@@ -24,6 +24,9 @@ class PloggingSessionState {
   final Position? currentPosition;
   final String? errorMessage;
   final double totalDistanceMeters; // 누적 거리 (O(1) 접근)
+  final DateTime? pausedAt; // 일시정지 시작 시간 (인증 대기 중)
+  final Duration pausedDuration; // 누적 일시정지 시간
+  final Duration elapsedDuration; // 계산된 경과 시간 (타이머에서 업데이트)
 
   const PloggingSessionState({
     this.currentSession,
@@ -34,7 +37,13 @@ class PloggingSessionState {
     this.currentPosition,
     this.errorMessage,
     this.totalDistanceMeters = 0,
+    this.pausedAt,
+    this.pausedDuration = Duration.zero,
+    this.elapsedDuration = Duration.zero,
   });
+
+  /// 현재 일시정지 상태인지 (인증 대기 중)
+  bool get isPaused => pausedAt != null;
 
   /// 세션 진행 중 여부
   bool get isSessionActive =>
@@ -61,8 +70,12 @@ class PloggingSessionState {
     Position? currentPosition,
     String? errorMessage,
     double? totalDistanceMeters,
+    DateTime? pausedAt,
+    Duration? pausedDuration,
+    Duration? elapsedDuration,
     bool clearSession = false,
     bool clearError = false,
+    bool clearPausedAt = false,
   }) {
     return PloggingSessionState(
       currentSession: clearSession ? null : (currentSession ?? this.currentSession),
@@ -73,6 +86,9 @@ class PloggingSessionState {
       currentPosition: currentPosition ?? this.currentPosition,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       totalDistanceMeters: totalDistanceMeters ?? this.totalDistanceMeters,
+      pausedAt: clearPausedAt ? null : (pausedAt ?? this.pausedAt),
+      pausedDuration: pausedDuration ?? this.pausedDuration,
+      elapsedDuration: elapsedDuration ?? this.elapsedDuration,
     );
   }
 }
@@ -262,7 +278,7 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
     _sessionTickCount = 0;
   }
 
-  /// 통합 세션 타이머 시작 (알림 업데이트 + 인증 상태 체크)
+  /// 통합 세션 타이머 시작 (알림 업데이트 + 인증 상태 체크 + 경과 시간)
   void _startSessionTimer() {
     _sessionTickCount = 0;
     _lastCanVerify = state.canVerify;
@@ -272,11 +288,14 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
       (_) {
         _sessionTickCount++;
 
+        // 경과 시간 업데이트 (매초) - UI 리빌드 트리거
+        _updateElapsedTime();
+
         // 알림 업데이트 (매초)
         _updateNotification();
 
-        // 인증 상태 체크 (1분마다만 UI 리빌드)
-        if (_sessionTickCount % 60 == 0) {
+        // 인증 상태 체크 (인증 인터벌에 맞춰 15초마다)
+        if (_sessionTickCount % verificationIntervalSeconds == 0) {
           _checkVerificationStatus();
         }
       },
@@ -308,8 +327,14 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
     final canVerifyNow = state.canVerify;
     if (canVerifyNow != _lastCanVerify) {
       _lastCanVerify = canVerifyNow;
-      // 인증 상태가 변경되었을 때만 상태 업데이트
-      state = state.copyWith();
+
+      if (canVerifyNow && state.pausedAt == null) {
+        // 인증 가능해짐 → 일시정지 시작
+        state = state.copyWith(pausedAt: DateTime.now());
+      } else {
+        // 인증 상태가 변경되었을 때만 상태 업데이트
+        state = state.copyWith();
+      }
     }
   }
 
@@ -394,12 +419,23 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
         longitude: state.currentPosition!.longitude,
       );
 
+      // 일시정지된 시간 계산
+      Duration additionalPausedDuration = Duration.zero;
+      if (state.pausedAt != null) {
+        additionalPausedDuration = DateTime.now().difference(state.pausedAt!);
+      }
+
       state = state.copyWith(
         verifications: [...state.verifications, result],
         nextVerificationTime: DateTime.now().add(
           const Duration(seconds: verificationIntervalSeconds),
         ),
+        clearPausedAt: true, // 일시정지 해제
+        pausedDuration: state.pausedDuration + additionalPausedDuration,
       );
+
+      // 인증 상태 플래그 업데이트
+      _lastCanVerify = false;
 
       // 알림 업데이트 (인증 가능 상태 변경)
       await _updateNotification();
@@ -470,24 +506,3 @@ final ploggingMapRefreshTriggerProvider =
       PloggingMapRefreshTrigger.new,
     );
 
-// ========================================
-// PLOGGING ELAPSED TIME STREAM PROVIDER
-// ========================================
-
-/// 플로깅 경과 시간 스트림 Provider (PloggingSessionInfo용)
-/// - 1초마다 경과 시간 업데이트
-/// - 세션이 없으면 Duration.zero 반환
-final ploggingElapsedTimeProvider = StreamProvider.autoDispose<Duration>((ref) {
-  final sessionState = ref.watch(ploggingSessionProvider);
-
-  if (!sessionState.isSessionActive || sessionState.currentSession == null) {
-    return Stream.value(Duration.zero);
-  }
-
-  final startedAt = sessionState.currentSession!.startedAt;
-
-  return Stream.periodic(
-    const Duration(seconds: 1),
-    (_) => DateTime.now().difference(startedAt),
-  );
-});

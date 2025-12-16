@@ -55,11 +55,13 @@ class _RecruitingMembersTabState extends State<RecruitingMembersTab> {
         roomId: int.parse(chatRoomId),
         userId: userId,
       );
+      if (!mounted) return;
       setState(() {
         _members = members;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -176,11 +178,11 @@ class _RecruitingMembersTabState extends State<RecruitingMembersTab> {
         // 프로필 이미지
         CircleAvatar(
           radius: 24,
-          backgroundImage: member.userImageUrl != null
+          backgroundImage: (member.userImageUrl?.isNotEmpty ?? false)
               ? NetworkImage(member.userImageUrl!)
               : null,
           backgroundColor: AppColors.primary.withValues(alpha: 0.2),
-          child: member.userImageUrl == null
+          child: !(member.userImageUrl?.isNotEmpty ?? false)
               ? Icon(Icons.person, color: AppColors.primary)
               : null,
         ),

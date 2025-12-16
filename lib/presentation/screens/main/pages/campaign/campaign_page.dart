@@ -186,7 +186,10 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
             ),
           );
         },
-        loading: () => const SizedBox.shrink(),
+        loading: () => Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 20),
+          child: const ExternalCampaignCarouselShimmer(),
+        ),
         error: (_, __) => const SizedBox.shrink(),
       ),
     );
@@ -326,16 +329,11 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                     child: CampaignCard(
                       campaign: campaign,
                       onTap: () {
-                        // ZERORO 캠페인은 미션 페이지로 이동 (추후 구현)
-                        // 현재는 웹뷰로 이동
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => CampaignWebViewScreen(
-                              url: campaign.url,
-                              title: campaign.title,
-                            ),
-                          ),
+                        // ZERORO 캠페인은 상세 페이지로 이동
+                        context.pushNamed(
+                          'campaign-detail',
+                          pathParameters: {'id': campaign.id},
+                          extra: campaign,
                         );
                       },
                       onParticipate: () async {
@@ -380,7 +378,7 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                       onShare: () async {
                         try {
                           await Share.share(
-                            '지구를 위해 저와 ${campaign.title}을(를) 함께 해요!\n\n${campaign.url}',
+                            '지구를 위해 저와 ${campaign.title}을(를) 함께 해요!\n\nZERORO 앱에서 함께 참여하세요!',
                             subject: '지구를 위해 저와 ${campaign.title}을(를) 함께 해요!',
                           );
                         } catch (e) {

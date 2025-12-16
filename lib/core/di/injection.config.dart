@@ -12,6 +12,8 @@
 import 'package:dio/dio.dart' as _i361;
 import 'package:frontend/data/data_source/agent/agent_chat.api.dart' as _i65;
 import 'package:frontend/data/data_source/campaign/campaign_api.dart' as _i499;
+import 'package:frontend/data/data_source/character/character_api.dart'
+    as _i1015;
 import 'package:frontend/data/data_source/data_source_module.dart' as _i720;
 import 'package:frontend/data/data_source/leaderboard/leaderboard_remote_data_source.dart'
     as _i562;
@@ -20,6 +22,8 @@ import 'package:frontend/data/data_source/location/location_service.dart'
 import 'package:frontend/data/data_source/mission/mission_api.dart' as _i800;
 import 'package:frontend/data/data_source/notification/fcm_service.dart'
     as _i837;
+import 'package:frontend/data/data_source/personality/personality_api.dart'
+    as _i158;
 import 'package:frontend/data/data_source/plogging/plogging_api.dart' as _i249;
 import 'package:frontend/data/data_source/point/point_api.dart' as _i116;
 import 'package:frontend/data/data_source/recruiting/recruiting_api.dart'
@@ -32,6 +36,10 @@ import 'package:frontend/data/data_source/user/user_remote_data_source.dart'
     as _i64;
 import 'package:frontend/data/data_source/verification/verification_api.dart'
     as _i876;
+import 'package:frontend/data/repository/character/character_repository.dart'
+    as _i1008;
+import 'package:frontend/data/repository/character/character_repository_impl.dart'
+    as _i593;
 import 'package:frontend/data/repository_impl/agent_chat_repository_impl.dart'
     as _i315;
 import 'package:frontend/data/repository_impl/campaign_repository_impl.dart'
@@ -40,6 +48,8 @@ import 'package:frontend/data/repository_impl/leaderboard_repository_impl.dart'
     as _i856;
 import 'package:frontend/data/repository_impl/mission_repository_impl.dart'
     as _i1053;
+import 'package:frontend/data/repository_impl/personality_repository_impl.dart'
+    as _i879;
 import 'package:frontend/data/repository_impl/plogging_repository_impl.dart'
     as _i268;
 import 'package:frontend/data/repository_impl/point_repository_impl.dart'
@@ -57,6 +67,8 @@ import 'package:frontend/domain/repository/campaign_repository.dart' as _i737;
 import 'package:frontend/domain/repository/leaderboard_repository.dart'
     as _i362;
 import 'package:frontend/domain/repository/mission_repository.dart' as _i629;
+import 'package:frontend/domain/repository/personality_repository.dart'
+    as _i901;
 import 'package:frontend/domain/repository/plogging_repository.dart' as _i102;
 import 'package:frontend/domain/repository/point_repository.dart' as _i974;
 import 'package:frontend/domain/repository/recruiting_repository.dart' as _i138;
@@ -98,6 +110,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i876.VerificationApi>(
       () => _i876.VerificationApi(gh<_i361.Dio>()),
     );
+    gh.factory<_i158.PersonalityApi>(
+      () => _i158.PersonalityApi(gh<_i361.Dio>()),
+    );
+    gh.factory<_i1015.CharacterApi>(() => _i1015.CharacterApi(gh<_i361.Dio>()));
+    gh.factory<_i1008.CharacterRepository>(
+      () => _i593.CharacterRepositoryImpl(gh<_i1015.CharacterApi>()),
+    );
     gh.factory<_i138.RecruitingRepository>(
       () => _i491.RecruitingRepositoryImpl(
         gh<_i324.RecruitingApi>(),
@@ -106,6 +125,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i974.PointRepository>(
       () => _i278.PointRepositoryImpl(gh<_i116.PointApi>()),
+    );
+    gh.factory<_i901.PersonalityRepository>(
+      () => _i879.PersonalityRepositoryImpl(gh<_i158.PersonalityApi>()),
     );
     gh.factory<_i589.ReportRepository>(
       () => _i76.ReportRepositoryImpl(gh<_i889.ReportApi>()),

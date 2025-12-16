@@ -898,8 +898,8 @@ class _MissionTileWithExpandState extends ConsumerState<_MissionTileWithExpand> 
     }
 
     // 미션 제출 성공 시 상태 갱신
+    // trigger만 호출하면 campaignMissionProvider와 combinedRankingProvider 모두 재빌드됨
     if (result == true && context.mounted) {
-      ref.invalidate(campaignMissionProvider);
       ref.read(leaderboardRefreshTriggerProvider.notifier).trigger();
     }
   }

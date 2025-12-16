@@ -6,9 +6,9 @@ import '../../../../../../core/utils/character_notification_helper.dart';
 import '../../../../../../domain/model/mission/mission_template.dart';
 import '../../../../../../domain/model/mission/mission_with_template.dart';
 import '../../../../../../domain/model/mission/verification_type.dart';
+import '../../activity/components/shimmer_widgets.dart';
+import '../../activity/state/leaderboard_state.dart';
 import '../state/campaign_mission_state.dart';
-import '../../plogging_map/state/leaderboard_state.dart';
-import '../../plogging_map/components/shimmer_widgets.dart';
 import 'verification_bottom_sheets/image_verification_bottom_sheet.dart';
 import 'verification_bottom_sheets/location_verification_bottom_sheet.dart';
 import 'verification_bottom_sheets/quiz_verification_bottom_sheet.dart';
@@ -430,7 +430,8 @@ class _MissionTileWithExpand extends ConsumerStatefulWidget {
       _MissionTileWithExpandState();
 }
 
-class _MissionTileWithExpandState extends ConsumerState<_MissionTileWithExpand> {
+class _MissionTileWithExpandState
+    extends ConsumerState<_MissionTileWithExpand> {
   bool _isExpanded = false;
 
   @override

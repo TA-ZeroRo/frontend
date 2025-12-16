@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/components/custom_app_bar.dart';
 
 import '../../../../../core/theme/app_color.dart';
+import '../../../../../core/utils/character_notification_helper.dart';
 import 'components/photo_verification_sheet.dart';
 import 'components/plogging_fab.dart';
 import 'components/plogging_map_view.dart';
@@ -20,9 +21,21 @@ class PloggingMapPage extends ConsumerWidget {
     ref.listen<PloggingSessionState>(ploggingSessionProvider, (prev, next) {
       if (next.errorMessage != null &&
           next.errorMessage != prev?.errorMessage) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(next.errorMessage!)));
+        // GPS 관련 에러인 경우 캐릭터 알림 사용
+        if (next.errorMessage!.contains('위치') ||
+            next.errorMessage!.contains('GPS') ||
+            next.errorMessage!.contains('location')) {
+          CharacterNotificationHelper.show(
+            context,
+            message: '앗, GPS가 안잡혀요ㅠ',
+            characterImage: 'assets/images/cloud_zeroro_sad.png',
+            alignment: const Alignment(0.85, -0.4),
+          );
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(next.errorMessage!)));
+        }
         ref.read(ploggingSessionProvider.notifier).clearError();
       }
     });

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/presentation/screens/main/pages/activity/state/leaderboard_state.dart';
 
 import '../../../../../../core/di/injection.dart';
 import '../../../../../../data/data_source/location/location_service.dart';
@@ -7,7 +8,6 @@ import '../../../../../../domain/model/verification/location_verification_result
 import '../../../../../../domain/repository/mission_repository.dart';
 import '../../../../../../domain/repository/verification_repository.dart';
 import '../../../../entry/state/auth_controller.dart';
-import '../../plogging_map/state/leaderboard_state.dart';
 
 // ========================================
 // CAMPAIGN MISSION STATE

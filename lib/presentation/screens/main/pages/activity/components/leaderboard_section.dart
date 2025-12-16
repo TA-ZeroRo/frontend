@@ -30,7 +30,7 @@ class LeaderboardSection extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildSectionHeader(context, ref),
+          _buildSectionHeader(context),
           const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
           _buildMyRankSection(myRankingAsync),
           const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
@@ -40,7 +40,7 @@ class LeaderboardSection extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, WidgetRef ref) {
+  Widget _buildSectionHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 12),
       decoration: BoxDecoration(
@@ -50,29 +50,13 @@ class LeaderboardSection extends ConsumerWidget {
           topRight: Radius.circular(18),
         ),
       ),
-      child: Row(
-        children: [
-          const Text(
-            '리더보드',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-          ),
-          const Spacer(),
-          SizedBox(
-            width: 24,
-            height: 24,
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              icon: const Icon(Icons.refresh, size: 20, color: Colors.grey),
-              onPressed: () async {
-                await ref.read(combinedRankingProvider.notifier).refresh();
-              },
-            ),
-          ),
-        ],
+      child: const Text(
+        '리더보드',
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w500,
+          color: Colors.black87,
+        ),
       ),
     );
   }

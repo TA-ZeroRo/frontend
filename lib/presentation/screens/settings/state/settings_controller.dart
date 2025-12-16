@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class _SettingsKeys {
   static const String notificationsEnabled = 'notificationsEnabled';
   static const String language = 'language';
-  static const String selectedCharacter = 'selectedCharacter';
+  static const String selectedCharacter = 'selected_character';
   static const String selectedPersonality = 'selectedPersonality';
 }
 
@@ -19,7 +19,7 @@ class SettingsState {
   const SettingsState({
     this.notificationsEnabled = true,
     this.language = 'ko',
-    this.selectedCharacter = 'earth', // 'earth' or 'cloud'
+    this.selectedCharacter = 'earth_zeroro', // 'earth_zeroro' or 'dust_zeroro'
     this.selectedPersonality = 'friendly', // 기본 성격
   });
 
@@ -55,7 +55,7 @@ class AppSettingsNotifier extends Notifier<SettingsState> {
           _prefs?.getBool(_SettingsKeys.notificationsEnabled) ?? true,
       language: _prefs?.getString(_SettingsKeys.language) ?? 'ko',
       selectedCharacter:
-          _prefs?.getString(_SettingsKeys.selectedCharacter) ?? 'earth',
+          _prefs?.getString(_SettingsKeys.selectedCharacter) ?? 'earth_zeroro',
       selectedPersonality:
           _prefs?.getString(_SettingsKeys.selectedPersonality) ?? 'friendly',
     );

@@ -77,6 +77,15 @@ class ChatNotifier extends Notifier<ChatState> {
   void clearError() {
     state = state.copyWith(error: null);
   }
+
+  /// 채팅 기록 초기화 (캐릭터 변경 시 사용)
+  void clearMessages() {
+    state = state.copyWith(
+      messages: [],
+      error: null,
+      isLoading: false,
+    );
+  }
 }
 
 final chatProvider = NotifierProvider<ChatNotifier, ChatState>(
