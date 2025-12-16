@@ -84,6 +84,9 @@ class _RecruitingDetailScreenState
                     _refreshPost();
                     ref.invalidate(recruitingListProvider);
                   },
+                  onLeaveSuccess: () {
+                    ref.invalidate(recruitingListProvider);
+                  },
                 ),
                 RecruitingChatTab(post: _currentPost),
                 RecruitingMembersTab(

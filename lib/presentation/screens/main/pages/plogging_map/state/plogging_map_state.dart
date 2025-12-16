@@ -110,8 +110,9 @@ class CommunityRoutesNotifier extends AsyncNotifier<List<PloggingRoute>> {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 400), () async {
       if (_pendingBounds != null) {
-        state = const AsyncValue.loading();
-        state = await AsyncValue.guard(() => _fetchRoutes(_pendingBounds!));
+        // 이전 데이터 유지하면서 백그라운드 로딩 (깜빡임 방지)
+        final newRoutes = await AsyncValue.guard(() => _fetchRoutes(_pendingBounds!));
+        state = newRoutes;
       }
     });
   }

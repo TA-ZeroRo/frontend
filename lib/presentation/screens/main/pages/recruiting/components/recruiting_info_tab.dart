@@ -13,17 +13,22 @@ import '../../campaign/state/recruiting_state.dart';
 class RecruitingInfoTab extends ConsumerWidget {
   final RecruitingPost post;
   final VoidCallback? onJoinSuccess;
+  final VoidCallback? onLeaveSuccess;
 
   const RecruitingInfoTab({
     super.key,
     required this.post,
     this.onJoinSuccess,
+    this.onLeaveSuccess,
   });
 
   String? get _currentUserId =>
       Supabase.instance.client.auth.currentSession?.user.id;
 
   bool get _isHost => _currentUserId != null && _currentUserId == post.hostId;
+
+  /// 주최자가 아닌 참여자인지 확인
+  bool get _isParticipantNotHost => post.isParticipating && !_isHost;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -38,6 +43,10 @@ class RecruitingInfoTab extends ConsumerWidget {
           const SizedBox(height: 24),
           if (_isHost) ...[
             _buildHostManagementSection(context, ref),
+            const SizedBox(height: 24),
+          ],
+          if (_isParticipantNotHost) ...[
+            _buildLeaveButton(context, ref),
             const SizedBox(height: 24),
           ],
           if (!post.isParticipating) _buildParticipateButton(context, ref),
@@ -335,6 +344,129 @@ class RecruitingInfoTab extends ConsumerWidget {
       if (context.mounted) Navigator.pop(context); // 로딩 닫기
       ToastHelper.showError('게시글 삭제에 실패했습니다');
     }
+  }
+
+  /// 나가기 버튼 (주최자가 아닌 참여자용)
+  Widget _buildLeaveButton(BuildContext context, WidgetRef ref) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.exit_to_app, size: 20, color: AppColors.error),
+              const SizedBox(width: 8),
+              Text(
+                '리크루팅 나가기',
+                style: AppTextStyle.bodyLarge.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.error,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '리크루팅을 나가면 채팅방에서도 퇴장됩니다.',
+            style: AppTextStyle.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => _showLeaveConfirmation(context, ref),
+              icon: const Icon(Icons.logout, size: 18),
+              label: const Text('나가기'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.error,
+                side: BorderSide(color: AppColors.error),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 나가기 확인 다이얼로그
+  Future<void> _showLeaveConfirmation(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('리크루팅 나가기'),
+        content: const Text('정말 이 리크루팅을 나가시겠습니까?\n나가면 채팅방에서도 퇴장됩니다.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('나가기'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    // 로딩 표시
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final repository = getIt<RecruitingRepository>();
+      await repository.leaveRecruiting(
+        postId: int.parse(post.id),
+        userId: _currentUserId!,
+      );
+
+      if (context.mounted) {
+        Navigator.pop(context); // 로딩 닫기
+        Navigator.pop(context); // 상세 화면 닫기
+      }
+
+      ref.invalidate(recruitingListProvider);
+      onLeaveSuccess?.call();
+      ToastHelper.showSuccess('리크루팅에서 나갔습니다');
+    } catch (e) {
+      if (context.mounted) Navigator.pop(context); // 로딩 닫기
+      ToastHelper.showError(_getLeaveErrorMessage(e));
+    }
+  }
+
+  /// 나가기 에러 메시지 변환
+  String _getLeaveErrorMessage(dynamic error) {
+    final errorStr = error.toString();
+    if (errorStr.contains('주최자') || errorStr.contains('host')) {
+      return '주최자는 리크루팅을 나갈 수 없습니다';
+    } else if (errorStr.contains('참여') || errorStr.contains('participant')) {
+      return '참여 중인 리크루팅이 아닙니다';
+    }
+    return '나가기에 실패했습니다';
   }
 
   /// 기본 정보 섹션
