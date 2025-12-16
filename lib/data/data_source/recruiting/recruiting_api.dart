@@ -235,4 +235,16 @@ class RecruitingApi {
       },
     );
   }
+
+  /// 리크루팅 나가기
+  /// DELETE /recruiting/posts/{postId}/leave
+  Future<void> leaveRecruiting({
+    required int postId,
+    required String userId,
+  }) async {
+    await _dio.delete(
+      '/recruiting/posts/$postId/leave',
+      data: {'user_id': userId},
+    );
+  }
 }
