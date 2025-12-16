@@ -337,13 +337,16 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                         );
                       },
                       onParticipate: () async {
+                        // 토글 전 상태를 저장
+                        final wasParticipating = campaign.isParticipating;
+
                         try {
                           await ref
                               .read(campaignListProvider.notifier)
                               .toggleParticipation(campaign.id);
 
-                          if (campaign.isParticipating) {
-                            // 취소됨
+                          if (wasParticipating) {
+                            // 참가 중이었으면 → 취소됨
                             CharacterNotificationHelper.show(
                               context,
                               message: '캠페인 참가가 취소되었어요',
@@ -351,7 +354,7 @@ class _CampaignPageState extends ConsumerState<CampaignPage> {
                               alignment: const Alignment(0.85, -0.4),
                             );
                           } else {
-                            // 성공함
+                            // 참가 안 했으면 → 참가됨
                             CharacterNotificationHelper.show(
                               context,
                               message: '캠페인 참가에 성공했어요!',

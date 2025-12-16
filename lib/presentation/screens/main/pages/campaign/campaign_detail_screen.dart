@@ -475,13 +475,17 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
   }
 
   Future<void> _onParticipate() async {
+    // 토글 전 상태를 저장 (API 호출 후에도 올바른 메시지를 표시하기 위해)
+    final wasParticipating = _campaign.isParticipating;
+
     try {
       await ref
           .read(campaignListProvider.notifier)
           .toggleParticipation(_campaign.id);
 
       if (mounted) {
-        if (_campaign.isParticipating) {
+        if (wasParticipating) {
+          // 참가 중이었으면 → 취소됨
           CharacterNotificationHelper.show(
             context,
             message: '캠페인 참가가 취소되었어요',
@@ -489,6 +493,7 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
             alignment: const Alignment(0.85, -0.4),
           );
         } else {
+          // 참가 안 했으면 → 참가됨
           CharacterNotificationHelper.show(
             context,
             message: '캠페인 참가에 성공했어요!',
