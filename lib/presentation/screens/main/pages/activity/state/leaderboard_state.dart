@@ -18,8 +18,14 @@ class CombinedRankingAsyncNotifier
   @override
   Future<(List<LeaderboardEntry>, LeaderboardEntry?)> build() async {
     _repository = getIt<LeaderboardRepository>();
-    // Watch trigger to auto-refresh when needed
-    ref.watch(leaderboardRefreshTriggerProvider);
+
+    // trigger 변경 시 refresh 호출 (listen으로 변경하여 build 재실행 방지)
+    ref.listen(leaderboardRefreshTriggerProvider, (previous, next) {
+      if (previous != null && previous != next) {
+        refresh();
+      }
+    });
+
     return await _fetchRankings();
   }
 
@@ -29,11 +35,17 @@ class CombinedRankingAsyncNotifier
   }
 
   Future<void> refresh() async {
+    // 이전 데이터 보존하면서 로딩 (에러 시 기존 데이터 유지)
+    final previousData = state.value;
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final userId = ref.read(authProvider).currentUser?.id;
       return await _repository.getRankingWithMyRank(userId);
     });
+    // 에러 발생 시 이전 데이터로 복원
+    if (state.hasError && previousData != null) {
+      state = AsyncValue.data(previousData);
+    }
   }
 }
 
