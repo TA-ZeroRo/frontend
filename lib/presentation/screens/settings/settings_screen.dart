@@ -6,6 +6,7 @@ import '../../../core/theme/app_text_style.dart';
 import '../../../core/utils/toast_helper.dart';
 import '../../routes/router_path.dart';
 import '../entry/state/auth_controller.dart';
+import '../entry/privacy_policy_modal.dart';
 import 'state/settings_controller.dart';
 import '../../../core/utils/character_notification_helper.dart';
 
@@ -743,8 +744,13 @@ class SettingsScreen extends ConsumerWidget {
                   icon: Icons.privacy_tip_rounded,
                   iconColor: AppColors.error,
                   onTap: () {
-                    ToastHelper.showInfo(
-                      '개인정보 처리방침 페이지를 준비 중입니다. 잠시만 기다려 주세요!',
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => const PrivacyPolicyModal(
+                        isViewOnly: true,
+                      ),
                     );
                   },
                 ),
@@ -789,11 +795,7 @@ class SettingsScreen extends ConsumerWidget {
                   subtitle: '의견을 들려주세요',
                   icon: Icons.feedback_rounded,
                   iconColor: AppColors.primary,
-                  onTap: () {
-                    ToastHelper.showInfo(
-                      '피드백 페이지를 준비 중입니다. 잠시만 기다려 주세요!',
-                    );
-                  },
+                  onTap: () => context.push(RoutePath.feedback),
                 ),
               ],
             ),

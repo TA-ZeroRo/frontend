@@ -3,7 +3,13 @@ import '../../../core/theme/app_color.dart';
 import '../../../core/theme/app_text_style.dart';
 
 class PrivacyPolicyModal extends StatelessWidget {
-  const PrivacyPolicyModal({super.key});
+  /// 조회 전용 모드 (설정 화면에서 사용)
+  final bool isViewOnly;
+
+  const PrivacyPolicyModal({
+    super.key,
+    this.isViewOnly = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +200,7 @@ class PrivacyPolicyModal extends StatelessWidget {
                   elevation: 0,
                 ),
                 child: Text(
-                  '동의하고 계속하기',
+                  isViewOnly ? '확인' : '동의하고 계속하기',
                   style: AppTextStyle.bodyLarge.copyWith(
                     color: AppColors.onPrimary,
                     fontWeight: FontWeight.w500,
