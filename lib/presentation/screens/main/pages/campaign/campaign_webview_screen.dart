@@ -102,6 +102,13 @@ class _CampaignWebViewScreenState extends State<CampaignWebViewScreen> {
   }
 
   @override
+  void dispose() {
+    // WebView 리소스 정리 - 빈 페이지로 이동하여 렌더러 프로세스 크래시 방지
+    _controller.loadRequest(Uri.parse('about:blank'));
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,

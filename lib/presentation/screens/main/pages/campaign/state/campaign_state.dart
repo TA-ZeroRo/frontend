@@ -207,6 +207,7 @@ class CampaignListNotifier extends AsyncNotifier<List<CampaignData>> {
     return CampaignData(
       id: campaign.id.toString(),
       title: campaign.title,
+      hostOrganizer: campaign.hostOrganizer,
       imageUrl: campaign.imageUrl ?? '',
       description: campaign.description ?? '',
       url: campaign.campaignUrl,

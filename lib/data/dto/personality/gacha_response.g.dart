@@ -9,7 +9,8 @@ part of 'gacha_response.dart';
 GachaResponse _$GachaResponseFromJson(Map<String, dynamic> json) =>
     GachaResponse(
       personality: PersonalityResult.fromJson(
-          json['personality'] as Map<String, dynamic>),
+        json['personality'] as Map<String, dynamic>,
+      ),
       isNew: json['is_new'] as bool,
       remainingTickets: (json['remaining_tickets'] as num).toInt(),
     );

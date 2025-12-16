@@ -95,11 +95,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i361.Dio>(() => dioModule.dio);
     gh.factory<_i65.AgentChatApi>(() => _i65.AgentChatApi(gh<_i361.Dio>()));
     gh.factory<_i499.CampaignApi>(() => _i499.CampaignApi(gh<_i361.Dio>()));
+    gh.factory<_i1015.CharacterApi>(() => _i1015.CharacterApi(gh<_i361.Dio>()));
     gh.factory<_i562.LeaderboardRemoteDataSource>(
       () => _i562.LeaderboardRemoteDataSource(gh<_i361.Dio>()),
     );
     gh.factory<_i800.MissionApi>(() => _i800.MissionApi(gh<_i361.Dio>()));
     gh.factory<_i837.FcmService>(() => _i837.FcmService(gh<_i361.Dio>()));
+    gh.factory<_i158.PersonalityApi>(
+      () => _i158.PersonalityApi(gh<_i361.Dio>()),
+    );
     gh.factory<_i249.PloggingApi>(() => _i249.PloggingApi(gh<_i361.Dio>()));
     gh.factory<_i116.PointApi>(() => _i116.PointApi(gh<_i361.Dio>()));
     gh.factory<_i324.RecruitingApi>(() => _i324.RecruitingApi(gh<_i361.Dio>()));
@@ -110,10 +114,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i876.VerificationApi>(
       () => _i876.VerificationApi(gh<_i361.Dio>()),
     );
-    gh.factory<_i158.PersonalityApi>(
-      () => _i158.PersonalityApi(gh<_i361.Dio>()),
-    );
-    gh.factory<_i1015.CharacterApi>(() => _i1015.CharacterApi(gh<_i361.Dio>()));
     gh.factory<_i1008.CharacterRepository>(
       () => _i593.CharacterRepositoryImpl(gh<_i1015.CharacterApi>()),
     );

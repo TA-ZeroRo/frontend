@@ -5,6 +5,7 @@ import '../../../../../../../domain/model/campaign/campaign_source.dart';
 class CampaignData {
   final String id;
   final String title;
+  final String hostOrganizer; // 캠페인 주최자
   final String imageUrl;
   final String url; // 캠페인 상세 페이지 URL
   final DateTime startDate;
@@ -20,6 +21,7 @@ class CampaignData {
   const CampaignData({
     required this.id,
     required this.title,
+    required this.hostOrganizer,
     required this.imageUrl,
     this.description = '캠페인 설명이 없습니다.',
     required this.url,
@@ -64,6 +66,7 @@ class CampaignData {
   CampaignData copyWith({
     String? id,
     String? title,
+    String? hostOrganizer,
     String? imageUrl,
     String? description,
     String? url,
@@ -79,6 +82,7 @@ class CampaignData {
     return CampaignData(
       id: id ?? this.id,
       title: title ?? this.title,
+      hostOrganizer: hostOrganizer ?? this.hostOrganizer,
       imageUrl: imageUrl ?? this.imageUrl,
       description: description ?? this.description,
       url: url ?? this.url,

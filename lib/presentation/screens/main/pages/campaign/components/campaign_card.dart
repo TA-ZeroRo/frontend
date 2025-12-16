@@ -139,7 +139,7 @@ class CampaignCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // ZERORO 배지
+            // 주최자 배지
             if (campaign.isZeroro)
               Container(
                 margin: const EdgeInsets.only(bottom: 8),
@@ -157,9 +157,9 @@ class CampaignCard extends ConsumerWidget {
                       color: Colors.white,
                     ),
                     const SizedBox(width: 4),
-                    const Text(
-                      'ZERORO',
-                      style: TextStyle(
+                    Text(
+                      campaign.hostOrganizer,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
