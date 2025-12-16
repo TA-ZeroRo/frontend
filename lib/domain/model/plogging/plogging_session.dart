@@ -26,6 +26,7 @@ abstract class PloggingSession with _$PloggingSession {
     @Default(0) int verificationCount,
     @Default(0) int pointsEarned,
     required DateTime createdAt,
+    String? initialPhotoUrl,
   }) = _PloggingSession;
 
   factory PloggingSession.fromJson(Map<String, dynamic> json) =>

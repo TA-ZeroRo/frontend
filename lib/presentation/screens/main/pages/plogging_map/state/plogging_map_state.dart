@@ -158,41 +158,9 @@ final userPloggingStatsProvider =
     );
 
 // ========================================
-// INTENSITY COLOR HELPER
+// PLOGGING ROUTE COLOR
 // ========================================
 
-/// 강도 레벨에 따른 색상 반환
-/// 1: 연두색 (0-20분)
-/// 2: 녹색 (20-40분)
-/// 3: 진녹색 (40-60분)
-/// 4: 깊은 녹색 (60분+)
-int getIntensityColor(int level) {
-  switch (level) {
-    case 1:
-      return 0xFF90EE90; // Light Green
-    case 2:
-      return 0xFF32CD32; // Lime Green
-    case 3:
-      return 0xFF228B22; // Forest Green
-    case 4:
-      return 0xFF006400; // Dark Green
-    default:
-      return 0xFF90EE90;
-  }
-}
-
-/// 강도 레벨에 따른 투명도 반환
-double getIntensityOpacity(int level) {
-  switch (level) {
-    case 1:
-      return 0.4;
-    case 2:
-      return 0.6;
-    case 3:
-      return 0.8;
-    case 4:
-      return 1.0;
-    default:
-      return 0.4;
-  }
-}
+/// 플로깅 경로 색상 (단일 색상)
+const int ploggingRouteColor = 0xFF32CD32; // Lime Green
+const double ploggingRouteOpacity = 0.7;

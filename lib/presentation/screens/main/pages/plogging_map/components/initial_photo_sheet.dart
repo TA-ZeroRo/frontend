@@ -5,20 +5,19 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../../../core/theme/app_color.dart';
-import '../../../../../../core/utils/character_notification_helper.dart';
-import '../../../../../../domain/model/plogging/photo_verification.dart';
 import '../state/plogging_session_state.dart';
 
-class PhotoVerificationSheet extends ConsumerStatefulWidget {
-  const PhotoVerificationSheet({super.key});
+/// 플로깅 시작 전 초기 사진 촬영 시트
+class InitialPhotoSheet extends ConsumerStatefulWidget {
+  final VoidCallback onPhotoSubmitted;
+
+  const InitialPhotoSheet({super.key, required this.onPhotoSubmitted});
 
   @override
-  ConsumerState<PhotoVerificationSheet> createState() =>
-      _PhotoVerificationSheetState();
+  ConsumerState<InitialPhotoSheet> createState() => _InitialPhotoSheetState();
 }
 
-class _PhotoVerificationSheetState
-    extends ConsumerState<PhotoVerificationSheet> {
+class _InitialPhotoSheetState extends ConsumerState<InitialPhotoSheet> {
   final ImagePicker _picker = ImagePicker();
   XFile? _selectedImage;
   bool _isSubmitting = false;
@@ -47,7 +46,7 @@ class _PhotoVerificationSheetState
 
           // 제목
           const Text(
-            '플로깅 인증',
+            '플로깅 준비 사진',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -55,7 +54,8 @@ class _PhotoVerificationSheetState
           ),
           const SizedBox(height: 8),
           Text(
-            '쓰레기를 줍고 있는 모습을 촬영해주세요',
+            '본인과 쓰레기를 담을 봉투/바구니가\n함께 나오도록 촬영해주세요',
+            textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.grey[600],
             ),
@@ -106,7 +106,7 @@ class _PhotoVerificationSheetState
           ),
           const SizedBox(height: 24),
 
-          // 인증 가이드
+          // 가이드
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -119,7 +119,7 @@ class _PhotoVerificationSheetState
               children: [
                 Row(
                   children: [
-                    Icon(Icons.camera_alt, size: 18, color: Colors.grey[700]),
+                    Icon(Icons.info_outline, size: 18, color: Colors.grey[700]),
                     const SizedBox(width: 8),
                     Text(
                       '이런 사진을 찍어주세요',
@@ -133,40 +133,27 @@ class _PhotoVerificationSheetState
                 ),
                 const SizedBox(height: 12),
                 _buildGuideItem(
-                  icon: Icons.back_hand_outlined,
-                  title: '쓰레기를 들고 있는 모습',
-                  example: '손에 페트병, 캔, 비닐 등',
+                  icon: Icons.person,
+                  title: '본인이 나오게',
+                  example: '얼굴 또는 상반신',
                 ),
                 const SizedBox(height: 8),
                 _buildGuideItem(
                   icon: Icons.shopping_bag_outlined,
-                  title: '수거한 쓰레기가 담긴 봉투',
-                  example: '쓰레기가 보이는 봉투',
-                ),
-                const SizedBox(height: 8),
-                _buildGuideItem(
-                  icon: Icons.pinch_outlined,
-                  title: '쓰레기를 줍는 장면',
-                  example: '바닥에서 집는 모습',
-                ),
-                const SizedBox(height: 8),
-                _buildGuideItem(
-                  icon: Icons.handyman_outlined,
-                  title: '플로깅 장비 + 수거된 쓰레기',
-                  example: '집게, 장갑 사용 중',
+                  title: '빈 봉투/바구니',
+                  example: '쓰레기를 담을 용기',
                 ),
               ],
             ),
           ),
           const SizedBox(height: 24),
 
-          // 제출 버튼
+          // 시작 버튼
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _selectedImage != null && !_isSubmitting
-                  ? _submitVerification
-                  : null,
+              onPressed:
+                  _selectedImage != null && !_isSubmitting ? _submitAndStart : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -184,7 +171,7 @@ class _PhotoVerificationSheetState
                       ),
                     )
                   : const Text(
-                      '인증하기',
+                      '플로깅 시작',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -283,7 +270,7 @@ class _PhotoVerificationSheetState
     }
   }
 
-  Future<void> _submitVerification() async {
+  Future<void> _submitAndStart() async {
     if (_selectedImage == null) return;
 
     setState(() {
@@ -291,10 +278,10 @@ class _PhotoVerificationSheetState
     });
 
     try {
-      // Supabase Storage에 이미지 업로드
+      // 1. Supabase Storage에 이미지 업로드
       final supabase = Supabase.instance.client;
       final fileName =
-          'plogging_${DateTime.now().millisecondsSinceEpoch}.jpg';
+          'plogging_initial_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final imageBytes = await File(_selectedImage!.path).readAsBytes();
 
       await supabase.storage.from('zeroro-post-bucket').uploadBinary(
@@ -306,18 +293,20 @@ class _PhotoVerificationSheetState
       final imageUrl =
           supabase.storage.from('zeroro-post-bucket').getPublicUrl(fileName);
 
-      final result = await ref
+      // 2. 세션 시작 (초기 사진 URL 포함)
+      await ref
           .read(ploggingSessionProvider.notifier)
-          .submitVerification(imageUrl: imageUrl);
+          .startSessionWithPhoto(imageUrl);
 
+      // 3. 시트 닫기 및 콜백 호출
       if (mounted) {
         Navigator.pop(context);
-        _showResultDialog(result);
+        widget.onPhotoSubmitted();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('인증 실패: $e')),
+          SnackBar(content: Text('플로깅 시작 실패: $e')),
         );
       }
     } finally {
@@ -328,98 +317,14 @@ class _PhotoVerificationSheetState
       }
     }
   }
-
-  void _showResultDialog(PhotoVerificationResponse? result) {
-    if (result == null) return;
-
-    final isVerified = result.verificationStatus == VerificationStatus.verified;
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        // 다이얼로그가 빌드된 후 캐릭터 알림 표시
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (dialogContext.mounted) {
-            if (isVerified) {
-              CharacterNotificationHelper.show(
-                dialogContext,
-                message: '멋져요! 인증 완료~',
-                characterImage: 'assets/images/earth_zeroro_sunglasses.png',
-                duration: const Duration(minutes: 5),
-                alignment: const Alignment(0, -0.45),
-              );
-            } else {
-              CharacterNotificationHelper.show(
-                dialogContext,
-                message: '앗, 다시 시도해볼까요?',
-                characterImage: 'assets/images/cloud_zeroro_sad.png',
-                duration: const Duration(minutes: 5),
-                alignment: const Alignment(0, -0.45),
-              );
-            }
-          }
-        });
-
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                isVerified ? Icons.check_circle : Icons.cancel,
-                color: isVerified ? Colors.green : Colors.red,
-                size: 64,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                isVerified ? '인증 성공!' : '인증 실패',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              if (isVerified)
-                Text(
-                  '+${result.pointsEarned}P 획득!',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              else if (result.aiResult != null)
-                Text(
-                  result.aiResult!.reason,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                  ),
-                ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('확인'),
-            ),
-          ],
-        );
-      },
-    ).then((_) {
-      CharacterNotificationHelper.hide();
-    });
-  }
 }
 
-/// 인증 바텀시트 표시 함수
-void showPhotoVerificationSheet(BuildContext context) {
+/// 초기 사진 촬영 시트 표시 함수
+void showInitialPhotoSheet(BuildContext context, {required VoidCallback onPhotoSubmitted}) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (context) => const PhotoVerificationSheet(),
+    builder: (context) => InitialPhotoSheet(onPhotoSubmitted: onPhotoSubmitted),
   );
 }

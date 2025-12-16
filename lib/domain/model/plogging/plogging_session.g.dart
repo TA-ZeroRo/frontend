@@ -21,6 +21,7 @@ _PloggingSession _$PloggingSessionFromJson(Map<String, dynamic> json) =>
       verificationCount: (json['verificationCount'] as num?)?.toInt() ?? 0,
       pointsEarned: (json['pointsEarned'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['createdAt'] as String),
+      initialPhotoUrl: json['initialPhotoUrl'] as String?,
     );
 
 Map<String, dynamic> _$PloggingSessionToJson(_PloggingSession instance) =>
@@ -36,6 +37,7 @@ Map<String, dynamic> _$PloggingSessionToJson(_PloggingSession instance) =>
       'verificationCount': instance.verificationCount,
       'pointsEarned': instance.pointsEarned,
       'createdAt': instance.createdAt.toIso8601String(),
+      'initialPhotoUrl': instance.initialPhotoUrl,
     };
 
 const _$PloggingStatusEnumMap = {

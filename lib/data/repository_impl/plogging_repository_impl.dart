@@ -19,9 +19,15 @@ class PloggingRepositoryImpl implements PloggingRepository {
   PloggingRepositoryImpl(this._ploggingApi);
 
   @override
-  Future<PloggingSession> startSession(String userId) async {
+  Future<PloggingSession> startSession({
+    required String userId,
+    required String initialPhotoUrl,
+  }) async {
     try {
-      final result = await _ploggingApi.startSession(userId);
+      final result = await _ploggingApi.startSession(
+        userId: userId,
+        initialPhotoUrl: initialPhotoUrl,
+      );
       CustomLogger.logger.i('startSession - 플로깅 세션 시작 (userId: $userId)');
       return result.toModel();
     } catch (e) {

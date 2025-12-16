@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/utils/character_notification_helper.dart';
 import '../state/plogging_session_state.dart';
+import 'initial_photo_sheet.dart';
 
 class PloggingFab extends ConsumerWidget {
   const PloggingFab({super.key});
@@ -89,17 +90,21 @@ class PloggingFab extends ConsumerWidget {
         CharacterNotificationHelper.hide();
       });
     } else {
-      // 시작
-      notifier.startSession();
-      // 플로깅 시작 알림 (타임 카드와 동시에 표시되도록 프레임 렌더링 후 표시)
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        CharacterNotificationHelper.show(
-          context,
-          message: '플로깅 시작! 화이팅~',
-          characterImage: 'assets/images/earth_zeroro_smile.png',
-          alignment: const Alignment(0.85, 0.15),
-        );
-      });
+      // 시작 - 초기 사진 촬영 시트 표시
+      showInitialPhotoSheet(
+        context,
+        onPhotoSubmitted: () {
+          // 플로깅 시작 알림 (타임 카드와 동시에 표시되도록 프레임 렌더링 후 표시)
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            CharacterNotificationHelper.show(
+              context,
+              message: '플로깅 시작! 화이팅~',
+              characterImage: 'assets/images/earth_zeroro_smile.png',
+              alignment: const Alignment(0.85, 0.15),
+            );
+          });
+        },
+      );
     }
   }
 }

@@ -29,6 +29,8 @@ class PloggingSessionDto {
   final String createdAt;
   @JsonKey(name: 'route_points')
   final List<GpsPointDto>? routePoints;
+  @JsonKey(name: 'initial_photo_url')
+  final String? initialPhotoUrl;
 
   const PloggingSessionDto({
     required this.id,
@@ -43,6 +45,7 @@ class PloggingSessionDto {
     this.pointsEarned = 0,
     required this.createdAt,
     this.routePoints,
+    this.initialPhotoUrl,
   });
 
   factory PloggingSessionDto.fromJson(Map<String, dynamic> json) =>
@@ -63,6 +66,7 @@ class PloggingSessionDto {
       verificationCount: verificationCount,
       pointsEarned: pointsEarned,
       createdAt: DateTime.parse(createdAt),
+      initialPhotoUrl: initialPhotoUrl,
     );
   }
 
@@ -84,8 +88,13 @@ class PloggingSessionDto {
 class PloggingSessionCreateRequest {
   @JsonKey(name: 'user_id')
   final String userId;
+  @JsonKey(name: 'initial_photo_url')
+  final String initialPhotoUrl;
 
-  const PloggingSessionCreateRequest({required this.userId});
+  const PloggingSessionCreateRequest({
+    required this.userId,
+    required this.initialPhotoUrl,
+  });
 
   factory PloggingSessionCreateRequest.fromJson(Map<String, dynamic> json) =>
       _$PloggingSessionCreateRequestFromJson(json);

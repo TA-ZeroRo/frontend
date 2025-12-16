@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PloggingSession {
 
- int get id; String get userId; PloggingStatus get status; DateTime get startedAt; DateTime? get endedAt; int? get durationMinutes; double? get totalDistanceMeters; int get intensityLevel; int get verificationCount; int get pointsEarned; DateTime get createdAt;
+ int get id; String get userId; PloggingStatus get status; DateTime get startedAt; DateTime? get endedAt; int? get durationMinutes; double? get totalDistanceMeters; int get intensityLevel; int get verificationCount; int get pointsEarned; DateTime get createdAt; String? get initialPhotoUrl;
 /// Create a copy of PloggingSession
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $PloggingSessionCopyWith<PloggingSession> get copyWith => _$PloggingSessionCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PloggingSession&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.status, status) || other.status == status)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.endedAt, endedAt) || other.endedAt == endedAt)&&(identical(other.durationMinutes, durationMinutes) || other.durationMinutes == durationMinutes)&&(identical(other.totalDistanceMeters, totalDistanceMeters) || other.totalDistanceMeters == totalDistanceMeters)&&(identical(other.intensityLevel, intensityLevel) || other.intensityLevel == intensityLevel)&&(identical(other.verificationCount, verificationCount) || other.verificationCount == verificationCount)&&(identical(other.pointsEarned, pointsEarned) || other.pointsEarned == pointsEarned)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PloggingSession&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.status, status) || other.status == status)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.endedAt, endedAt) || other.endedAt == endedAt)&&(identical(other.durationMinutes, durationMinutes) || other.durationMinutes == durationMinutes)&&(identical(other.totalDistanceMeters, totalDistanceMeters) || other.totalDistanceMeters == totalDistanceMeters)&&(identical(other.intensityLevel, intensityLevel) || other.intensityLevel == intensityLevel)&&(identical(other.verificationCount, verificationCount) || other.verificationCount == verificationCount)&&(identical(other.pointsEarned, pointsEarned) || other.pointsEarned == pointsEarned)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.initialPhotoUrl, initialPhotoUrl) || other.initialPhotoUrl == initialPhotoUrl));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,status,startedAt,endedAt,durationMinutes,totalDistanceMeters,intensityLevel,verificationCount,pointsEarned,createdAt);
+int get hashCode => Object.hash(runtimeType,id,userId,status,startedAt,endedAt,durationMinutes,totalDistanceMeters,intensityLevel,verificationCount,pointsEarned,createdAt,initialPhotoUrl);
 
 @override
 String toString() {
-  return 'PloggingSession(id: $id, userId: $userId, status: $status, startedAt: $startedAt, endedAt: $endedAt, durationMinutes: $durationMinutes, totalDistanceMeters: $totalDistanceMeters, intensityLevel: $intensityLevel, verificationCount: $verificationCount, pointsEarned: $pointsEarned, createdAt: $createdAt)';
+  return 'PloggingSession(id: $id, userId: $userId, status: $status, startedAt: $startedAt, endedAt: $endedAt, durationMinutes: $durationMinutes, totalDistanceMeters: $totalDistanceMeters, intensityLevel: $intensityLevel, verificationCount: $verificationCount, pointsEarned: $pointsEarned, createdAt: $createdAt, initialPhotoUrl: $initialPhotoUrl)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $PloggingSessionCopyWith<$Res>  {
   factory $PloggingSessionCopyWith(PloggingSession value, $Res Function(PloggingSession) _then) = _$PloggingSessionCopyWithImpl;
 @useResult
 $Res call({
- int id, String userId, PloggingStatus status, DateTime startedAt, DateTime? endedAt, int? durationMinutes, double? totalDistanceMeters, int intensityLevel, int verificationCount, int pointsEarned, DateTime createdAt
+ int id, String userId, PloggingStatus status, DateTime startedAt, DateTime? endedAt, int? durationMinutes, double? totalDistanceMeters, int intensityLevel, int verificationCount, int pointsEarned, DateTime createdAt, String? initialPhotoUrl
 });
 
 
@@ -65,7 +65,7 @@ class _$PloggingSessionCopyWithImpl<$Res>
 
 /// Create a copy of PloggingSession
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? status = null,Object? startedAt = null,Object? endedAt = freezed,Object? durationMinutes = freezed,Object? totalDistanceMeters = freezed,Object? intensityLevel = null,Object? verificationCount = null,Object? pointsEarned = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? status = null,Object? startedAt = null,Object? endedAt = freezed,Object? durationMinutes = freezed,Object? totalDistanceMeters = freezed,Object? intensityLevel = null,Object? verificationCount = null,Object? pointsEarned = null,Object? createdAt = null,Object? initialPhotoUrl = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -78,7 +78,8 @@ as double?,intensityLevel: null == intensityLevel ? _self.intensityLevel : inten
 as int,verificationCount: null == verificationCount ? _self.verificationCount : verificationCount // ignore: cast_nullable_to_non_nullable
 as int,pointsEarned: null == pointsEarned ? _self.pointsEarned : pointsEarned // ignore: cast_nullable_to_non_nullable
 as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,initialPhotoUrl: freezed == initialPhotoUrl ? _self.initialPhotoUrl : initialPhotoUrl // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -163,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String userId,  PloggingStatus status,  DateTime startedAt,  DateTime? endedAt,  int? durationMinutes,  double? totalDistanceMeters,  int intensityLevel,  int verificationCount,  int pointsEarned,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String userId,  PloggingStatus status,  DateTime startedAt,  DateTime? endedAt,  int? durationMinutes,  double? totalDistanceMeters,  int intensityLevel,  int verificationCount,  int pointsEarned,  DateTime createdAt,  String? initialPhotoUrl)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PloggingSession() when $default != null:
-return $default(_that.id,_that.userId,_that.status,_that.startedAt,_that.endedAt,_that.durationMinutes,_that.totalDistanceMeters,_that.intensityLevel,_that.verificationCount,_that.pointsEarned,_that.createdAt);case _:
+return $default(_that.id,_that.userId,_that.status,_that.startedAt,_that.endedAt,_that.durationMinutes,_that.totalDistanceMeters,_that.intensityLevel,_that.verificationCount,_that.pointsEarned,_that.createdAt,_that.initialPhotoUrl);case _:
   return orElse();
 
 }
@@ -184,10 +185,10 @@ return $default(_that.id,_that.userId,_that.status,_that.startedAt,_that.endedAt
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String userId,  PloggingStatus status,  DateTime startedAt,  DateTime? endedAt,  int? durationMinutes,  double? totalDistanceMeters,  int intensityLevel,  int verificationCount,  int pointsEarned,  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String userId,  PloggingStatus status,  DateTime startedAt,  DateTime? endedAt,  int? durationMinutes,  double? totalDistanceMeters,  int intensityLevel,  int verificationCount,  int pointsEarned,  DateTime createdAt,  String? initialPhotoUrl)  $default,) {final _that = this;
 switch (_that) {
 case _PloggingSession():
-return $default(_that.id,_that.userId,_that.status,_that.startedAt,_that.endedAt,_that.durationMinutes,_that.totalDistanceMeters,_that.intensityLevel,_that.verificationCount,_that.pointsEarned,_that.createdAt);case _:
+return $default(_that.id,_that.userId,_that.status,_that.startedAt,_that.endedAt,_that.durationMinutes,_that.totalDistanceMeters,_that.intensityLevel,_that.verificationCount,_that.pointsEarned,_that.createdAt,_that.initialPhotoUrl);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +205,10 @@ return $default(_that.id,_that.userId,_that.status,_that.startedAt,_that.endedAt
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String userId,  PloggingStatus status,  DateTime startedAt,  DateTime? endedAt,  int? durationMinutes,  double? totalDistanceMeters,  int intensityLevel,  int verificationCount,  int pointsEarned,  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String userId,  PloggingStatus status,  DateTime startedAt,  DateTime? endedAt,  int? durationMinutes,  double? totalDistanceMeters,  int intensityLevel,  int verificationCount,  int pointsEarned,  DateTime createdAt,  String? initialPhotoUrl)?  $default,) {final _that = this;
 switch (_that) {
 case _PloggingSession() when $default != null:
-return $default(_that.id,_that.userId,_that.status,_that.startedAt,_that.endedAt,_that.durationMinutes,_that.totalDistanceMeters,_that.intensityLevel,_that.verificationCount,_that.pointsEarned,_that.createdAt);case _:
+return $default(_that.id,_that.userId,_that.status,_that.startedAt,_that.endedAt,_that.durationMinutes,_that.totalDistanceMeters,_that.intensityLevel,_that.verificationCount,_that.pointsEarned,_that.createdAt,_that.initialPhotoUrl);case _:
   return null;
 
 }
@@ -219,7 +220,7 @@ return $default(_that.id,_that.userId,_that.status,_that.startedAt,_that.endedAt
 @JsonSerializable()
 
 class _PloggingSession implements PloggingSession {
-  const _PloggingSession({required this.id, required this.userId, required this.status, required this.startedAt, this.endedAt, this.durationMinutes, this.totalDistanceMeters, this.intensityLevel = 1, this.verificationCount = 0, this.pointsEarned = 0, required this.createdAt});
+  const _PloggingSession({required this.id, required this.userId, required this.status, required this.startedAt, this.endedAt, this.durationMinutes, this.totalDistanceMeters, this.intensityLevel = 1, this.verificationCount = 0, this.pointsEarned = 0, required this.createdAt, this.initialPhotoUrl});
   factory _PloggingSession.fromJson(Map<String, dynamic> json) => _$PloggingSessionFromJson(json);
 
 @override final  int id;
@@ -233,6 +234,7 @@ class _PloggingSession implements PloggingSession {
 @override@JsonKey() final  int verificationCount;
 @override@JsonKey() final  int pointsEarned;
 @override final  DateTime createdAt;
+@override final  String? initialPhotoUrl;
 
 /// Create a copy of PloggingSession
 /// with the given fields replaced by the non-null parameter values.
@@ -247,16 +249,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PloggingSession&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.status, status) || other.status == status)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.endedAt, endedAt) || other.endedAt == endedAt)&&(identical(other.durationMinutes, durationMinutes) || other.durationMinutes == durationMinutes)&&(identical(other.totalDistanceMeters, totalDistanceMeters) || other.totalDistanceMeters == totalDistanceMeters)&&(identical(other.intensityLevel, intensityLevel) || other.intensityLevel == intensityLevel)&&(identical(other.verificationCount, verificationCount) || other.verificationCount == verificationCount)&&(identical(other.pointsEarned, pointsEarned) || other.pointsEarned == pointsEarned)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PloggingSession&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.status, status) || other.status == status)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.endedAt, endedAt) || other.endedAt == endedAt)&&(identical(other.durationMinutes, durationMinutes) || other.durationMinutes == durationMinutes)&&(identical(other.totalDistanceMeters, totalDistanceMeters) || other.totalDistanceMeters == totalDistanceMeters)&&(identical(other.intensityLevel, intensityLevel) || other.intensityLevel == intensityLevel)&&(identical(other.verificationCount, verificationCount) || other.verificationCount == verificationCount)&&(identical(other.pointsEarned, pointsEarned) || other.pointsEarned == pointsEarned)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.initialPhotoUrl, initialPhotoUrl) || other.initialPhotoUrl == initialPhotoUrl));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,status,startedAt,endedAt,durationMinutes,totalDistanceMeters,intensityLevel,verificationCount,pointsEarned,createdAt);
+int get hashCode => Object.hash(runtimeType,id,userId,status,startedAt,endedAt,durationMinutes,totalDistanceMeters,intensityLevel,verificationCount,pointsEarned,createdAt,initialPhotoUrl);
 
 @override
 String toString() {
-  return 'PloggingSession(id: $id, userId: $userId, status: $status, startedAt: $startedAt, endedAt: $endedAt, durationMinutes: $durationMinutes, totalDistanceMeters: $totalDistanceMeters, intensityLevel: $intensityLevel, verificationCount: $verificationCount, pointsEarned: $pointsEarned, createdAt: $createdAt)';
+  return 'PloggingSession(id: $id, userId: $userId, status: $status, startedAt: $startedAt, endedAt: $endedAt, durationMinutes: $durationMinutes, totalDistanceMeters: $totalDistanceMeters, intensityLevel: $intensityLevel, verificationCount: $verificationCount, pointsEarned: $pointsEarned, createdAt: $createdAt, initialPhotoUrl: $initialPhotoUrl)';
 }
 
 
@@ -267,7 +269,7 @@ abstract mixin class _$PloggingSessionCopyWith<$Res> implements $PloggingSession
   factory _$PloggingSessionCopyWith(_PloggingSession value, $Res Function(_PloggingSession) _then) = __$PloggingSessionCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String userId, PloggingStatus status, DateTime startedAt, DateTime? endedAt, int? durationMinutes, double? totalDistanceMeters, int intensityLevel, int verificationCount, int pointsEarned, DateTime createdAt
+ int id, String userId, PloggingStatus status, DateTime startedAt, DateTime? endedAt, int? durationMinutes, double? totalDistanceMeters, int intensityLevel, int verificationCount, int pointsEarned, DateTime createdAt, String? initialPhotoUrl
 });
 
 
@@ -284,7 +286,7 @@ class __$PloggingSessionCopyWithImpl<$Res>
 
 /// Create a copy of PloggingSession
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? status = null,Object? startedAt = null,Object? endedAt = freezed,Object? durationMinutes = freezed,Object? totalDistanceMeters = freezed,Object? intensityLevel = null,Object? verificationCount = null,Object? pointsEarned = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? status = null,Object? startedAt = null,Object? endedAt = freezed,Object? durationMinutes = freezed,Object? totalDistanceMeters = freezed,Object? intensityLevel = null,Object? verificationCount = null,Object? pointsEarned = null,Object? createdAt = null,Object? initialPhotoUrl = freezed,}) {
   return _then(_PloggingSession(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -297,7 +299,8 @@ as double?,intensityLevel: null == intensityLevel ? _self.intensityLevel : inten
 as int,verificationCount: null == verificationCount ? _self.verificationCount : verificationCount // ignore: cast_nullable_to_non_nullable
 as int,pointsEarned: null == pointsEarned ? _self.pointsEarned : pointsEarned // ignore: cast_nullable_to_non_nullable
 as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,initialPhotoUrl: freezed == initialPhotoUrl ? _self.initialPhotoUrl : initialPhotoUrl // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

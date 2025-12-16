@@ -15,10 +15,16 @@ class PloggingApi {
 
   /// 플로깅 세션 시작
   /// POST /plogging/sessions
-  Future<PloggingSessionDto> startSession(String userId) async {
+  Future<PloggingSessionDto> startSession({
+    required String userId,
+    required String initialPhotoUrl,
+  }) async {
     final response = await _dio.post(
       '/plogging/sessions',
-      data: {'user_id': userId},
+      data: {
+        'user_id': userId,
+        'initial_photo_url': initialPhotoUrl,
+      },
     );
     return PloggingSessionDto.fromJson(response.data);
   }

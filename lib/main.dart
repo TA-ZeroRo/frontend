@@ -26,7 +26,7 @@ void main() async {
     url: EnvConfig.supabaseUrl,
     anonKey: EnvConfig.supabaseAnonKey,
   );
- 
+
   // Dependency Injection 초기화
   configureDependencies();
 
@@ -60,6 +60,6 @@ class MainApp extends StatelessWidget {
           // builder: (context, child) => FcmInitializer(child: child ?? const SizedBox()),
         ),
       ),
-    );  
+    );
   }
 }

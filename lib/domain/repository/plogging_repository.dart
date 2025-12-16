@@ -6,8 +6,11 @@ import '../model/plogging/plogging_stats.dart';
 
 /// 플로깅 관련 저장소 인터페이스
 abstract class PloggingRepository {
-  /// 플로깅 세션 시작
-  Future<PloggingSession> startSession(String userId);
+  /// 플로깅 세션 시작 (초기 사진 URL 필수)
+  Future<PloggingSession> startSession({
+    required String userId,
+    required String initialPhotoUrl,
+  });
 
   /// 플로깅 세션 종료
   Future<PloggingSession> endSession({

@@ -27,6 +27,7 @@ class PloggingSessionState {
   final DateTime? pausedAt; // 일시정지 시작 시간 (인증 대기 중)
   final Duration pausedDuration; // 누적 일시정지 시간
   final Duration elapsedDuration; // 계산된 경과 시간 (타이머에서 업데이트)
+  final String? initialPhotoUrl; // 초기 사진 URL
 
   const PloggingSessionState({
     this.currentSession,
@@ -40,6 +41,7 @@ class PloggingSessionState {
     this.pausedAt,
     this.pausedDuration = Duration.zero,
     this.elapsedDuration = Duration.zero,
+    this.initialPhotoUrl,
   });
 
   /// 현재 일시정지 상태인지 (인증 대기 중)
@@ -73,9 +75,11 @@ class PloggingSessionState {
     DateTime? pausedAt,
     Duration? pausedDuration,
     Duration? elapsedDuration,
+    String? initialPhotoUrl,
     bool clearSession = false,
     bool clearError = false,
     bool clearPausedAt = false,
+    bool clearInitialPhoto = false,
   }) {
     return PloggingSessionState(
       currentSession: clearSession ? null : (currentSession ?? this.currentSession),
@@ -89,6 +93,7 @@ class PloggingSessionState {
       pausedAt: clearPausedAt ? null : (pausedAt ?? this.pausedAt),
       pausedDuration: pausedDuration ?? this.pausedDuration,
       elapsedDuration: elapsedDuration ?? this.elapsedDuration,
+      initialPhotoUrl: clearInitialPhoto ? null : (initialPhotoUrl ?? this.initialPhotoUrl),
     );
   }
 }
@@ -143,8 +148,8 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
     }
   }
 
-  /// 플로깅 세션 시작
-  Future<void> startSession() async {
+  /// 플로깅 세션 시작 (초기 사진 URL 필수)
+  Future<void> startSessionWithPhoto(String initialPhotoUrl) async {
     final userId = ref.read(authProvider).currentUser?.id;
     if (userId == null) {
       state = state.copyWith(errorMessage: '로그인이 필요합니다');
@@ -165,8 +170,11 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
         }
       }
 
-      // 세션 생성
-      final session = await _repository.startSession(userId);
+      // 세션 생성 (초기 사진 URL 포함)
+      final session = await _repository.startSession(
+        userId: userId,
+        initialPhotoUrl: initialPhotoUrl,
+      );
 
       state = state.copyWith(
         currentSession: session,
@@ -174,6 +182,7 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
         verifications: [],
         isTracking: true,
         totalDistanceMeters: 0,
+        initialPhotoUrl: initialPhotoUrl,
         nextVerificationTime: DateTime.now().add(
           const Duration(seconds: verificationIntervalSeconds),
         ),

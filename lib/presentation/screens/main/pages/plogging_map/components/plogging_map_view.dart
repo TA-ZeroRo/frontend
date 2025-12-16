@@ -105,12 +105,36 @@ class _PloggingMapViewState extends ConsumerState<PloggingMapView> {
             ),
 
             // 커뮤니티 경로 (다른 사용자들의 플로깅 경로)
+            // 포인트 2개 이상: Polyline으로 표시, 1개: Marker로 표시
             communityRoutes.when(
-              data: (routes) => PolylineLayer(
-                polylines: routes
-                    .map((route) => _buildCommunityPolyline(route))
-                    .toList(),
-              ),
+              data: (routes) {
+                final polylineRoutes =
+                    routes.where((r) => r.routePoints.length >= 2).toList();
+                final singlePointRoutes =
+                    routes.where((r) => r.routePoints.length == 1).toList();
+
+                return Stack(
+                  children: [
+                    // 경로 선 (2개 이상 포인트)
+                    PolylineLayer(
+                      polylines: polylineRoutes
+                          .map((route) => _buildCommunityPolyline(route))
+                          .toList(),
+                    ),
+                    // 단일 포인트 마커 (1개 포인트)
+                    if (singlePointRoutes.isNotEmpty)
+                      ValueListenableBuilder<double>(
+                        valueListenable: _zoomNotifier,
+                        builder: (context, zoom, _) => MarkerLayer(
+                          markers: singlePointRoutes
+                              .map((route) =>
+                                  _buildSinglePointMarker(route, zoom))
+                              .toList(),
+                        ),
+                      ),
+                  ],
+                );
+              },
               loading: () => const PolylineLayer(polylines: []),
               error: (_, __) => const PolylineLayer(polylines: []),
             ),
@@ -222,13 +246,37 @@ class _PloggingMapViewState extends ConsumerState<PloggingMapView> {
 
   /// 커뮤니티 경로 폴리라인 생성
   Polyline _buildCommunityPolyline(PloggingRoute route) {
-    final color = Color(getIntensityColor(route.intensityLevel));
-    final opacity = getIntensityOpacity(route.intensityLevel);
-
     return Polyline(
       points: route.routePoints.map((p) => LatLng(p.lat, p.lng)).toList(),
       strokeWidth: _getResponsiveSize(6.0),
-      color: color.withValues(alpha: opacity),
+      color: const Color(ploggingRouteColor).withValues(alpha: ploggingRouteOpacity),
+    );
+  }
+
+  /// 단일 포인트 마커 생성 (GPS 포인트가 1개인 경로용)
+  Marker _buildSinglePointMarker(PloggingRoute route, double zoom) {
+    final point = route.routePoints.first;
+    final size = _getResponsiveSize(20, zoom);
+
+    return Marker(
+      point: LatLng(point.lat, point.lng),
+      width: size,
+      height: size,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(ploggingRouteColor)
+              .withValues(alpha: ploggingRouteOpacity),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

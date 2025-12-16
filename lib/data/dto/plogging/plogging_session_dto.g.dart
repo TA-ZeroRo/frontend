@@ -22,6 +22,7 @@ PloggingSessionDto _$PloggingSessionDtoFromJson(Map<String, dynamic> json) =>
       routePoints: (json['route_points'] as List<dynamic>?)
           ?.map((e) => GpsPointDto.fromJson(e as Map<String, dynamic>))
           .toList(),
+      initialPhotoUrl: json['initial_photo_url'] as String?,
     );
 
 Map<String, dynamic> _$PloggingSessionDtoToJson(PloggingSessionDto instance) =>
@@ -38,15 +39,22 @@ Map<String, dynamic> _$PloggingSessionDtoToJson(PloggingSessionDto instance) =>
       'points_earned': instance.pointsEarned,
       'created_at': instance.createdAt,
       'route_points': instance.routePoints?.map((e) => e.toJson()).toList(),
+      'initial_photo_url': instance.initialPhotoUrl,
     };
 
 PloggingSessionCreateRequest _$PloggingSessionCreateRequestFromJson(
   Map<String, dynamic> json,
-) => PloggingSessionCreateRequest(userId: json['user_id'] as String);
+) => PloggingSessionCreateRequest(
+  userId: json['user_id'] as String,
+  initialPhotoUrl: json['initial_photo_url'] as String,
+);
 
 Map<String, dynamic> _$PloggingSessionCreateRequestToJson(
   PloggingSessionCreateRequest instance,
-) => <String, dynamic>{'user_id': instance.userId};
+) => <String, dynamic>{
+  'user_id': instance.userId,
+  'initial_photo_url': instance.initialPhotoUrl,
+};
 
 PloggingSessionEndRequest _$PloggingSessionEndRequestFromJson(
   Map<String, dynamic> json,

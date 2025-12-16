@@ -13,6 +13,24 @@ import 'state/plogging_session_state.dart';
 class PloggingMapPage extends ConsumerWidget {
   const PloggingMapPage({super.key});
 
+  void _showWeeklyStatsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('주간 플로깅 현황'),
+        content: const Text(
+          '서울특별시는 지난주 128명의 유저가 256시간 활동했어요!',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sessionState = ref.watch(ploggingSessionProvider);
@@ -43,9 +61,15 @@ class PloggingMapPage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       extendBodyBehindAppBar: true,
-      appBar: const CustomAppBar(
+      appBar: CustomAppBar(
         title: '플로깅 맵',
         backgroundColor: Colors.transparent,
+        additionalActions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () => _showWeeklyStatsDialog(context),
+          ),
+        ],
       ),
       body: Stack(
         children: [
