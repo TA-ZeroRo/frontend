@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/di/injection.dart';
 import 'package:frontend/core/theme/app_color.dart';
 import 'package:frontend/core/utils/toast_helper.dart';
 import 'package:frontend/data/data_source/location/location_service.dart';
+import 'package:frontend/data/data_source/mission/mission_api.dart';
 import 'package:frontend/domain/model/mission/mission_with_template.dart';
+import 'package:frontend/domain/model/verification/location_verification_result.dart';
 
 import '../../state/campaign_mission_state.dart';
 
@@ -19,6 +22,9 @@ class LocationVerificationBottomSheet extends ConsumerStatefulWidget {
 
 class _LocationVerificationBottomSheetState
     extends ConsumerState<LocationVerificationBottomSheet> {
+  final MissionApi _missionApi = getIt<MissionApi>();
+  bool _isSubmittingProof = false;
+
   @override
   void initState() {
     super.initState();
@@ -30,16 +36,43 @@ class _LocationVerificationBottomSheetState
     });
   }
 
+  /// 위치 인증 성공 시 증빙 데이터 제출
+  Future<void> _submitLocationProof(LocationVerificationResult result) async {
+    if (_isSubmittingProof) return;
+    _isSubmittingProof = true;
+
+    try {
+      await _missionApi.submitProof(
+        logId: widget.mission.missionLog.id,
+        proofData: {
+          'verification_type': 'location',
+          'address': result.locationAddress,
+          'distance': result.distance?.toStringAsFixed(0),
+          'verified_at': result.verifiedAt?.toIso8601String() ??
+              DateTime.now().toIso8601String(),
+        },
+      );
+      // 미션 목록 새로고침
+      ref.read(campaignMissionProvider.notifier).refresh();
+    } catch (e) {
+      ToastHelper.showError('증빙 제출 중 오류가 발생했습니다.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final verificationState = ref.watch(locationVerificationProvider);
 
-    // 성공 시 토스트 표시
+    // 성공 시 토스트 표시 및 증빙 데이터 제출
     ref.listen<LocationVerificationState>(locationVerificationProvider,
         (previous, next) {
       if (previous?.status != LocationVerificationStatus.success &&
           next.status == LocationVerificationStatus.success) {
         ToastHelper.showSuccess('위치 인증에 성공했습니다!');
+        // 증빙 데이터 제출
+        if (next.result != null) {
+          _submitLocationProof(next.result!);
+        }
       }
     });
 
