@@ -503,7 +503,7 @@ class RecruitingInfoTab extends ConsumerWidget {
           Text(
             '${post.region} ${post.city}',
             style: AppTextStyle.bodyLarge.copyWith(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const Divider(height: 24),
@@ -523,7 +523,7 @@ class RecruitingInfoTab extends ConsumerWidget {
           Text(
             DateFormat('yyyy년 M월 d일').format(post.startDate),
             style: AppTextStyle.bodyLarge.copyWith(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const Divider(height: 24),
@@ -543,7 +543,7 @@ class RecruitingInfoTab extends ConsumerWidget {
           Text(
             '${post.currentMembers}/${post.capacity}명',
             style: AppTextStyle.bodyLarge.copyWith(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               color: post.currentMembers >= post.capacity
                   ? AppColors.error
                   : AppColors.primary,
@@ -568,7 +568,7 @@ class RecruitingInfoTab extends ConsumerWidget {
                 ? '나이 제한 없음'
                 : '${post.minAge}세 ~ ${post.maxAge}세',
             style: AppTextStyle.bodyLarge.copyWith(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -694,7 +694,7 @@ class RecruitingInfoTab extends ConsumerWidget {
               '리크루팅 참여하기',
               style: AppTextStyle.bodyLarge.copyWith(
                 color: Colors.white,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w200,
               ),
             ),
           ],

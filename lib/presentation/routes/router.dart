@@ -9,6 +9,7 @@ import '../screens/main/pages/campaign/models/recruiting_post.dart';
 import '../screens/main/pages/campaign/models/campaign_data.dart';
 import '../screens/main/pages/campaign/campaign_detail_screen.dart';
 import '../screens/settings/settings_screen.dart';
+import '../screens/settings/feedback_screen.dart';
 import 'router_path.dart';
 
 final GoRouter router = GoRouter(
@@ -37,6 +38,11 @@ final GoRouter router = GoRouter(
       path: RoutePath.settings,
       name: 'settings',
       builder: (context, state) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: RoutePath.feedback,
+      name: 'feedback',
+      builder: (context, state) => const FeedbackScreen(),
     ),
     GoRoute(
       path: '/recruiting/:id',

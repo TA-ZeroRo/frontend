@@ -184,7 +184,8 @@ class WeeklyReportContent extends StatelessWidget {
               '월간 환경 활동',
               style: AppTextStyle.headlineMedium.copyWith(
                 color: AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
+                fontSize: 24,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -314,7 +315,7 @@ class WeeklyReportContent extends StatelessWidget {
             value,
             style: AppTextStyle.headlineSmall.copyWith(
               color: AppColors.textPrimary,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 4),
