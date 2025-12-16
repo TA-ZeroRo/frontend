@@ -106,13 +106,14 @@ class RecruitingMessageBubble extends StatelessWidget {
 
   /// 프로필 이미지
   Widget _buildAvatar() {
+    final hasValidImage = message.userImageUrl?.isNotEmpty ?? false;
     return CircleAvatar(
       radius: 18,
-      backgroundImage: message.userImageUrl != null
+      backgroundImage: hasValidImage
           ? NetworkImage(message.userImageUrl!)
           : null,
       backgroundColor: AppColors.primary.withValues(alpha: 0.2),
-      child: message.userImageUrl == null
+      child: !hasValidImage
           ? Text(
               message.username[0],
               style: const TextStyle(

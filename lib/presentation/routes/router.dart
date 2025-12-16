@@ -6,6 +6,8 @@ import '../screens/entry/splash_screen.dart';
 import '../screens/main/main_screen.dart';
 import '../screens/main/pages/recruiting/recruiting_detail_screen.dart';
 import '../screens/main/pages/campaign/models/recruiting_post.dart';
+import '../screens/main/pages/campaign/models/campaign_data.dart';
+import '../screens/main/pages/campaign/campaign_detail_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import 'router_path.dart';
 
@@ -46,6 +48,14 @@ final GoRouter router = GoRouter(
           post: post,
           initialTabIndex: tabIndex == 'chat' ? 1 : 0,
         );
+      },
+    ),
+    GoRoute(
+      path: '/campaign/:id',
+      name: 'campaign-detail',
+      builder: (context, state) {
+        final campaign = state.extra as CampaignData;
+        return CampaignDetailScreen(campaign: campaign);
       },
     ),
   ],

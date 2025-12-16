@@ -3,7 +3,7 @@ class RecruitingPost {
   final String hostId; // 주최자 ID
   final String campaignId;
   final String campaignTitle;
-  final String campaignImageUrl;
+  final String? campaignImageUrl;
   final String title;
   final String region;
   final String city;
@@ -22,7 +22,7 @@ class RecruitingPost {
     required this.hostId,
     required this.campaignId,
     required this.campaignTitle,
-    required this.campaignImageUrl,
+    this.campaignImageUrl,
     required this.title,
     required this.region,
     required this.city,
