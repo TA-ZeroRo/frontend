@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/theme/app_color.dart';
+import '../../../../../../core/utils/toast_helper.dart';
+import '../../../../../../core/di/injection.dart';
+import '../../../../../../data/repository/character/character_repository.dart';
+import '../../../../../../data/dto/character/character_info.dart';
 import '../../../../settings/state/settings_controller.dart';
+import '../../../../entry/state/auth_controller.dart';
+import '../state/chat_controller.dart';
 
 class CharacterSelectModal extends ConsumerStatefulWidget {
   const CharacterSelectModal({super.key});
@@ -12,12 +18,83 @@ class CharacterSelectModal extends ConsumerStatefulWidget {
 
 class _CharacterSelectModalState extends ConsumerState<CharacterSelectModal> {
   late String _tempSelectedCharacter;
+  final CharacterRepository _characterRepository = getIt<CharacterRepository>();
+
+  bool _isLoading = true;
+  List<CharacterInfo> _characters = [];
+  int _currentPoints = 0;
 
   @override
   void initState() {
     super.initState();
     // 현재 설정된 캐릭터를 임시 선택 상태로 초기화
     _tempSelectedCharacter = ref.read(appSettingsProvider).selectedCharacter;
+    _loadCharacters();
+  }
+
+  /// 백엔드에서 캐릭터 목록 불러오기
+  Future<void> _loadCharacters() async {
+    final userId = ref.read(authProvider).currentUser?.id;
+    if (userId == null) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      final response = await _characterRepository.getCharacters(userId);
+      setState(() {
+        _characters = response.characters;
+        _currentPoints = response.totalPoints;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ToastHelper.showError('캐릭터 목록을 불러오는데 실패했습니다.');
+    }
+  }
+
+  /// 캐릭터 선택 처리 (잠금 해제 포함)
+  Future<void> _handleCharacterSelect(String characterId) async {
+    final userId = ref.read(authProvider).currentUser?.id;
+    if (userId == null) {
+      ToastHelper.showError('로그인이 필요합니다.');
+      return;
+    }
+
+    final character = _characters.firstWhere((c) => c.id == characterId);
+
+    // 이미 해금된 캐릭터면 바로 선택
+    if (character.isUnlocked) {
+      setState(() {
+        _tempSelectedCharacter = characterId;
+      });
+      return;
+    }
+
+    // 해금 가능한지 확인
+    if (!character.canUnlock) {
+      ToastHelper.showError('${character.requiredPoints}점 달성 시 해금됩니다.');
+      return;
+    }
+
+    // 캐릭터 해금 API 호출
+    try {
+      await _characterRepository.unlockCharacter(userId, characterId);
+      ToastHelper.showSuccess('${character.name}이(가) 해금되었습니다!');
+
+      // 캐릭터 목록 새로고침
+      await _loadCharacters();
+
+      setState(() {
+        _tempSelectedCharacter = characterId;
+      });
+    } catch (e) {
+      ToastHelper.showError('캐릭터 해금에 실패했습니다.');
+    }
   }
 
   @override
@@ -91,37 +168,38 @@ class _CharacterSelectModalState extends ConsumerState<CharacterSelectModal> {
             const SizedBox(height: 24),
 
             // Character Options
-            Row(
-              children: [
-                Expanded(
-                  child: _CharacterOptionCard(
-                    id: 'earth',
-                    name: '지구 제로로',
-                    imagePath: 'assets/images/earth_zeroro.png',
-                    isSelected: _tempSelectedCharacter == 'earth',
-                    onTap: () {
-                      setState(() {
-                        _tempSelectedCharacter = 'earth';
-                      });
-                    },
-                  ),
+            if (_isLoading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: CircularProgressIndicator(),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _CharacterOptionCard(
-                    id: 'cloud',
-                    name: '먼지 제로로',
-                    imagePath: 'assets/images/cloud_zeroro.png',
-                    isSelected: _tempSelectedCharacter == 'cloud',
-                    onTap: () {
-                      setState(() {
-                        _tempSelectedCharacter = 'cloud';
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
+              )
+            else
+              Row(
+                children: _characters.map((character) {
+                  return Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: character == _characters.last ? 0 : 16,
+                      ),
+                      child: _CharacterOptionCard(
+                        id: character.id,
+                        name: character.name,
+                        imagePath: character.id == 'earth_zeroro'
+                            ? 'assets/images/earth_zeroro.png'
+                            : 'assets/images/cloud_zeroro.png',
+                        isSelected: _tempSelectedCharacter == character.id,
+                        isLocked: !character.isUnlocked,
+                        canUnlock: character.canUnlock,
+                        requiredPoints: character.requiredPoints,
+                        currentPoints: _currentPoints,
+                        onTap: () => _handleCharacterSelect(character.id),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
             const SizedBox(height: 32),
             Row(
               children: [
@@ -149,6 +227,8 @@ class _CharacterSelectModalState extends ConsumerState<CharacterSelectModal> {
                   flex: 2,
                   child: ElevatedButton(
                     onPressed: () {
+                      // 캐릭터 변경 시 채팅 기록 초기화
+                      ref.read(chatProvider.notifier).clearMessages();
                       // 상태 업데이트를 먼저 수행
                       ref
                           .read(appSettingsProvider.notifier)
@@ -188,6 +268,10 @@ class _CharacterOptionCard extends StatefulWidget {
   final String name;
   final String imagePath;
   final bool isSelected;
+  final bool isLocked;
+  final bool canUnlock;
+  final int requiredPoints;
+  final int currentPoints;
   final VoidCallback onTap;
 
   const _CharacterOptionCard({
@@ -195,6 +279,10 @@ class _CharacterOptionCard extends StatefulWidget {
     required this.name,
     required this.imagePath,
     required this.isSelected,
+    required this.isLocked,
+    required this.canUnlock,
+    required this.requiredPoints,
+    required this.currentPoints,
     required this.onTap,
   });
 
@@ -274,7 +362,7 @@ class _CharacterOptionCardState extends State<_CharacterOptionCard>
                 alignment: Alignment.center,
                 children: [
                   // Glow effect behind image when selected
-                  if (widget.isSelected)
+                  if (widget.isSelected && !widget.isLocked)
                     Container(
                       width: 70,
                       height: 70,
@@ -297,7 +385,7 @@ class _CharacterOptionCardState extends State<_CharacterOptionCard>
                       shape: BoxShape.circle,
                       color: Colors.white,
                       border: Border.all(
-                        color: widget.isSelected
+                        color: widget.isSelected && !widget.isLocked
                             ? AppColors.primary.withValues(alpha: 0.3)
                             : Colors.transparent,
                         width: 1,
@@ -311,14 +399,38 @@ class _CharacterOptionCardState extends State<_CharacterOptionCard>
                       ],
                     ),
                     child: ClipOval(
-                      child: Transform.scale(
-                        scale: 1.2,
-                        child: Image.asset(widget.imagePath, fit: BoxFit.cover),
+                      child: Stack(
+                        children: [
+                          Transform.scale(
+                            scale: 1.2,
+                            child: Image.asset(
+                              widget.imagePath,
+                              fit: BoxFit.cover,
+                              color: widget.isLocked
+                                  ? Colors.black.withValues(alpha: 0.5)
+                                  : null,
+                              colorBlendMode:
+                                  widget.isLocked ? BlendMode.darken : null,
+                            ),
+                          ),
+                          // Lock overlay
+                          if (widget.isLocked)
+                            Container(
+                              color: Colors.black.withValues(alpha: 0.4),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.lock,
+                                  color: Colors.white,
+                                  size: 32,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ),
                   // Selection badge
-                  if (widget.isSelected)
+                  if (widget.isSelected && !widget.isLocked)
                     Positioned(
                       right: 0,
                       bottom: 0,
@@ -350,14 +462,32 @@ class _CharacterOptionCardState extends State<_CharacterOptionCard>
                 widget.name,
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight: widget.isSelected
+                  fontWeight: widget.isSelected && !widget.isLocked
                       ? FontWeight.bold
                       : FontWeight.w600,
-                  color: widget.isSelected
-                      ? AppColors.primary
-                      : AppColors.textPrimary,
+                  color: widget.isLocked
+                      ? AppColors.textSecondary
+                      : (widget.isSelected
+                          ? AppColors.primary
+                          : AppColors.textPrimary),
                 ),
               ),
+              if (widget.isLocked) ...[
+                const SizedBox(height: 4),
+                Text(
+                  widget.canUnlock
+                      ? '탭하여 해금'
+                      : '${widget.requiredPoints}점 필요',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: widget.canUnlock
+                        ? AppColors.primary
+                        : AppColors.textSecondary,
+                    fontWeight:
+                        widget.canUnlock ? FontWeight.w600 : FontWeight.normal,
+                  ),
+                ),
+              ],
             ],
           ),
         ),

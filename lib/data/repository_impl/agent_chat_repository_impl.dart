@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/logger/logger.dart';
 import '../../core/utils/character_preferences.dart';
 import '../../domain/repository/agent_chat_repository.dart';
@@ -17,13 +18,19 @@ class AgentChatRepositoryImpl implements AgentChatRepository {
     required String message,
   }) async {
     try {
-      // Shared Preferences에서 선택된 캐릭터 가져오기
+      // Shared Preferences에서 선택된 캐릭터와 성격 가져오기
       final selectedCharacter = await CharacterPreferences.getSelectedCharacter();
+
+      // 설정에서 선택된 성격 가져오기 (SettingsController 사용)
+      // TODO: SharedPreferences에서 직접 가져오도록 수정 필요
+      final prefs = await SharedPreferences.getInstance();
+      final selectedPersonality = prefs.getString('selectedPersonality') ?? 'friendly';
 
       final request = AgentChatRequest(
         userId: userId,
         message: message,
         selectedCharacter: selectedCharacter,
+        selectedPersonality: selectedPersonality,
       );
       final response = await _agentChatApi.sendMessage(request);
       return response.message;
