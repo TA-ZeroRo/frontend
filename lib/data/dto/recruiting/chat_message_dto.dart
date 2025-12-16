@@ -29,13 +29,17 @@ class ChatMessageDto {
 
   Map<String, dynamic> toJson() => _$ChatMessageDtoToJson(this);
 
+  static String? _getValidImageUrl(dynamic img) {
+    return (img is String && img.isNotEmpty && img.startsWith('http')) ? img : null;
+  }
+
   ChatMessage toModel() {
     return ChatMessage(
       id: id.toString(),
       chatRoomId: chatRoomId.toString(),
       userId: userId,
       username: profiles?['username'] ?? 'Unknown',
-      userImageUrl: profiles?['user_img'],
+      userImageUrl: _getValidImageUrl(profiles?['user_img']),
       message: message,
       timestamp: DateTime.parse(createdAt),
     );

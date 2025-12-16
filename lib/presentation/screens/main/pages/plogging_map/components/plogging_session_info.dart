@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../core/theme/app_color.dart';
+import '../../../../../../domain/model/plogging/photo_verification.dart';
 import '../state/plogging_session_state.dart';
 
 /// 플로깅 세션 정보 위젯
@@ -120,6 +121,11 @@ class _PloggingSessionInfoState extends ConsumerState<PloggingSessionInfo> {
     Duration elapsed,
     PloggingSessionState sessionState,
   ) {
+    // 성공한 인증만 필터링
+    final successfulVerifications = sessionState.verifications
+        .where((v) => v.verificationStatus == VerificationStatus.verified)
+        .toList();
+
     return GestureDetector(
       onTap: () => setState(() => _isExpanded = true),
       behavior: HitTestBehavior.opaque,
@@ -146,9 +152,9 @@ class _PloggingSessionInfoState extends ConsumerState<PloggingSessionInfo> {
             ),
           ),
           const SizedBox(width: 12),
-          // 인증 횟수
+          // 인증 횟수 (성공한 것만)
           Text(
-            '${sessionState.verifications.length}회',
+            '${successfulVerifications.length}회',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -229,6 +235,13 @@ class _PloggingSessionInfoState extends ConsumerState<PloggingSessionInfo> {
   }
 
   Widget _buildStatsRow(PloggingSessionState sessionState) {
+    // 성공한 인증만 필터링
+    final successfulVerifications = sessionState.verifications
+        .where((v) => v.verificationStatus == VerificationStatus.verified)
+        .toList();
+    final totalPoints =
+        successfulVerifications.fold(0, (sum, v) => sum + v.pointsEarned);
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
@@ -248,13 +261,13 @@ class _PloggingSessionInfoState extends ConsumerState<PloggingSessionInfo> {
           _VerticalDivider(),
           _InfoItem(
             label: '인증',
-            value: '${sessionState.verifications.length}',
+            value: '${successfulVerifications.length}',
             unit: '회',
           ),
           _VerticalDivider(),
           _InfoItem(
             label: '포인트',
-            value: '${sessionState.verifications.length * 50}',
+            value: '$totalPoints',
             unit: 'P',
           ),
         ],

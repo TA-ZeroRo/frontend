@@ -125,14 +125,16 @@ class _RecruitingChatTabState extends ConsumerState<RecruitingChatTab> {
   }
 
   @override
-  void deactivate() {
-    // 활성 채팅방 ID 해제 - dispose() 전에 ref가 유효한 시점에서 처리
-    ref.read(activeChatRoomIdProvider.notifier).state = null;
-    super.deactivate();
-  }
-
-  @override
   void dispose() {
+    // 활성 채팅방 ID 해제 - dispose 시점에 안전하게 처리
+    // WidgetsBinding.addPostFrameCallback은 dispose 후에는 실행되지 않으므로
+    // 직접 Provider 컨테이너를 통해 접근하거나 try-catch로 안전하게 처리
+    try {
+      ref.read(activeChatRoomIdProvider.notifier).state = null;
+    } catch (_) {
+      // ref가 이미 무효화된 경우 무시
+    }
+
     _realtimeSubscription?.cancel();
     _repository.unsubscribeFromChatRoom();
     _scrollController.dispose();

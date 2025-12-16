@@ -64,13 +64,19 @@ class RecruitingPostDto {
 
   Map<String, dynamic> toJson() => _$RecruitingPostDtoToJson(this);
 
+  static String? _getValidImageUrl(dynamic url) {
+    return (url is String && url.isNotEmpty && url.startsWith('http'))
+        ? url
+        : null;
+  }
+
   RecruitingPost toModel() {
     return RecruitingPost(
       id: id.toString(),
       hostId: userId,
       campaignId: campaignId.toString(),
       campaignTitle: campaigns?['title'] as String? ?? '',
-      campaignImageUrl: campaigns?['image_url'] as String? ?? '',
+      campaignImageUrl: _getValidImageUrl(campaigns?['image_url']),
       title: title,
       region: region,
       city: city,

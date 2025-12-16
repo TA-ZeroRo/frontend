@@ -103,13 +103,17 @@ class _RecruitingDetailScreenState
 
   /// 헤더 (캠페인 이미지 + 타이틀)
   Widget _buildHeader(BuildContext context) {
+    final hasImage = _currentPost.campaignImageUrl?.isNotEmpty ?? false;
     return Container(
       height: 240,
       decoration: BoxDecoration(
-        image: DecorationImage(
-          image: NetworkImage(_currentPost.campaignImageUrl),
-          fit: BoxFit.cover,
-        ),
+        color: hasImage ? null : AppColors.primary.withValues(alpha: 0.3),
+        image: hasImage
+            ? DecorationImage(
+                image: NetworkImage(_currentPost.campaignImageUrl!),
+                fit: BoxFit.cover,
+              )
+            : null,
       ),
       child: Stack(
         children: [

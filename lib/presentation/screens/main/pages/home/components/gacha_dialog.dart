@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/theme/app_color.dart';
 import '../../../../../../core/utils/toast_helper.dart';
+import '../../../../../../core/di/injection.dart';
+import '../../../../../../domain/repository/personality_repository.dart';
 import '../../../../../../presentation/screens/settings/state/settings_controller.dart';
 import '../../../../entry/state/auth_controller.dart';
 
@@ -18,16 +20,19 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
   late AnimationController _controller;
   late Animation<double> _shakeAnimation;
   late Animation<double> _scaleAnimation;
+  final PersonalityRepository _personalityRepository = getIt<PersonalityRepository>();
 
   bool _isDrawing = false;
+  bool _isLoading = true; // API 로딩 상태
   String? _resultCharacter;
   bool _showResult = false;
   bool _isNewCharacter = false;
   bool _showCollection = false; // 성격 도감 표시 여부
   String? _selectedInCollection; // 도감에서 선택된 캐릭터 (확정 전)
 
-  // UI 테스트용 보유 성격 목록 (임시 데이터)
-  final Set<String> _collectedCharacters = {'playful', 'passionate'};
+  // 백엔드에서 불러온 보유 성격 목록
+  Set<String> _collectedCharacters = {};
+  int _gachaTickets = 0; // 보유 뽑기권
 
   // 목표 달성 점수 (이 점수에 도달하면 뽑기 가능)
   final int _targetMilestone = 300;
@@ -35,29 +40,29 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
   // 여기서는 _targetMilestone으로 완전히 대체합니다.
   final List<Map<String, String>> _characterPool = [
     {
+      'id': 'friendly',
+      'name': '친절한 선생님',
+      'image': 'assets/images/earth_zeroro.png',
+    },
+    {
       'id': 'playful',
       'name': '장난꾸러기 아이',
       'image': 'assets/images/earth_zeroro.png',
     },
     {
-      'id': 'rational',
+      'id': 'researcher',
       'name': '이성적인 연구원',
       'image': 'assets/images/cloud_zeroro.png',
     },
     {
-      'id': 'passionate',
+      'id': 'coach',
       'name': '열정적인 코치',
       'image': 'assets/images/earth_zeroro_magic.png',
     },
     {
-      'id': 'noble',
+      'id': 'elegant',
       'name': '품격있는 귀족',
       'image': 'assets/images/cloud_zeroro_magic.png',
-    },
-    {
-      'id': 'kind',
-      'name': '친절한 선생님',
-      'image': 'assets/images/earth_zeroro.png', // 임시 이미지
     },
   ];
 
@@ -78,6 +83,34 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
       begin: 1.0,
       end: 1.2,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+    // 보유 성격 목록 불러오기
+    _loadPersonalities();
+  }
+
+  /// 백엔드에서 보유 성격 목록 불러오기
+  Future<void> _loadPersonalities() async {
+    final userId = ref.read(authProvider).currentUser?.id;
+    if (userId == null) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      final response = await _personalityRepository.getPersonalities(userId);
+      setState(() {
+        _collectedCharacters = response.ownedPersonalities.toSet();
+        _gachaTickets = response.gachaTickets;
+        _isLoading = false;
+      });
+    } catch (e) {
+      ToastHelper.showError('성격 목록을 불러오는데 실패했습니다.');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -87,8 +120,11 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
   }
 
   void _startGacha() async {
-    // UI 테스트용 로직: 실제 포인트 차감이나 유저 업데이트 로직은 제거됨
-    // TODO: 추후 백엔드 연동 시 포인트 확인 및 차감 로직 구현 필요
+    final userId = ref.read(authProvider).currentUser?.id;
+    if (userId == null) {
+      ToastHelper.showError('로그인이 필요합니다.');
+      return;
+    }
 
     // 1. 뽑기 진행 (기기 애니메이션)
     setState(() {
@@ -102,27 +138,57 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
     await _controller.forward();
     await _controller.reverse();
 
-    // 2. 결과 계산 (UI 테스트용 랜덤 선택)
-    final random = Random();
-    final result = _characterPool[random.nextInt(_characterPool.length)];
+    try {
+      // 2. 백엔드 API 호출
+      final response = await _personalityRepository.drawGacha(userId);
 
-    // UI 테스트를 위해 항상 새로운 캐릭터로 가정
-    final isNew = true;
+      // 3. 도감에 추가
+      _collectedCharacters.add(response.personality.id);
+      _gachaTickets = response.remainingTickets;
 
-    if (mounted) {
-      setState(() {
-        _isDrawing = false;
-        _showResult = true; // 결과 화면 표시
-        _resultCharacter = result['id'];
-        _isNewCharacter = isNew;
-      });
+      if (mounted) {
+        setState(() {
+          _isDrawing = false;
+          _showResult = true; // 결과 화면 표시
+          _resultCharacter = response.personality.id;
+          _isNewCharacter = response.isNew;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isDrawing = false;
+        });
+        ToastHelper.showError('뽑기에 실패했습니다. 뽑기권이 있는지 확인해주세요.');
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(authProvider).currentUser;
-    final currentPoints = user?.totalPoints ?? 400; // UI 테스트를 위해 400으로 설정
+    // 로딩 중일 때 로딩 인디케이터 표시
+    if (_isLoading) {
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(48),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+          ),
+          child: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('성격 목록을 불러오는 중...'),
+            ],
+          ),
+        ),
+      );
+    }
 
     // 메인 다이얼로그
     return Dialog(
@@ -168,9 +234,9 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
                           ),
                           const SizedBox(height: 24),
                           if (!_showResult) ...[
-                            _buildPointInfo(currentPoints),
+                            _buildTicketInfo(),
                             const SizedBox(height: 24),
-                            _buildDrawButton(currentPoints),
+                            _buildDrawButton(),
                           ] else
                             _buildResultActions(),
                         ],
@@ -264,7 +330,7 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
   }
 
   Widget _buildCollectionView() {
-    final currentEquipped = ref.watch(appSettingsProvider).selectedCharacter;
+    final currentEquipped = ref.watch(appSettingsProvider).selectedPersonality;
 
     return Column(
       key: const ValueKey('collection_view'),
@@ -305,7 +371,7 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
 
   Widget _buildCollectionActions() {
     final hasSelection = _selectedInCollection != null;
-    final currentEquipped = ref.read(appSettingsProvider).selectedCharacter;
+    final currentEquipped = ref.read(appSettingsProvider).selectedPersonality;
     final isDifferent = _selectedInCollection != currentEquipped;
 
     return Row(
@@ -342,7 +408,7 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
               if (hasSelection && isDifferent) {
                 ref
                     .read(appSettingsProvider.notifier)
-                    .updateCharacter(_selectedInCollection!);
+                    .updatePersonality(_selectedInCollection!);
               }
 
               setState(() {
@@ -427,7 +493,7 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
                         child: isCollected
                             ? Transform.translate(
                                 offset:
-                                    ['passionate', 'noble'].contains(char['id'])
+                                    ['coach', 'elegant'].contains(char['id'])
                                     ? const Offset(-5, 0)
                                     : Offset.zero,
                                 child: Image.asset(
@@ -501,7 +567,7 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
     );
   }
 
-  Widget _buildPointInfo(int currentPoints) {
+  Widget _buildTicketInfo() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
@@ -513,7 +579,7 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
         mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
-            '누적 포인트',
+            '보유 뽑기권',
             style: TextStyle(
               fontSize: 14,
               color: AppColors.textSecondary,
@@ -524,15 +590,15 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
           Container(width: 1, height: 16, color: Colors.grey[300]),
           const SizedBox(width: 12),
           const Icon(
-            Icons.monetization_on_rounded,
-            color: Colors.amber,
+            Icons.confirmation_number_rounded,
+            color: AppColors.primary,
             size: 20,
           ),
           const SizedBox(width: 6),
           Transform.translate(
             offset: const Offset(0, -1),
             child: Text(
-              '$currentPoints P',
+              '$_gachaTickets 개',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -608,13 +674,13 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
     );
   }
 
-  Widget _buildDrawButton(int currentPoints) {
-    final canDraw = currentPoints >= _targetMilestone;
+  Widget _buildDrawButton() {
+    final canDraw = _gachaTickets > 0;
 
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: _isDrawing ? null : _startGacha,
+        onPressed: (_isDrawing || !canDraw) ? null : _startGacha,
         style: ElevatedButton.styleFrom(
           backgroundColor: canDraw ? AppColors.primary : Colors.grey[400],
           foregroundColor: Colors.white,
@@ -645,8 +711,8 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
                     fit: BoxFit.scaleDown,
                     child: Text(
                       canDraw
-                          ? '누적 $_targetMilestone점 달성 보상!'
-                          : '$_targetMilestone점 달성 시 오픈',
+                          ? '뽑기권 1개 사용'
+                          : '뽑기권이 부족합니다',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.white.withValues(alpha: 0.9),
@@ -718,7 +784,7 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
                   ),
                   child: ClipOval(
                     child: Transform.translate(
-                      offset: ['passionate', 'noble'].contains(character['id'])
+                      offset: ['coach', 'elegant'].contains(character['id'])
                           ? const Offset(-5, 0)
                           : Offset.zero,
                       child: Image.asset(
@@ -792,11 +858,11 @@ class _GachaDialogState extends ConsumerState<GachaDialog>
           flex: 2,
           child: ElevatedButton(
             onPressed: () {
-              // 적용하기: 선택된 캐릭터 적용 후 뽑기 화면(머신)으로 복귀
+              // 적용하기: 선택된 성격 적용 후 뽑기 화면(머신)으로 복귀
               if (_resultCharacter != null) {
                 ref
                     .read(appSettingsProvider.notifier)
-                    .updateCharacter(_resultCharacter!);
+                    .updatePersonality(_resultCharacter!);
                 ToastHelper.showSuccess('캐릭터 성격이 적용되었습니다.');
               }
 

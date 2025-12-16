@@ -18,8 +18,8 @@ class QuickActionData {
   static const List<QuickActionItem> actions = [
     QuickActionItem(
       icon: Icons.campaign_outlined,
-      label: '우리 지역 캠페인',
-      prompt: '우리 지역에서 현재 진행 중인 캠페인을 알려줘',
+      label: '앱 내 캠페인',
+      prompt: '제로로 앱 내 캠페인 뭐있는지 알려줘',
     ),
     QuickActionItem(
       icon: Icons.newspaper_outlined,

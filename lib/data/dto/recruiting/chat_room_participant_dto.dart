@@ -27,6 +27,9 @@ class ChatRoomParticipantDto {
   Map<String, dynamic> toJson() => _$ChatRoomParticipantDtoToJson(this);
 
   String get username => profiles?['username'] ?? 'Unknown';
-  String? get userImageUrl => profiles?['user_img'];
+  String? get userImageUrl {
+    final img = profiles?['user_img'];
+    return (img is String && img.isNotEmpty && img.startsWith('http')) ? img : null;
+  }
   DateTime get joinedAtDateTime => DateTime.parse(joinedAt);
 }
