@@ -421,39 +421,50 @@ class CampaignMissionSectionShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // 섹션 헤더 (static, 실제 UI와 동일)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Row(
-            children: [
-              Transform.translate(
-                offset: const Offset(0, -2),
-                child: Image.asset(
-                  'assets/images/file_icon.png',
-                  width: 28,
-                  height: 28,
-                  fit: BoxFit.contain,
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                '캠페인 미션',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
+    // 실제 UI와 동일한 구조: 외부 카드 안에 헤더 + 내부 캠페인 카드
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE0E0E0), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-        ),
-        const SizedBox(height: 12),
-        // 캠페인 카드 shimmer
-        _buildCampaignCardShimmer(),
-      ],
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // 섹션 헤더 (카드 안에 위치)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(18),
+                topRight: Radius.circular(18),
+              ),
+            ),
+            child: const Text(
+              '캠페인 미션',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+          const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+          // 내부 캠페인 카드 shimmer
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: _buildCampaignCardShimmer(),
+          ),
+        ],
+      ),
     );
   }
 
