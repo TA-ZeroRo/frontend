@@ -36,9 +36,13 @@ class CampaignMissionAsyncNotifier
     // 서버에서 사용자의 미션 로그 가져오기
     final missionLogs = await _repository.getUserMissionLogs(userId);
 
-    // 캠페인별로 그룹화
+    // 캠페인별로 그룹화 (진행 중인 캠페인만 포함)
     final Map<int, List<MissionWithTemplate>> campaignMap = {};
     for (final missionLog in missionLogs) {
+      // 종료된 캠페인은 제외 (ACTIVE 상태가 아닌 경우)
+      if (missionLog.campaign.status != 'ACTIVE') {
+        continue;
+      }
       final campaignId = missionLog.campaign.id;
       if (!campaignMap.containsKey(campaignId)) {
         campaignMap[campaignId] = [];
