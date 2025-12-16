@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class _SettingsKeys {
   static const String notificationsEnabled = 'notificationsEnabled';
   static const String language = 'language';
-  static const String selectedCharacter = 'selectedCharacter';
+  static const String selectedCharacter = 'selected_character';
   static const String selectedPersonality = 'selectedPersonality';
 }
 
