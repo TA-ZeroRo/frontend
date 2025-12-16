@@ -197,7 +197,7 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
     if (state.currentSession == null) return;
 
     try {
-      final result = await _repository.endSession(
+      await _repository.endSession(
         sessionId: state.currentSession!.id,
         routePoints: state.routePoints,
       );
@@ -208,11 +208,8 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
       // 알림 종료
       await _notificationService.stopNotification();
 
-      state = state.copyWith(
-        currentSession: result,
-        isTracking: false,
-        clearSession: true,
-      );
+      // 모든 상태 초기화
+      state = const PloggingSessionState();
 
       // 지도 데이터 리프레시 트리거
       ref.read(ploggingMapRefreshTriggerProvider.notifier).trigger();
@@ -309,8 +306,9 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
   void _updateElapsedTime() {
     if (state.currentSession == null) return;
 
-    final startedAt = state.currentSession!.startedAt;
-    final totalElapsed = DateTime.now().difference(startedAt);
+    // UTC로 통일하여 시간대 차이 방지
+    final startedAt = state.currentSession!.startedAt.toUtc();
+    final totalElapsed = DateTime.now().toUtc().difference(startedAt);
 
     // 일시정지 시간 제외
     var adjustedElapsed = totalElapsed - state.pausedDuration;
@@ -359,7 +357,8 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
   Future<void> _updateNotification() async {
     if (state.currentSession == null) return;
 
-    final elapsed = DateTime.now().difference(state.currentSession!.startedAt);
+    // UTC로 통일하여 시간대 차이 방지
+    final elapsed = DateTime.now().toUtc().difference(state.currentSession!.startedAt.toUtc());
     final hours = elapsed.inHours;
     final minutes = elapsed.inMinutes % 60;
     final seconds = elapsed.inSeconds % 60;
