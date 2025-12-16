@@ -101,10 +101,17 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
         icon: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.2),
+            color: Colors.white,
             shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+          child: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
         ),
         onPressed: () => context.pop(),
       ),
@@ -113,10 +120,17 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: Colors.white,
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            child: const Icon(Icons.share, color: Colors.white, size: 20),
+            child: const Icon(Icons.share, color: Colors.black, size: 20),
           ),
           onPressed: _onShare,
         ),
@@ -181,18 +195,18 @@ class _CampaignDetailScreenState extends ConsumerState<CampaignDetailScreen> {
                             ),
                           ],
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.eco_rounded,
                               size: 14,
                               color: Colors.white,
                             ),
-                            SizedBox(width: 4),
+                            const SizedBox(width: 4),
                             Text(
-                              'ZERORO',
-                              style: TextStyle(
+                              _campaign.hostOrganizer,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,

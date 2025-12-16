@@ -41,7 +41,7 @@ class ChatMessageDto {
       username: profiles?['username'] ?? 'Unknown',
       userImageUrl: _getValidImageUrl(profiles?['user_img']),
       message: message,
-      timestamp: DateTime.parse(createdAt),
+      timestamp: DateTime.parse(createdAt).toLocal(), // UTC → 한국 시간 변환
     );
   }
 }
