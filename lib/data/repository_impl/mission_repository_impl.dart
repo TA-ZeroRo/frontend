@@ -21,7 +21,23 @@ class MissionRepositoryImpl implements MissionRepository {
         includeTemplate: true,
         includeCampaign: true,
       );
-      return result.map((dto) => dto.toMissionWithTemplate()).toList();
+
+      // 개별 항목 변환 실패 시 해당 항목만 스킵 (전체 실패 방지)
+      // toMissionWithTemplateOrNull()은 mission_templates나 campaigns가 null이면 null 반환
+      final missions = result
+          .map((dto) => dto.toMissionWithTemplateOrNull())
+          .whereType<MissionWithTemplate>()
+          .toList();
+
+      // 스킵된 항목이 있으면 경고 로그
+      final skippedCount = result.length - missions.length;
+      if (skippedCount > 0) {
+        CustomLogger.logger.w(
+          'getUserMissionLogs - $skippedCount개의 미션 로그가 불완전한 데이터로 인해 스킵됨 (userId: $userId)',
+        );
+      }
+
+      return missions;
     } catch (e) {
       CustomLogger.logger.e(
         'getUserMissionLogs - 사용자 미션 로그 조회 실패 (userId: $userId)',

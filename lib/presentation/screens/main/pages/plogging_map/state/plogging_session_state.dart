@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -123,7 +124,8 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
     ref.onDispose(() {
       _positionSubscription?.cancel();
       _sessionTimer?.cancel();
-      _notificationService.stopNotification();
+      // dispose에서는 fire-and-forget으로 처리, 에러 무시
+      _notificationService.stopNotification().catchError((_) {});
     });
 
     // 초기 상태 - 진행 중인 세션이 있는지 확인
@@ -210,26 +212,34 @@ class PloggingSessionNotifier extends Notifier<PloggingSessionState> {
     state = state.copyWith(isEndingSession: true);
 
     try {
+      // 1. 서버 API 호출 (핵심 작업)
       await _repository.endSession(
         sessionId: state.currentSession!.id,
         routePoints: state.routePoints,
       );
 
-      // 트래킹 중지
+      // 2. 트래킹 중지 (로컬 정리)
       _stopTracking();
 
-      // 알림 종료
-      await _notificationService.stopNotification();
+      // 3. 알림 종료 (실패해도 세션 종료는 성공으로 처리)
+      // stopNotification() 내부에서도 예외를 catch하지만, 이중 안전장치
+      try {
+        await _notificationService.stopNotification();
+      } catch (e) {
+        // 알림 종료 실패는 무시 - 서버에서 세션이 이미 종료됨
+        debugPrint('알림 종료 실패 (무시됨): $e');
+      }
 
-      // 모든 상태 초기화 (isEndingSession도 false로 리셋됨)
+      // 4. 모든 상태 초기화 (서버 성공했으므로 반드시 실행)
       state = const PloggingSessionState();
 
-      // 지도 데이터 리프레시 트리거
+      // 5. 지도 데이터 리프레시 트리거
       ref.read(ploggingMapRefreshTriggerProvider.notifier).trigger();
     } catch (e) {
+      // 서버 API 실패 시에만 에러 상태로 전환
       state = state.copyWith(
         errorMessage: '세션 종료 실패: $e',
-        isEndingSession: false, // 에러 시 플래그 해제
+        isEndingSession: false,
       );
     }
   }

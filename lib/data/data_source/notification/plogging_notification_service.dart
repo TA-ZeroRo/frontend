@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -200,10 +201,22 @@ class PloggingNotificationService {
     );
   }
 
-  /// 알림 종료
+  /// 알림 종료 (방어적 코딩 - 실패해도 예외 전파 안 함)
   Future<void> stopNotification() async {
-    await _notifications.cancel(_notificationId);
-    await _notifications.cancel(_alertNotificationId);
+    if (!_isInitialized) return;
+
+    try {
+      await _notifications.cancel(_notificationId);
+    } catch (e) {
+      // 실기기에서 알림이 이미 없거나 채널 문제일 수 있음
+      debugPrint('Foreground 알림 취소 실패 (무시됨): $e');
+    }
+
+    try {
+      await _notifications.cancel(_alertNotificationId);
+    } catch (e) {
+      debugPrint('Alert 알림 취소 실패 (무시됨): $e');
+    }
   }
 
   /// 인증 가능 알림 (진동 + 소리)

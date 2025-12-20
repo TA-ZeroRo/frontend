@@ -55,10 +55,18 @@ class CampaignMissionAsyncNotifier
 
   /// 새로고침
   Future<void> refresh() async {
+    // 이전 데이터 보존 (에러 시 복구용)
+    final previousData = state.value;
+
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       return await _fetchCampaignMissions();
     });
+
+    // 에러 발생 시 이전 데이터로 복구 (UX 개선)
+    if (state.hasError && previousData != null) {
+      state = AsyncValue.data(previousData);
+    }
   }
 }
 

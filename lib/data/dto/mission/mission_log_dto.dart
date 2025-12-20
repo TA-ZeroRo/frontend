@@ -78,4 +78,17 @@ class MissionLogDto {
       campaign: missionTemplates!.campaigns!.toModel(),
     );
   }
+
+  /// 안전한 변환 - null인 경우 null 반환 (에러 대신)
+  /// 개별 항목 변환 실패 시 전체 리스트가 실패하는 것을 방지
+  MissionWithTemplate? toMissionWithTemplateOrNull() {
+    if (missionTemplates == null || missionTemplates!.campaigns == null) {
+      return null;
+    }
+    return MissionWithTemplate(
+      missionLog: toModel(),
+      missionTemplate: missionTemplates!.toModel(),
+      campaign: missionTemplates!.campaigns!.toModel(),
+    );
+  }
 }
